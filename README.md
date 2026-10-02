@@ -1,6 +1,7 @@
 # Khánh Tiên Online – Hệ thống ra đề, chấm bài, theo dõi tiến độ
 
-- Trang học sinh: /            (vào bằng mã lớp + họ tên)
+
+- Trang học sinh: / (vào bằng mã lớp + họ tên)
 - Trang giáo viên: /gv.html    (mật khẩu = biến TEACHER_PASSWORD)
 
 ## Biến môi trường trên Netlify (Project configuration → Environment variables)
