@@ -7,7 +7,7 @@
 <title>Khánh Tiên – Giáo viên</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233B82F6'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>K</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans:wght@500;700&family=Noto+Sans+SC:wght@500;700&family=Noto+Serif+SC:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20261002d">
+<link rel="stylesheet" href="/style.css?v=20261002f">
 <style>
 .qed{border-left:8px solid var(--sky)}
 .qed[data-t=fill]{border-left-color:var(--jade)} .qed[data-t=order]{border-left-color:var(--sun)}
@@ -23,32 +23,33 @@
 </head>
 <body>
 <header class="topbar"><div class="top">
-  <div class="brand"><img src="/logo.png" alt="Khánh Tiên Chinese Education Center"><span class="sep" aria-hidden="true"></span><span>Khu vực giáo viên<small id="whoami"></small></span></div>
+  <div class="brand"><img src="/logo.png" alt="Khánh Tiên Chinese Education Center"><span class="sep" aria-hidden="true"></span><span><span class="ai wave" aria-hidden="true">🧑‍🏫</span> Khu vực giáo viên<small id="whoami"></small></span></div>
   <div class="row"><button class="btn ghost sm hide" id="chpw">Đổi mật khẩu</button><button class="btn ghost sm hide" id="logout">Đăng xuất</button></div>
 </div></header>
 <main class="wrap">
   <section id="vLogin" class="card" style="max-width:420px;margin:24px auto">
-    <h1>Đăng nhập giáo viên</h1>
+    <h1><span class="ai wave" aria-hidden="true">🐼</span> Đăng nhập giáo viên</h1>
     <label class="f" for="un">Tên đăng nhập</label>
-    <input class="i" id="un" autocomplete="username" placeholder="Quản trị: để trống">
+    <input class="i" id="un" autocomplete="username" placeholder="VD: khanhtien" autocapitalize="none">
     <label class="f" for="pw">Mật khẩu</label>
     <input class="i" type="password" id="pw" autocomplete="current-password">
     <div class="err hide" id="lErr"></div>
     <button class="btn" id="lBtn" style="width:100%;margin-top:12px">Đăng nhập</button>
+    <p style="text-align:center;margin:12px 0 0"><button class="linkbtn" id="forgot" type="button">Quên mật khẩu?</button></p>
   </section>
 
   <section id="vApp" class="hide">
     <div id="aiBanner"></div>
     <nav class="tabs" role="tablist">
-      <button role="tab" data-tab="tClass" aria-selected="true">Lớp học</button>
-      <button role="tab" data-tab="tExam">Đề bài</button>
-      <button role="tab" data-tab="tGrade">Chấm bài</button>
-      <button role="tab" data-tab="tProg">Tiến độ</button>
-      <button role="tab" data-tab="tTeach" class="hide" id="tabTeach">Giáo viên</button>
+      <button role="tab" data-tab="tClass" aria-selected="true"><span class="ai bounce" aria-hidden="true">🏫</span> Lớp học</button>
+      <button role="tab" data-tab="tExam"><span class="ai wiggle" aria-hidden="true">📝</span> Đề bài</button>
+      <button role="tab" data-tab="tGrade"><span class="ai pulse" aria-hidden="true">✅</span> Chấm bài</button>
+      <button role="tab" data-tab="tProg"><span class="ai bounce" aria-hidden="true">📈</span> Tiến độ</button>
+      <button role="tab" data-tab="tTeach" class="hide" id="tabTeach"><span class="ai wave" aria-hidden="true">🧑‍🏫</span> Giáo viên <span id="resetBadge" class="badge hide"></span></button>
     </nav>
 
     <div id="tClass">
-      <div class="card"><h3>Tạo lớp mới</h3>
+      <div class="card"><h3><span class="ai bounce" aria-hidden="true">✨</span> Tạo lớp mới</h3>
         <div class="row"><input class="i grow" id="cName" placeholder="VD: YCT5 – Thứ 3, 5" style="flex:1;min-width:200px"><select class="i hide" id="cOwner" style="width:auto"></select><button class="btn" id="cAdd">Tạo lớp</button></div>
       </div>
       <div id="cList"></div>
@@ -65,11 +66,12 @@
     </div>
 
     <div id="tTeach" class="hide">
-      <div class="card"><h3>Tạo tài khoản giáo viên</h3>
+      <div class="card"><h3><span class="ai bounce" aria-hidden="true">➕</span> Tạo tài khoản giáo viên</h3>
         <div class="row"><div class="grow"><label class="f">Họ tên</label><input class="i" id="nName" placeholder="VD: Nguyễn Thu Hà"></div>
         <div class="grow"><label class="f">Tên đăng nhập</label><input class="i" id="nUser" placeholder="VD: thuha"></div>
         <div class="grow"><label class="f">Mật khẩu (từ 6 ký tự)</label><input class="i" id="nPw"></div></div>
         <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" id="nAdd">Tạo tài khoản</button></div></div>
+      <div id="resetBox"></div>
       <div id="teachList"></div>
     </div>
     <div id="tProg" class="hide">
@@ -99,13 +101,51 @@ const STATUS={doing:["Đang làm",""],done:["Đã chấm","ok"],waiting_ai:["AI 
 const TYPE={mcq:"Trắc nghiệm",tf:"Đúng / Sai",fill:"Điền từ",listen:"🎧 Nghe chọn đáp án",tone:"〰️ Chọn thanh điệu",match:"🔗 Nối từ – nghĩa",order:"Sắp xếp câu",short:"Trả lời ngắn",speak:"🎤 Ghi âm đọc (ngữ âm)",essay:"Tự luận (AI chấm)"};
 const TL={1:"Thanh 1",2:"Thanh 2",3:"Thanh 3",4:"Thanh 4",0:"Thanh nhẹ"};
 
+/* ---------- Hộp thoại thông báo đẹp (thay hộp thoại mặc định của trình duyệt) ---------- */
+function openDlg({icon="💬",title="",msg="",fields=[],ok="Đồng ý",cancel="Huỷ",danger=false}){
+  return new Promise(res=>{
+    const last=document.activeElement;
+    const ov=document.createElement("div");ov.className="dlg-ov";
+    ov.innerHTML=`<div class="dlg ${danger?"danger":""}" role="dialog" aria-modal="true" aria-labelledby="dlgT">
+      <div class="dlg-ic" aria-hidden="true">${icon}</div>
+      ${title?`<h3 id="dlgT">${esc(title)}</h3>`:""}<p ${title?"":'id="dlgT"'}>${esc(msg)}</p>
+      ${fields.map((f,i)=>`<label class="f" for="dlgF${i}">${esc(f.label)}</label><input class="i" id="dlgF${i}" type="${f.type||"text"}" autocomplete="${f.type==="password"?"new-password":"off"}">`).join("")}
+      <div class="dlg-err hide" id="dlgErr"></div>
+      <div class="dlg-btns">${cancel?`<button class="btn ghost" data-v="0">${esc(cancel)}</button>`:""}<button class="btn ${danger?"red":""}" data-v="1">${esc(ok)}</button></div></div>`;
+    document.body.appendChild(ov);
+    const inputs=[...ov.querySelectorAll("input")];
+    const done=v=>{ov.classList.add("out");setTimeout(()=>ov.remove(),180);document.removeEventListener("keydown",key);if(last&&last.focus)last.focus();res(v)};
+    const submit=()=>{ if(!fields.length) return done(true);
+      const vals=inputs.map(i=>i.value); const bad=fields.findIndex((f,i)=>f.required!==false&&!vals[i].trim());
+      if(bad>=0){const e=ov.querySelector("#dlgErr");e.textContent="Vui lòng nhập "+fields[bad].label.toLowerCase();e.classList.remove("hide");inputs[bad].focus();return}
+      done(vals) };
+    ov.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>b.dataset.v==="1"?submit():done(fields.length?null:false));
+    ov.addEventListener("click",e=>{if(e.target===ov&&cancel)done(fields.length?null:false)});
+    function key(e){if(e.key==="Escape"&&cancel)done(fields.length?null:false);if(e.key==="Enter"&&(!fields.length||e.target.tagName==="INPUT")){e.preventDefault();submit()}
+      if(e.key==="Tab"){const f=[...ov.querySelectorAll("button,input")];const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}}
+    document.addEventListener("keydown",key);
+    (inputs[0]||ov.querySelector('[data-v="1"]')).focus();
+  });
+}
+const askConfirm=(msg,o={})=>openDlg({icon:"🤔",ok:"Đồng ý",...o,msg});
+const tell=(msg,o={})=>openDlg({icon:"📢",ok:"Đã hiểu",cancel:"",...o,msg});
+
 /* ---------- Đăng nhập ---------- */
 function logout(){TOK="";try{localStorage.removeItem("kt_tok")}catch(e){};$("vApp").classList.add("hide");$("vLogin").classList.remove("hide");$("logout").classList.add("hide");$("chpw").classList.add("hide");$("whoami").textContent=""}
 $("logout").onclick=logout;
 $("lBtn").onclick=async()=>{$("lErr").classList.add("hide");
   try{const d=await api("/api/login",{body:{username:$("un").value.trim(),password:$("pw").value}});TOK=d.token;try{localStorage.setItem("kt_tok",TOK)}catch(e){};$("pw").value="";await boot()}
   catch(e){$("lErr").textContent=e.message;$("lErr").classList.remove("hide")}};
-$("chpw").onclick=async()=>{const o=prompt("Mật khẩu hiện tại:");if(o==null)return;const n=prompt("Mật khẩu mới (từ 6 ký tự):");if(!n)return;
+$("forgot").onclick=async()=>{
+  const v=await openDlg({icon:"🔐",title:"Quên mật khẩu",msg:"Nhập tên đăng nhập của thầy/cô.",fields:[{label:"Tên đăng nhập"}],ok:"Gửi yêu cầu"});
+  if(!v) return;
+  try{const d=await api("/api/forgot",{body:{username:v[0].trim()}}); const mail=d.adminEmail||"";
+    if(d.admin){ await tell(`Mật khẩu quản trị được cài trong Netlify. Đăng nhập app.netlify.com bằng ${mail||"email quản trị"} → dự án khanhtien-tiengtrung → Project configuration → Environment variables → TEACHER_PASSWORD để xem hoặc đổi, sau đó bấm Trigger deploy.`,{icon:"🛠️",title:"Tài khoản quản trị"}); return; }
+    const go=await openDlg({icon:"📨",title:"Đã gửi yêu cầu",msg:`Quản trị viên sẽ thấy yêu cầu trong trang quản lý và đặt lại mật khẩu cho thầy/cô.${mail?` Có thể gửi thêm email tới ${mail} để được xử lý nhanh hơn.`:""}`,ok:mail?"✉️ Gửi email":"Đã hiểu",cancel:mail?"Đóng":""});
+    if(go&&mail) location.href=`mailto:${mail}?subject=${encodeURIComponent("Yêu cầu đặt lại mật khẩu – "+v[0].trim())}&body=${encodeURIComponent("Chào quản trị,\n\nTôi quên mật khẩu tài khoản giáo viên: "+v[0].trim()+"\nNhờ thầy/cô đặt lại giúp.\n\nCảm ơn!")}`;
+  }catch(e){toast(e.message)}
+};
+$("chpw").onclick=async()=>{const v=await openDlg({icon:"🔑",title:"Đổi mật khẩu",msg:"Mật khẩu mới cần từ 6 ký tự.",fields:[{label:"Mật khẩu hiện tại",type:"password"},{label:"Mật khẩu mới",type:"password"}],ok:"Đổi mật khẩu"});if(!v)return;const [o,n]=v;
   try{await api("/api/t/password",{body:{oldPassword:o,newPassword:n}});toast("Đã đổi mật khẩu")}catch(e){toast(e.message)}};
 $("pw").addEventListener("keydown",e=>{if(e.key==="Enter")$("lBtn").click()});
 
@@ -138,14 +178,25 @@ function fillSelects(){
 /* ---------- Giáo viên (quản trị) ---------- */
 function renderTeachers(){
   if(!isAdmin()) return;
-  $("teachList").innerHTML=D.teachers.map(t=>{const n=D.classes.filter(c=>c.ownerId===t.id).length;return`<div class="card row"><div class="grow"><h3>${esc(t.name)} ${t.disabled?`<span class="tag bad">Đã khoá</span>`:""}</h3>
-    <div class="small muted">Tên đăng nhập: <b>${esc(t.id)}</b> · ${n} lớp</div></div>
-    <div class="row"><button class="btn ghost sm" data-tpw="${t.id}">Đặt lại mật khẩu</button><button class="btn ghost sm" data-tlock="${t.id}">${t.disabled?"Mở khoá":"Khoá"}</button></div></div>`}).join("")||`<p class="muted">Chưa có giáo viên nào.</p>`;
-  $("teachList").querySelectorAll("[data-tpw]").forEach(b=>b.onclick=async()=>{const pw=prompt("Mật khẩu mới cho "+b.dataset.tpw+" (từ 6 ký tự):");if(!pw)return;
-    try{await api("/api/t/teacher",{body:{username:b.dataset.tpw,password:pw}});toast("Đã đặt lại mật khẩu")}catch(e){toast(e.message)}});
+  const R=D.resets||[];
+  $("resetBadge").textContent=R.length; $("resetBadge").classList.toggle("hide",!R.length);
+  $("resetBox").innerHTML=R.length?`<div class="card" style="background:var(--warn-bg)"><b>🔔 ${R.length} yêu cầu đặt lại mật khẩu</b>
+    ${R.map(r=>`<div class="row" style="margin-top:6px"><span class="grow">${esc(r.name)} (<b>${esc(r.id)}</b>) · ${fmt(r.at)}</span><button class="btn sm" data-tpw="${esc(r.id)}">Đặt lại mật khẩu</button></div>`).join("")}</div>`:"";
+  $("teachList").innerHTML=D.teachers.map(t=>{const n=D.classes.filter(c=>c.ownerId===t.id).length;const req=R.some(r=>r.id===t.id);
+    return`<div class="card row"><div class="grow"><h3>${esc(t.name)} ${t.disabled?`<span class="tag bad">Đã khoá</span>`:""} ${req?`<span class="tag warn">🔔 Quên mật khẩu</span>`:""}</h3>
+    <div class="small muted">Tên đăng nhập: <b>${esc(t.id)}</b> · ${n} lớp</div>
+    <div class="small muted">Đăng nhập gần nhất: <b>${t.lastLogin?fmt(t.lastLogin):"chưa đăng nhập"}</b>${t.loginCount?` · tổng ${t.loginCount} lần`:""}
+      ${(t.logins||[]).length>1?`<details style="display:inline"><summary style="cursor:pointer;display:inline">xem lịch sử</summary><div>${t.logins.map(x=>fmt(x)).join("<br>")}</div></details>`:""}</div></div>
+    <div class="row"><button class="btn ghost sm" data-tpw="${t.id}">Đặt lại mật khẩu</button><button class="btn ghost sm" data-tlock="${t.id}">${t.disabled?"Mở khoá":"Khoá"}</button><button class="btn red sm" data-tdel="${t.id}">Xoá tài khoản</button></div></div>`}).join("")||`<p class="muted">Chưa có giáo viên nào.</p>`;
+  document.querySelectorAll("#tTeach [data-tpw]").forEach(b=>b.onclick=async()=>{const v=await openDlg({icon:"🔑",title:"Đặt lại mật khẩu",msg:"Tài khoản: "+b.dataset.tpw+". Mật khẩu mới cần từ 6 ký tự.",fields:[{label:"Mật khẩu mới",type:"text"}],ok:"Lưu"});if(!v)return;const pw=v[0];
+    try{await api("/api/t/teacher",{body:{username:b.dataset.tpw,password:pw}});D.resets=(D.resets||[]).filter(r=>r.id!==b.dataset.tpw);renderTeachers();
+      await tell(`Mật khẩu mới của ${b.dataset.tpw}: ${pw}\nHãy gửi cho giáo viên và nhắc đổi lại sau khi đăng nhập.`,{icon:"✅",title:"Đã đặt lại"})}catch(e){toast(e.message)}});
   $("teachList").querySelectorAll("[data-tlock]").forEach(b=>b.onclick=async()=>{const t=D.teachers.find(x=>x.id===b.dataset.tlock);
-    if(!t.disabled&&!confirm(`Khoá tài khoản ${t.name}? Giáo viên này sẽ không đăng nhập được, dữ liệu lớp vẫn giữ nguyên.`))return;
+    if(!t.disabled&&!(await askConfirm(`Giáo viên ${t.name} sẽ không đăng nhập được. Dữ liệu lớp vẫn giữ nguyên, có thể mở khoá lại.`,{icon:"🔒",title:"Khoá tài khoản?",ok:"Khoá"})))return;
     try{const u=await api("/api/t/teacher",{body:{username:t.id,disabled:!t.disabled}});Object.assign(t,u);renderTeachers()}catch(e){toast(e.message)}});
+  $("teachList").querySelectorAll("[data-tdel]").forEach(b=>b.onclick=async()=>{const t=D.teachers.find(x=>x.id===b.dataset.tdel);const n=D.classes.filter(c=>c.ownerId===t.id).length;
+    if(!(await askConfirm(`Tài khoản ${t.name} (${t.id}) sẽ bị xoá vĩnh viễn.${n?` ${n} lớp cùng đề và bài làm của học sinh sẽ được chuyển về quản trị, không bị mất.`:""}`,{icon:"⚠️",title:"Xoá tài khoản giáo viên?",ok:"Xoá vĩnh viễn",danger:true})))return;
+    try{const r=await api("/api/t/teacher/"+encodeURIComponent(t.id),{method:"DELETE"});await boot();toast(`Đã xoá ${t.name}`+(r.moved?` · ${r.moved} lớp chuyển về quản trị`:""))}catch(e){toast(e.message)}});
 }
 $("nAdd").onclick=async()=>{
   const name=$("nName").value.trim(),username=$("nUser").value.trim(),password=$("nPw").value;
@@ -163,14 +214,14 @@ function renderClasses(){
     <div class="small muted">Link cho học sinh: <a href="${link}" target="_blank">${esc(link)}</a></div></div>
     <div class="row"><button class="btn ghost sm" data-copy="${esc(link)}">Sao chép link</button><button class="btn ghost sm" data-del="${c.code}">Xoá lớp</button></div></div>`}).join("")||`<p class="muted">Chưa có lớp nào. Tạo lớp đầu tiên ở trên.</p>`;
   $("cList").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(b.dataset.copy).then(()=>toast("Đã sao chép link"),()=>toast(b.dataset.copy))});
-  $("cList").querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{if(!confirm("Xoá lớp này? Đề và bài làm cũ vẫn được giữ."))return;await api("/api/t/class/"+b.dataset.del,{method:"DELETE"});D.classes=D.classes.filter(c=>c.code!==b.dataset.del);renderClasses();fillSelects()});
+  $("cList").querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{if(!(await askConfirm("Đề và bài làm cũ vẫn được giữ lại.",{icon:"🗑️",title:"Xoá lớp này?",ok:"Xoá lớp",danger:true})))return;await api("/api/t/class/"+b.dataset.del,{method:"DELETE"});D.classes=D.classes.filter(c=>c.code!==b.dataset.del);renderClasses();fillSelects()});
 }
 $("cAdd").onclick=async()=>{const n=$("cName").value.trim();if(!n)return toast("Nhập tên lớp");try{const c=await api("/api/t/class",{body:{name:n,ownerId:isAdmin()?$("cOwner").value:undefined}});D.classes.push(c);$("cName").value="";renderClasses();fillSelects();toast("Đã tạo lớp "+c.code)}catch(e){toast(e.message)}};
 
 /* ---------- Danh sách đề ---------- */
 function renderExamList(){
   $("exEdit").classList.add("hide");$("exList").classList.remove("hide");
-  $("exList").innerHTML=`<div class="row" style="margin-bottom:12px"><button class="btn" id="exNew">+ Tạo đề mới</button><button class="btn ghost" id="exSample">Tạo đề mẫu</button><button class="btn ghost" id="exImport">⬆ Nhập đề từ file</button></div>
+  $("exList").innerHTML=`<div class="row" style="margin-bottom:12px"><button class="btn" id="exNew"><span class="ai wiggle" aria-hidden="true">✏️</span> Tạo đề mới</button><button class="btn ghost" id="exSample">Tạo đề mẫu</button><button class="btn ghost" id="exImport">⬆ Nhập đề từ file</button></div>
    <div class="card hide" id="impBox"><h3>Nhập đề</h3><p class="small muted">Chọn file đề (.json) hoặc dán nội dung đề vào ô bên dưới, rồi bấm <b>Đọc đề</b>.</p>
      <input type="file" id="impFile" accept=".json,.txt,application/json" class="i">
      <textarea class="i zh" id="impText" style="min-height:140px;margin-top:8px" placeholder='{"title": "...", "durationMin": 20, "questions": [...]}'></textarea>
@@ -191,7 +242,7 @@ function renderExamList(){
     const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:"application/json"}));a.download=e.title.replace(/[^\p{L}\p{N}]+/gu,"-")+".json";a.click()});
   $("exList").querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>editExam(structuredClone(D.exams.find(e=>e.id===b.dataset.ed))));
   $("exList").querySelectorAll("[data-dup]").forEach(b=>b.onclick=()=>{const e=structuredClone(D.exams.find(x=>x.id===b.dataset.dup));delete e.id;e.title+=" (bản sao)";e.published=false;editExam(e)});
-  $("exList").querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{if(!confirm("Xoá đề này?"))return;await api("/api/t/exam/"+b.dataset.rm,{method:"DELETE"});D.exams=D.exams.filter(e=>e.id!==b.dataset.rm);renderExamList();fillSelects()});
+  $("exList").querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{if(!(await askConfirm("Bài làm của học sinh với đề này sẽ không còn xem được.",{icon:"🗑️",title:"Xoá đề này?",ok:"Xoá đề",danger:true})))return;await api("/api/t/exam/"+b.dataset.rm,{method:"DELETE"});D.exams=D.exams.filter(e=>e.id!==b.dataset.rm);renderExamList();fillSelects()});
 }
 function sampleExam(){return{title:"Kiểm tra: Chào hỏi & gia đình",classCode:D.classes[0]?.code||"",durationMin:15,published:false,showAnswers:true,showAI:false,questions:[
   {type:"mcq",prompt:"谢谢 nghĩa là gì?",options:["cảm ơn","xin chào","tạm biệt","không có gì"],correct:0,points:1},
@@ -302,7 +353,7 @@ function renderQs(){
       readHead();E.questions[el.dataset.i][el.dataset.upload]=d.key;renderQs();toast("Đã tải lên")}catch(e){toast(e.message)}});
   X.querySelectorAll("[data-rmaudio]").forEach(b=>b.onclick=()=>{readHead();E.questions[b.dataset.i][b.dataset.rmaudio]=null;renderQs()});
   X.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{const i=+b.dataset.mv,j=i+ +b.dataset.d;if(j<0||j>=E.questions.length)return;[E.questions[i],E.questions[j]]=[E.questions[j],E.questions[i]];renderQs()});
-  X.querySelectorAll("[data-qdel]").forEach(b=>b.onclick=()=>{if(confirm("Xoá câu này?")){E.questions.splice(+b.dataset.qdel,1);renderQs()}});
+  X.querySelectorAll("[data-qdel]").forEach(b=>b.onclick=async()=>{if(await askConfirm("Câu hỏi sẽ bị xoá khỏi đề đang soạn.",{icon:"🗑️",title:"Xoá câu này?",ok:"Xoá",danger:true})){E.questions.splice(+b.dataset.qdel,1);renderQs()}});
 }
 function validate(){
   if(!E.title) return "Đề chưa có tên.";
@@ -347,7 +398,7 @@ function renderSubs(){
       <b>${esc(s.student)}</b> ${s.late?`<span class="tag bad">muộn</span>`:""}<br>
       <span class="tag ${st[1]}">${st[0]}</span> ${s.status!=="doing"&&s.total?`<b>${s.total.score}/${s.total.max}</b>`:""}</button>`}).join("")||`<p class="muted">Chưa có học sinh làm bài.</p>`);
   $("gSubs").querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{G.cur=b.dataset.s;renderSubs();renderDetail(G.cur)});
-  if($("gBulk")) $("gBulk").onclick=async()=>{if(!confirm("Chấp nhận điểm AI cho tất cả bài đang chờ duyệt?"))return;
+  if($("gBulk")) $("gBulk").onclick=async()=>{if(!(await askConfirm("Điểm AI sẽ được trả cho học sinh ngay.",{icon:"✅",title:"Duyệt nhanh tất cả?",ok:"Duyệt"})))return;
     for(const s of G.subs.filter(x=>x.status==="ai_done")) await api("/api/t/review",{body:{examId:G.exam.id,subId:s.id,teacherScores:{},teacherComments:{},teacherNote:""}});
     toast("Đã duyệt");loadSubs()};
 }
@@ -405,7 +456,7 @@ function renderDetail(id){
     try{await api("/api/t/review",{body:{examId:ex.id,subId:s.id,teacherScores:ts,teacherComments:tc,teacherNote:$("dNote").value.trim()||s.ai?.nhan_xet_chung||""}});toast("Đã trả điểm cho "+s.student);loadSubs()}catch(e){toast(e.message)}
   };
   if($("dRe")) $("dRe").onclick=async()=>{try{await api("/api/t/regrade",{body:{examId:ex.id,subId:s.id}});toast("AI đang chấm lại…");setTimeout(loadSubs,8000)}catch(e){toast(e.message)}};
-  $("dRetake").onclick=async()=>{if(!confirm(`Xoá bài làm của ${s.student} để em làm lại?`))return;await api(`/api/t/sub?examId=${ex.id}&subId=${s.id}`,{method:"DELETE"});G.cur=null;$("gDetail").innerHTML="";loadSubs()};
+  $("dRetake").onclick=async()=>{if(!(await askConfirm(`Bài làm hiện tại của ${s.student} sẽ bị xoá để em làm lại từ đầu.`,{icon:"🔄",title:"Cho làm lại?",ok:"Cho làm lại",danger:true})))return;await api(`/api/t/sub?examId=${ex.id}&subId=${s.id}`,{method:"DELETE"});G.cur=null;$("gDetail").innerHTML="";loadSubs()};
 }
 setInterval(()=>{if(!$("tGrade").classList.contains("hide")&&TOK&&!document.activeElement?.matches("input,textarea"))loadSubs()},20000);
 

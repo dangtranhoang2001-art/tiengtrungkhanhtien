@@ -247,3 +247,77 @@ audio{max-width:100%}
 @keyframes drop{to{transform:translateY(110vh) rotate(360deg)}}
 @keyframes rise{0%{transform:translateY(0)}50%{transform:translateY(-55vh) translateX(20px)}100%{transform:translateY(-115vh) translateX(-10px)}}
 @media (prefers-reduced-motion:reduce){.cel-card,.panda,.cs.on,.stamp,.panda *{animation:none!important}}
+
+/* ===== Hộp thoại ===== */
+.dlg-ov{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(31,42,68,.5);backdrop-filter:blur(2px);animation:fadeIn .15s ease}
+.dlg-ov.out{animation:fadeOut .18s ease forwards}
+.dlg{background:#fff;border-radius:22px;padding:22px 22px 18px;max-width:420px;width:100%;text-align:center;border-top:6px solid var(--sky);box-shadow:0 24px 50px rgba(0,0,0,.25);animation:popIn .35s cubic-bezier(.2,1.5,.4,1) both}
+.dlg.danger{border-top-color:var(--coral)}
+.dlg-ic{font-size:46px;line-height:1;margin-bottom:6px}
+.dlg h3{margin:0 0 4px;font-size:22px}
+.dlg p{margin:0 0 10px;color:var(--muted);font-size:17px}
+.dlg label.f{text-align:left}
+.dlg-btns{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.dlg-btns .btn{min-width:120px}
+.dlg-err{color:var(--coral);font-weight:700;font-size:15px;margin-top:6px}
+.linkbtn{background:none;border:0;color:var(--sky);font-weight:700;text-decoration:underline;padding:4px}
+.badge{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:999px;background:var(--coral);color:#fff;font-size:13px;padding:0 6px;margin-left:4px}
+.dlg p{white-space:pre-line}
+
+/* ===== Cỡ chữ gọn hơn ===== */
+body{font-size:16px;line-height:1.5}
+h1{font-size:26px} h2{font-size:21px} h3{font-size:18px}
+.wrap{max-width:1000px;padding:14px}
+.card{padding:16px;border-radius:14px;margin-bottom:12px}
+.btn{padding:9px 18px;font-size:16px;border-radius:12px}
+.btn.sm{padding:5px 11px;font-size:14px}
+.btn.big{font-size:18px;padding:12px 18px}
+input.i,select.i,textarea.i{padding:9px 11px}
+label.f{margin:8px 0 3px;font-size:15px}
+.prompt{font-size:19px}
+.opt{font-size:18px;min-height:48px;padding:9px 12px}
+.opt.zh{font-size:22px}
+.chip{font-size:21px;padding:3px 12px}
+.qnum{width:30px;height:30px;font-size:15px}
+.clock{font-size:24px}
+.tabs button{padding:7px 14px;font-size:15px}
+table{font-size:15px}
+.h-big{font-size:34px} .h-sub{font-size:17px}
+.slogan .s-zh{font-size:26px} .slogan .s-py,.slogan .s-vi{font-size:15px}
+.jt{font-size:24px}
+.banner h1{font-size:26px}
+.tz{font-size:30px} .speaktext{font-size:28px}
+.examcard .ico{width:42px;height:42px;font-size:20px}
+.brand{font-size:16px} .brand img{height:32px}
+@media (max-width:520px){.h-big{font-size:27px} h1{font-size:23px}}
+
+/* ===== Icon động ===== */
+.ai{display:inline-block;transform-origin:50% 70%;line-height:1}
+@media (prefers-reduced-motion:no-preference){
+  .ai.bounce{animation:aiBounce 1.6s ease-in-out infinite}
+  .ai.wiggle{animation:aiWiggle 2.2s ease-in-out infinite}
+  .ai.wave{transform-origin:70% 80%;animation:aiWave 2.4s ease-in-out infinite}
+  .ai.float{animation:aiFloat 3s ease-in-out infinite}
+  .ai.pulse{animation:aiPulse 1.8s ease-in-out infinite}
+  .ai.spin{animation:aiSpin 6s linear infinite}
+  .ai.tick{animation:aiTick 1s steps(2) infinite}
+  .ai.rocket{animation:aiRocket 1.8s ease-in-out infinite}
+  .tabs button:hover .ai,.btn:hover .ai{animation:aiBounce .6s ease-in-out infinite}
+}
+@keyframes aiBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes aiWiggle{0%,60%,100%{transform:rotate(0)}70%{transform:rotate(-14deg)}80%{transform:rotate(12deg)}90%{transform:rotate(-6deg)}}
+@keyframes aiWave{0%,50%,100%{transform:rotate(0)}10%,30%{transform:rotate(18deg)}20%,40%{transform:rotate(-10deg)}}
+@keyframes aiFloat{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
+@keyframes aiPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@keyframes aiSpin{to{transform:rotate(360deg)}}
+@keyframes aiTick{0%{transform:rotate(-8deg)}100%{transform:rotate(8deg)}}
+@keyframes aiRocket{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(3px,-4px) rotate(-8deg)}}
+.hero .floaties{position:absolute;inset:0;pointer-events:none;z-index:0}
+.hero .floaties span{position:absolute;font-size:28px;opacity:.9}
+.hero .floaties span:nth-child(1){right:22px;top:16px}
+.hero .floaties span:nth-child(2){right:30px;bottom:18px;font-size:24px;animation-delay:.6s}
+.hero .floaties span:nth-child(3){right:90px;bottom:26px;font-size:26px;animation-delay:1.2s}
+.hero .floaties span:nth-child(4){right:150px;bottom:14px;font-size:20px;animation-delay:1.8s}
+.hero{padding-bottom:64px}
+@media (max-width:520px){.hero .floaties span:nth-child(n+3){display:none}}
+.examcard.st-open .ico .ai{animation:aiPulse 1.8s ease-in-out infinite}

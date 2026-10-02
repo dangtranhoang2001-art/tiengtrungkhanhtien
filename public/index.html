@@ -6,11 +6,11 @@
 <title>Khánh Tiên – Học sinh</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233B82F6'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>K</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans:wght@500;700&family=Noto+Sans+SC:wght@500;700&family=Noto+Serif+SC:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20261002d">
+<link rel="stylesheet" href="/style.css?v=20261002f">
 </head>
 <body>
 <header class="topbar"><div class="top">
-  <div class="brand"><a href="/"><img src="/logo.png" alt="Khánh Tiên Chinese Education Center"></a><span class="sep" aria-hidden="true"></span><span>Luyện tập online<small id="tName">Trung tâm Tiếng Trung Khánh Tiên</small></span></div>
+  <div class="brand"><a href="/"><img src="/logo.png" alt="Khánh Tiên Chinese Education Center"></a><span class="sep" aria-hidden="true"></span><span><span class="ai wave" aria-hidden="true">🐼</span> Luyện tập online<small id="tName">Trung tâm Tiếng Trung Khánh Tiên</small></span></div>
   <button class="btn ghost sm hide" id="outBtn">Đổi lớp</button>
 </div></header>
 
@@ -19,6 +19,7 @@
   <!-- Vào lớp -->
   <section id="vJoin" class="joinwrap">
     <div class="hero">
+      <div class="floaties" aria-hidden="true"><span class="ai float">📚</span><span class="ai float">✏️</span><span class="ai float">🏮</span><span class="ai float">⭐</span></div>
       <div class="hero-in">
         <span class="kick">KHÁNH TIÊN CHINESE EDUCATION CENTER</span>
         <h1 class="h-big">Vững nền tảng,<br>vươn xa cùng tiếng Trung</h1>
@@ -27,14 +28,14 @@
       </div>
     </div>
     <div class="card joincard">
-      <h2 class="jt">Vào lớp làm bài</h2>
-      <label class="f" for="jCode">Mã lớp</label>
+      <h2 class="jt"><span class="ai rocket" aria-hidden="true">🚀</span> Vào lớp làm bài</h2>
+      <label class="f" for="jCode"><span class="ai wiggle" aria-hidden="true">🔑</span> Mã lớp</label>
       <input class="i" id="jCode" maxlength="6" autocomplete="off" placeholder="VD: K7M2QP" style="text-transform:uppercase;letter-spacing:4px;font-weight:800;font-size:22px">
-      <label class="f" for="jName">Họ và tên</label>
+      <label class="f" for="jName"><span class="ai bounce" aria-hidden="true">🙋</span> Họ và tên</label>
       <input class="i" id="jName" maxlength="60" autocomplete="name" placeholder="VD: Nguyễn Minh Anh">
       <p class="small muted">Nhập đúng họ tên giống nhau ở mọi lần để thầy/cô theo dõi tiến độ của em.</p>
       <div id="jErr" class="err hide"></div>
-      <button class="btn big" id="jBtn" style="width:100%">Vào lớp 🚀</button>
+      <button class="btn big" id="jBtn" style="width:100%">Vào lớp <span class="ai rocket" aria-hidden="true">🚀</span></button>
     </div>
   </section>
 
@@ -51,10 +52,10 @@
   <section id="vExam" class="hide">
     <div class="bar">
       <div><b id="eTitle"></b><div class="small muted" id="eSaved">Bài làm được lưu tự động</div></div>
-      <div class="row"><span class="clock" id="eClock" aria-live="off">--:--</span><button class="btn red" id="eSubmit">Nộp bài</button></div>
+      <div class="row"><span class="ai tick" aria-hidden="true" style="font-size:22px">⏱️</span><span class="clock" id="eClock" aria-live="off">--:--</span><button class="btn red" id="eSubmit"><span class="ai bounce" aria-hidden="true">📤</span> Nộp bài</button></div>
     </div>
     <div id="eQs" style="margin-top:14px"></div>
-    <div class="row" style="justify-content:center;margin:20px 0"><button class="btn red" id="eSubmit2">Nộp bài</button></div>
+    <div class="row" style="justify-content:center;margin:20px 0"><button class="btn red" id="eSubmit2"><span class="ai bounce" aria-hidden="true">📤</span> Nộp bài</button></div>
   </section>
 
   <!-- Kết quả -->
@@ -97,8 +98,8 @@ $("outBtn").onclick=()=>{stopTimer();show("vJoin")};
 /* ---------- Danh sách bài ---------- */
 async function loadList(){
   const d=await api(`/api/class/${ME.code}?student=${encodeURIComponent(ME.name)}`);
-  $("lTitle").textContent="Lớp "+d.name; $("tName").textContent=d.teacherName?"GV: "+d.teacherName:"Trung tâm Tiếng Trung Khánh Tiên"; $("lWho").textContent="Học sinh: "+ME.name;
-  if(!d.exams.length){ $("lItems").innerHTML=`<div class="card">Lớp chưa có bài nào. Khi thầy/cô giao bài, bài sẽ hiện ở đây.</div>`; show("vList"); return; }
+  $("lTitle").innerHTML=`<span class="ai wave" aria-hidden="true">👋</span> Lớp ${esc(d.name)}`; $("tName").textContent=d.teacherName?"GV: "+d.teacherName:"Trung tâm Tiếng Trung Khánh Tiên"; $("lWho").innerHTML=`<span class="ai bounce" aria-hidden="true">🎒</span> Học sinh: ${esc(ME.name)}`;
+  if(!d.exams.length){ $("lItems").innerHTML=`<div class="card"><span class="ai float" aria-hidden="true" style="font-size:28px">🐼</span> Lớp chưa có bài nào. Khi thầy/cô giao bài, bài sẽ hiện ở đây.</div>`; show("vList"); return; }
   $("lItems").innerHTML=d.exams.map(e=>{
     let st, act="";
     if(e.my && e.my.status!=="doing"){
@@ -109,7 +110,7 @@ async function loadList(){
       act=`<button class="btn" data-go="${e.id}">${e.my?"Làm tiếp":"Bắt đầu làm"}</button>`;
     } else if(e.state==="upcoming"){ st=`<span class="tag">Mở lúc ${fmt(e.openAt)}</span>`; }
     else { st=`<span class="tag bad">Đã hết hạn</span>`; if(e.my) act=`<button class="btn" data-go="${e.id}">Nộp bài</button>`; }
-    return `<div class="card examcard st-${e.my&&e.my.status!=="doing"?"done":e.state}"><div class="row"><div class="ico" aria-hidden="true">${e.my&&e.my.status!=="doing"?"✓":e.state==="open"?"✎":e.state==="upcoming"?"⏳":"🔒"}</div><div class="grow"><h3>${esc(e.title)}</h3>
+    return `<div class="card examcard st-${e.my&&e.my.status!=="doing"?"done":e.state}"><div class="row"><div class="ico" aria-hidden="true"><span class="ai ${e.my&&e.my.status!=="doing"?"bounce":e.state==="upcoming"?"spin":""}">${e.my&&e.my.status!=="doing"?"🏅":e.state==="open"?"📝":e.state==="upcoming"?"⏳":"🔒"}</span></div><div class="grow"><h3>${esc(e.title)}</h3>
       <div class="small muted">${e.count} câu · ${e.durationMin} phút${e.dueAt?` · Hạn nộp ${fmt(e.dueAt)}`:""}</div>
       <div style="margin-top:6px">${st}</div></div>${act}</div></div>`;
   }).join("");
@@ -123,7 +124,7 @@ let X=null, timer=null, saveT=null;
 function stopTimer(){clearInterval(timer);timer=null;clearTimeout(saveT)}
 async function startExam(examId){
   if(!X||X.examId!==examId){
-    if(!confirm("Khi bấm OK, đồng hồ bắt đầu chạy và không dừng lại được. Em sẵn sàng chưa?")) return;
+    if(!(await askConfirm("Khi bấm Bắt đầu, đồng hồ sẽ chạy và không dừng lại được. Em đã sẵn sàng chưa?",{icon:"⏰",title:"Sẵn sàng làm bài?",ok:"Bắt đầu 🚀",cancel:"Chưa"}))) return;
   }
   try{
     const d=await api("/api/start",{body:{examId,classCode:ME.code,student:ME.name}});
@@ -250,7 +251,7 @@ function unanswered(){return X.exam.questions.filter(q=>{const a=X.answers[q.id]
 async function submit(auto){
   if(X.done) return;
   if(REC.qid){ if(!auto) return toast("Em bấm Dừng ghi âm trước khi nộp bài nhé."); try{REC.mr.stop()}catch(e){} }
-  if(!auto){const u=unanswered(); if(!confirm(u?`Em còn ${u} câu chưa làm xong. Vẫn nộp bài?`:"Em chắc chắn nộp bài?")) return;}
+  if(!auto){const u=unanswered(); if(!(await askConfirm(u?`Em còn ${u} câu chưa làm xong. Em vẫn muốn nộp bài chứ?`:"Em đã làm xong. Nộp bài ngay nhé?",{icon:u?"📝":"🎯",title:u?"Còn câu chưa làm":"Nộp bài",ok:"Nộp bài",cancel:u?"Làm tiếp":"Kiểm tra lại"}))) return;}
   X.done=true; stopTimer(); $("eSubmit").disabled=$("eSubmit2").disabled=true;
   for(let t=0;t<3;t++){
     try{
@@ -425,6 +426,35 @@ function rain(list,n,up){
     e.style.fontSize=(26+Math.random()*30)+"px";e.style.animationDelay=(Math.random()*1.4)+"s";e.style.animationDuration=(2.6+Math.random()*2)+"s";box.appendChild(e)}
   document.body.appendChild(box);setTimeout(()=>box.remove(),6000);
 }
+
+/* ---------- Hộp thoại thông báo đẹp (thay hộp thoại mặc định của trình duyệt) ---------- */
+function openDlg({icon="💬",title="",msg="",fields=[],ok="Đồng ý",cancel="Huỷ",danger=false}){
+  return new Promise(res=>{
+    const last=document.activeElement;
+    const ov=document.createElement("div");ov.className="dlg-ov";
+    ov.innerHTML=`<div class="dlg ${danger?"danger":""}" role="dialog" aria-modal="true" aria-labelledby="dlgT">
+      <div class="dlg-ic" aria-hidden="true">${icon}</div>
+      ${title?`<h3 id="dlgT">${esc(title)}</h3>`:""}<p ${title?"":'id="dlgT"'}>${esc(msg)}</p>
+      ${fields.map((f,i)=>`<label class="f" for="dlgF${i}">${esc(f.label)}</label><input class="i" id="dlgF${i}" type="${f.type||"text"}" autocomplete="${f.type==="password"?"new-password":"off"}">`).join("")}
+      <div class="dlg-err hide" id="dlgErr"></div>
+      <div class="dlg-btns">${cancel?`<button class="btn ghost" data-v="0">${esc(cancel)}</button>`:""}<button class="btn ${danger?"red":""}" data-v="1">${esc(ok)}</button></div></div>`;
+    document.body.appendChild(ov);
+    const inputs=[...ov.querySelectorAll("input")];
+    const done=v=>{ov.classList.add("out");setTimeout(()=>ov.remove(),180);document.removeEventListener("keydown",key);if(last&&last.focus)last.focus();res(v)};
+    const submit=()=>{ if(!fields.length) return done(true);
+      const vals=inputs.map(i=>i.value); const bad=fields.findIndex((f,i)=>f.required!==false&&!vals[i].trim());
+      if(bad>=0){const e=ov.querySelector("#dlgErr");e.textContent="Vui lòng nhập "+fields[bad].label.toLowerCase();e.classList.remove("hide");inputs[bad].focus();return}
+      done(vals) };
+    ov.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>b.dataset.v==="1"?submit():done(fields.length?null:false));
+    ov.addEventListener("click",e=>{if(e.target===ov&&cancel)done(fields.length?null:false)});
+    function key(e){if(e.key==="Escape"&&cancel)done(fields.length?null:false);if(e.key==="Enter"&&(!fields.length||e.target.tagName==="INPUT")){e.preventDefault();submit()}
+      if(e.key==="Tab"){const f=[...ov.querySelectorAll("button,input")];const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}}
+    document.addEventListener("keydown",key);
+    (inputs[0]||ov.querySelector('[data-v="1"]')).focus();
+  });
+}
+const askConfirm=(msg,o={})=>openDlg({icon:"🤔",ok:"Đồng ý",...o,msg});
+const tell=(msg,o={})=>openDlg({icon:"📢",ok:"Đã hiểu",cancel:"",...o,msg});
 
 /* ---------- Khởi động ---------- */
 const t0=new URLSearchParams(location.search).get("ten");
