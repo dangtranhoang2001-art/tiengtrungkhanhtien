@@ -24,7 +24,7 @@ function studentView(exam: any, sub: any) {
   const reviewed = sub.status === "reviewed";
   const hasSpeak = exam.questions.some((q: any) => q.type === "speak");
   const hasEssay = exam.questions.some((q: any) => q.type === "essay");
-  const essayVisible = reviewed || (exam.showAI && sub.status === "ai_done");
+  const essayVisible = reviewed;
   const allVisible = reviewed || (!hasSpeak && essayVisible);
   const t = totals(exam, sub);
   const detail = exam.questions.map((q: any) => {
@@ -172,7 +172,7 @@ export default async (req: Request) => {
       sub.submittedAt = new Date(now).toISOString();
       sub.late = now > Date.parse(sub.deadline) + GRACE_MS;
       sub.grading = autoGrade(exam, sub.answers);
-      const aiOn = !!env("ANTHROPIC_API_KEY");
+      const aiOn = false; // Tự luận do giáo viên chấm
       sub.status = sub.grading.pendingEssay ? (aiOn ? "waiting_ai" : "waiting_teacher") : (sub.grading.pendingSpeak ? "waiting_teacher" : "done");
       await s.setJSON(`sub/${examId}/${sub.id}`, sub);
       if (sub.status === "waiting_ai") await trigger(req, "grade-background", { examId, subId: sub.id });
@@ -192,13 +192,29 @@ export default async (req: Request) => {
     if (p[0] === "login" && m === "POST") {
       if (!env("TEACHER_PASSWORD")) return bad("Chưa cài mật khẩu quản trị (TEACHER_PASSWORD) trên Netlify.", 500);
       const u = slug(body.username || ""), pw = String(body.password || "");
-      if (!u || u === "admin") {
+      const adminUser = slug(env("ADMIN_USERNAME") || "admin");
+      if (!u) return bad("Vui lòng nhập tên đăng nhập.", 401);
+      if (u === adminUser) {
         if (pw !== env("TEACHER_PASSWORD")) return bad("Sai tên đăng nhập hoặc mật khẩu.", 401);
         return json({ token: makeToken("admin"), id: "admin", role: "admin", name: env("ADMIN_NAME") || "Quản trị" });
       }
       const t = await s.get(`teacher/${u}`, { type: "json" });
       if (!t || t.disabled || !checkPw(pw, t.salt, t.hash)) return bad("Sai tên đăng nhập hoặc mật khẩu.", 401);
+      t.lastLogin = new Date().toISOString(); t.loginCount = (t.loginCount || 0) + 1;
+      t.logins = [t.lastLogin, ...(t.logins || [])].slice(0, 10);
+      await s.setJSON(`teacher/${t.id}`, t);
       return json({ token: makeToken(t.id), id: t.id, role: "teacher", name: t.name });
+    }
+
+    if (p[0] === "forgot" && m === "POST") {
+      const u = slug(body.username || ""); const adminUser = slug(env("ADMIN_USERNAME") || "admin");
+      const adminEmail = env("ADMIN_EMAIL") || "";
+      if (u && u === adminUser) return json({ admin: true, adminEmail });
+      if (u) {
+        const t = await s.get(`teacher/${u}`, { type: "json" });
+        if (t) await s.setJSON(`reset/${u}`, { id: u, name: t.name, at: new Date().toISOString() });
+      }
+      return json({ ok: true, adminEmail }); // không tiết lộ tài khoản có tồn tại hay không
     }
 
     /* ================= GIÁO VIÊN ================= */
@@ -214,7 +230,8 @@ export default async (req: Request) => {
         const teachers = me.role === "admin"
           ? (await listJSON("teacher/")).map(({ salt, hash, ...t }: any) => t).sort((a: any, b: any) => a.name.localeCompare(b.name, "vi"))
           : [];
-        return json({ me, classes, exams, teachers, aiEnabled: !!env("ANTHROPIC_API_KEY") });
+        const resets = me.role === "admin" ? await listJSON("reset/") : [];
+        return json({ me, classes, exams, teachers, resets, aiEnabled: !!env("ANTHROPIC_API_KEY"), adminUser: slug(env("ADMIN_USERNAME") || "admin") });
       }
 
       /* --- Quản lý giáo viên (chỉ quản trị) --- */
@@ -222,15 +239,26 @@ export default async (req: Request) => {
         if (me.role !== "admin") return bad("Chỉ quản trị mới quản lý tài khoản giáo viên.", 403);
         if (m === "POST") {
           const id = slug(body.username || ""); const name = String(body.name || "").trim().slice(0, 60);
-          if (!id || id === "admin") return bad("Tên đăng nhập không hợp lệ (chỉ chữ không dấu, số, dấu gạch).");
+          if (!id || id === "admin" || id === slug(env("ADMIN_USERNAME") || "admin")) return bad("Tên đăng nhập không hợp lệ hoặc trùng tài khoản quản trị.");
           const old = await s.get(`teacher/${id}`, { type: "json" });
           if (!old && (!name || String(body.password || "").length < 6)) return bad("Cần họ tên và mật khẩu từ 6 ký tự.");
           const t: any = old || { id, createdAt: new Date().toISOString() };
           if (name) t.name = name;
-          if (body.password) { if (String(body.password).length < 6) return bad("Mật khẩu cần từ 6 ký tự."); Object.assign(t, hashPw(body.password)); }
+          if (body.password) { if (String(body.password).length < 6) return bad("Mật khẩu cần từ 6 ký tự."); Object.assign(t, hashPw(body.password)); await s.delete(`reset/${id}`); }
           if (typeof body.disabled === "boolean") t.disabled = body.disabled;
           await s.setJSON(`teacher/${id}`, t);
           const { salt, hash, ...pub } = t; return json(pub);
+        }
+        if (m === "DELETE" && p[2]) {
+          const id = slug(p[2]);
+          const t = await s.get(`teacher/${id}`, { type: "json" });
+          if (!t) return bad("Không tìm thấy tài khoản.", 404);
+          // Chuyển lớp và đề của giáo viên này về quản trị để không mất dữ liệu học sinh
+          let moved = 0;
+          for (const c of (await listJSON("class/")).filter((c: any) => c.ownerId === id)) { c.ownerId = "admin"; await s.setJSON(`class/${c.code}`, c); moved++; }
+          for (const e of (await listJSON("exam/")).filter((e: any) => e.ownerId === id)) { e.ownerId = "admin"; await s.setJSON(`exam/${e.id}`, e); }
+          await s.delete(`teacher/${id}`); await s.delete(`reset/${id}`);
+          return json({ ok: true, moved });
         }
       }
       if (r === "password" && m === "POST") {
