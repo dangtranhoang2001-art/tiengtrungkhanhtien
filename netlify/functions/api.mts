@@ -1,4 +1,4 @@
-import { db, env, json, bad, slug, rid, classCode, isTeacher, listJSON, publicQuestion, autoGrade, totals } from "../lib/core.mts";
+import { db, env, json, bad, slug, rid, classCode, listJSON, publicQuestion, autoGrade, totals, auth, hashPw, checkPw, makeToken, ownerOf, canSee } from "../lib/core.mts";
 
 const GRACE_MS = 90_000;
 
@@ -80,7 +80,9 @@ export default async (req: Request) => {
           my: sub ? { status: sub.status, score: sub.status === "doing" ? null : studentView(e, sub).score, max: totals(e, sub).max } : null,
         };
       }));
-      return json({ code, name: cls.name, exams: rows });
+      let teacherName = env("ADMIN_NAME") || "";
+      if (cls.ownerId) { const t = await s.get(`teacher/${cls.ownerId}`, { type: "json" }); if (t) teacherName = t.name; }
+      return json({ code, name: cls.name, teacherName, exams: rows });
     }
 
     if (p[0] === "start" && m === "POST") {
@@ -141,32 +143,85 @@ export default async (req: Request) => {
       return json({ title: exam.title, result: studentView(exam, sub) });
     }
 
+    /* ================= ĐĂNG NHẬP ================= */
+    if (p[0] === "login" && m === "POST") {
+      if (!env("TEACHER_PASSWORD")) return bad("Chưa cài mật khẩu quản trị (TEACHER_PASSWORD) trên Netlify.", 500);
+      const u = slug(body.username || ""), pw = String(body.password || "");
+      if (!u || u === "admin") {
+        if (pw !== env("TEACHER_PASSWORD")) return bad("Sai tên đăng nhập hoặc mật khẩu.", 401);
+        return json({ token: makeToken("admin"), id: "admin", role: "admin", name: env("ADMIN_NAME") || "Quản trị" });
+      }
+      const t = await s.get(`teacher/${u}`, { type: "json" });
+      if (!t || t.disabled || !checkPw(pw, t.salt, t.hash)) return bad("Sai tên đăng nhập hoặc mật khẩu.", 401);
+      return json({ token: makeToken(t.id), id: t.id, role: "teacher", name: t.name });
+    }
+
     /* ================= GIÁO VIÊN ================= */
     if (p[0] === "t") {
-      if (!env("TEACHER_PASSWORD")) return bad("Chưa cài mật khẩu giáo viên (TEACHER_PASSWORD) trên Netlify.", 500);
-      if (!isTeacher(req)) return bad("Sai mật khẩu giáo viên.", 401);
+      const me = await auth(req);
+      if (!me) return bad("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.", 401);
       const r = p[1];
+      const getExam = async (id: string) => { const e = await s.get(`exam/${id}`, { type: "json" }); return e && canSee(me, e) ? e : null; };
 
       if (r === "overview" && m === "GET") {
-        const classes = (await listJSON("class/")).sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
-        const exams = (await listJSON("exam/")).sort((a: any, b: any) => (b.createdAt || "").localeCompare(a.createdAt || ""));
-        return json({ classes, exams, aiEnabled: !!env("ANTHROPIC_API_KEY") });
+        const classes = (await listJSON("class/")).filter((c: any) => canSee(me, c)).sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
+        const exams = (await listJSON("exam/")).filter((e: any) => canSee(me, e)).sort((a: any, b: any) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+        const teachers = me.role === "admin"
+          ? (await listJSON("teacher/")).map(({ salt, hash, ...t }: any) => t).sort((a: any, b: any) => a.name.localeCompare(b.name, "vi"))
+          : [];
+        return json({ me, classes, exams, teachers, aiEnabled: !!env("ANTHROPIC_API_KEY") });
       }
+
+      /* --- Quản lý giáo viên (chỉ quản trị) --- */
+      if (r === "teacher") {
+        if (me.role !== "admin") return bad("Chỉ quản trị mới quản lý tài khoản giáo viên.", 403);
+        if (m === "POST") {
+          const id = slug(body.username || ""); const name = String(body.name || "").trim().slice(0, 60);
+          if (!id || id === "admin") return bad("Tên đăng nhập không hợp lệ (chỉ chữ không dấu, số, dấu gạch).");
+          const old = await s.get(`teacher/${id}`, { type: "json" });
+          if (!old && (!name || String(body.password || "").length < 6)) return bad("Cần họ tên và mật khẩu từ 6 ký tự.");
+          const t: any = old || { id, createdAt: new Date().toISOString() };
+          if (name) t.name = name;
+          if (body.password) { if (String(body.password).length < 6) return bad("Mật khẩu cần từ 6 ký tự."); Object.assign(t, hashPw(body.password)); }
+          if (typeof body.disabled === "boolean") t.disabled = body.disabled;
+          await s.setJSON(`teacher/${id}`, t);
+          const { salt, hash, ...pub } = t; return json(pub);
+        }
+      }
+      if (r === "password" && m === "POST") {
+        if (me.role === "admin") return bad("Mật khẩu quản trị đổi trên Netlify (biến TEACHER_PASSWORD).");
+        const t = await s.get(`teacher/${me.id}`, { type: "json" });
+        if (!checkPw(body.oldPassword || "", t.salt, t.hash)) return bad("Mật khẩu cũ không đúng.");
+        if (String(body.newPassword || "").length < 6) return bad("Mật khẩu mới cần từ 6 ký tự.");
+        Object.assign(t, hashPw(body.newPassword)); await s.setJSON(`teacher/${me.id}`, t); return json({ ok: true });
+      }
+
+      /* --- Lớp --- */
       if (r === "class" && m === "POST") {
         const name = String(body.name || "").trim(); if (!name) return bad("Nhập tên lớp.");
+        let ownerId = me.id;
+        if (me.role === "admin" && body.ownerId) ownerId = slug(body.ownerId) || "admin";
         let code = classCode(); while (await s.get(`class/${code}`)) code = classCode();
-        const cls = { code, name, createdAt: new Date().toISOString() };
+        const cls = { code, name, ownerId, createdAt: new Date().toISOString() };
         await s.setJSON(`class/${code}`, cls); return json(cls);
       }
-      if (r === "class" && m === "DELETE" && p[2]) { await s.delete(`class/${p[2].toUpperCase()}`); return json({ ok: true }); }
+      if (r === "class" && m === "DELETE" && p[2]) {
+        const c = await s.get(`class/${p[2].toUpperCase()}`, { type: "json" });
+        if (!c || !canSee(me, c)) return bad("Không có quyền với lớp này.", 403);
+        await s.delete(`class/${c.code}`); return json({ ok: true });
+      }
 
+      /* --- Đề --- */
       if (r === "exam" && m === "POST") {
         const e = body; if (!e.title || !e.classCode) return bad("Đề cần tên và lớp.");
         if (!Array.isArray(e.questions) || !e.questions.length) return bad("Đề chưa có câu hỏi.");
+        const cls = await s.get(`class/${String(e.classCode).toUpperCase()}`, { type: "json" });
+        if (!cls || !canSee(me, cls)) return bad("Không có quyền giao đề cho lớp này.", 403);
         const id = e.id || rid();
         const old = e.id ? await s.get(`exam/${id}`, { type: "json" }) : null;
+        if (old && !canSee(me, old)) return bad("Không có quyền sửa đề này.", 403);
         const exam = {
-          id, title: String(e.title).slice(0, 120), classCode: String(e.classCode).toUpperCase(),
+          id, title: String(e.title).slice(0, 120), classCode: cls.code, ownerId: ownerOf(cls),
           durationMin: Math.max(1, Math.min(300, Number(e.durationMin) || 15)),
           openAt: e.openAt || null, dueAt: e.dueAt || null, published: !!e.published,
           showAnswers: !!e.showAnswers, showAI: !!e.showAI,
@@ -175,35 +230,47 @@ export default async (req: Request) => {
         };
         await s.setJSON(`exam/${id}`, exam); return json(exam);
       }
-      if (r === "exam" && m === "DELETE" && p[2]) { await s.delete(`exam/${p[2]}`); return json({ ok: true }); }
+      if (r === "exam" && m === "DELETE" && p[2]) {
+        if (!(await getExam(p[2]))) return bad("Không có quyền với đề này.", 403);
+        await s.delete(`exam/${p[2]}`); return json({ ok: true });
+      }
 
+      /* --- Chấm bài --- */
       if (r === "subs" && m === "GET") {
-        const examId = url.searchParams.get("examId") || "";
-        const exam = await s.get(`exam/${examId}`, { type: "json" });
-        const subs = (await listJSON(`sub/${examId}/`)).map((x: any) => ({ ...x, total: exam ? totals(exam, x) : null }));
+        const exam = await getExam(url.searchParams.get("examId") || "");
+        if (!exam) return bad("Không tìm thấy đề.", 404);
+        const subs = (await listJSON(`sub/${exam.id}/`)).map((x: any) => ({ ...x, total: totals(exam, x) }));
         return json({ exam, subs });
       }
       if (r === "review" && m === "POST") {
         const { examId, subId, teacherScores, teacherComments, teacherNote } = body;
-        const exam = await s.get(`exam/${examId}`, { type: "json" });
-        const sub = await s.get(`sub/${examId}/${subId}`, { type: "json" });
+        const exam = await getExam(examId);
+        const sub = exam ? await s.get(`sub/${examId}/${subId}`, { type: "json" }) : null;
         if (!exam || !sub) return bad("Không tìm thấy bài.", 404);
         sub.teacherScores = teacherScores || {}; sub.teacherComments = teacherComments || {};
         sub.teacherNote = String(teacherNote || ""); sub.status = "reviewed"; sub.reviewedAt = new Date().toISOString();
+        sub.reviewedBy = me.name;
         await s.setJSON(`sub/${examId}/${subId}`, sub); return json({ ...sub, total: totals(exam, sub) });
       }
       if (r === "regrade" && m === "POST") {
         if (!env("ANTHROPIC_API_KEY")) return bad("Chưa cài API key AI.");
+        if (!(await getExam(body.examId))) return bad("Không có quyền.", 403);
         const sub = await s.get(`sub/${body.examId}/${body.subId}`, { type: "json" });
         if (!sub) return bad("Không tìm thấy bài.", 404);
         sub.status = "waiting_ai"; delete sub.aiError; await s.setJSON(`sub/${body.examId}/${body.subId}`, sub);
         await trigger(req, "grade-background", { examId: body.examId, subId: body.subId }); return json({ ok: true });
       }
-      if (r === "sub" && m === "DELETE") { // cho học sinh làm lại
-        await s.delete(`sub/${url.searchParams.get("examId")}/${url.searchParams.get("subId")}`); return json({ ok: true });
+      if (r === "sub" && m === "DELETE") {
+        const examId = url.searchParams.get("examId") || "";
+        if (!(await getExam(examId))) return bad("Không có quyền.", 403);
+        await s.delete(`sub/${examId}/${url.searchParams.get("subId")}`); return json({ ok: true });
       }
+
+      /* --- Tiến độ --- */
       if (r === "progress" && m === "GET") {
         const code = (url.searchParams.get("classCode") || "").toUpperCase();
+        const cls = await s.get(`class/${code}`, { type: "json" });
+        if (!cls || !canSee(me, cls)) return bad("Không có quyền với lớp này.", 403);
         const exams = (await listJSON("exam/")).filter((e: any) => e.classCode === code)
           .sort((a: any, b: any) => (a.createdAt || "").localeCompare(b.createdAt || ""));
         const students: Record<string, any> = {};
@@ -229,6 +296,8 @@ export default async (req: Request) => {
       if (r === "report" && m === "POST") {
         if (!env("ANTHROPIC_API_KEY")) return bad("Chưa cài API key AI.");
         const code = String(body.classCode || "").toUpperCase(), sid = slug(body.studentId || "");
+        const cls = await s.get(`class/${code}`, { type: "json" });
+        if (!cls || !canSee(me, cls)) return bad("Không có quyền với lớp này.", 403);
         await s.setJSON(`report/${code}/${sid}`, { studentId: sid, status: "working", at: new Date().toISOString() });
         await trigger(req, "report-background", { classCode: code, studentId: sid }); return json({ ok: true });
       }
