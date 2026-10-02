@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Khánh Tiên – Học sinh</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23D72134'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>K</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans:wght@500;700&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="topbar"><div class="top">
+  <div class="brand"><img src="/logo.png" alt="Khánh Tiên Chinese Education Center"><span class="sep" aria-hidden="true"></span><span>Luyện tập online<small id="tName">Trung tâm Tiếng Trung Khánh Tiên</small></span></div>
+  <button class="btn ghost sm hide" id="outBtn">Đổi lớp</button>
+</div></header>
+
+<main class="wrap">
+  <!-- Vào lớp -->
+  <section id="vJoin" class="card" style="max-width:460px;margin:24px auto">
+    <h1>Vào lớp làm bài</h1>
+    <label class="f" for="jCode">Mã lớp</label>
+    <input class="i" id="jCode" maxlength="6" autocomplete="off" placeholder="VD: K7M2QP" style="text-transform:uppercase;letter-spacing:3px;font-weight:800">
+    <label class="f" for="jName">Họ và tên</label>
+    <input class="i" id="jName" maxlength="60" autocomplete="name" placeholder="VD: Nguyễn Minh Anh">
+    <p class="small muted">Nhập đúng họ tên giống nhau ở mọi lần để thầy/cô theo dõi tiến độ của em.</p>
+    <div id="jErr" class="err hide"></div>
+    <button class="btn" id="jBtn" style="width:100%">Vào lớp</button>
+  </section>
+
+  <!-- Danh sách bài -->
+  <section id="vList" class="hide">
+    <h1 id="lTitle"></h1>
+    <p class="muted" id="lWho"></p>
+    <div id="lItems"></div>
+  </section>
+
+  <!-- Làm bài -->
+  <section id="vExam" class="hide">
+    <div class="bar">
+      <div><b id="eTitle"></b><div class="small muted" id="eSaved">Bài làm được lưu tự động</div></div>
+      <div class="row"><span class="clock" id="eClock" aria-live="off">--:--</span><button class="btn red" id="eSubmit">Nộp bài</button></div>
+    </div>
+    <div id="eQs" style="margin-top:14px"></div>
+    <div class="row" style="justify-content:center;margin:20px 0"><button class="btn red" id="eSubmit2">Nộp bài</button></div>
+  </section>
+
+  <!-- Kết quả -->
+  <section id="vRes" class="hide"></section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<footer><b>Khánh Tiên Chinese Education Center</b> · Trung tâm Tiếng Trung Khánh Tiên</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),2600)}
+async function api(path,opt={}){
+  const r=await fetch(path,{method:opt.body?"POST":"GET",headers:{"content-type":"application/json"},body:opt.body?JSON.stringify(opt.body):undefined});
+  const d=await r.json().catch(()=>({error:"Không đọc được phản hồi máy chủ."}));
+  if(!r.ok) throw new Error(d.error||"Có lỗi xảy ra.");
+  return d;
+}
+function show(v){["vJoin","vList","vExam","vRes"].forEach(x=>$(x).classList.toggle("hide",x!==v));$("outBtn").classList.toggle("hide",v==="vJoin");scrollTo(0,0)}
+const fmt=iso=>iso?new Date(iso).toLocaleString("vi-VN",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"}):"";
+
+let ME=LS.get("kt_me")||{code:"",name:""};
+
+/* ---------- Vào lớp ---------- */
+const q0=new URLSearchParams(location.search).get("lop");
+$("jCode").value=(q0||ME.code||"").toUpperCase(); $("jName").value=ME.name||"";
+$("jBtn").onclick=async()=>{
+  const code=$("jCode").value.trim().toUpperCase(), name=$("jName").value.trim().replace(/\s+/g," ");
+  $("jErr").classList.add("hide");
+  if(code.length!==6||!name){ $("jErr").textContent="Em nhập đủ mã lớp (6 ký tự) và họ tên nhé."; $("jErr").classList.remove("hide"); return; }
+  $("jBtn").disabled=true;
+  try{ ME={code,name}; await loadList(); LS.set("kt_me",ME); }
+  catch(e){ $("jErr").textContent=e.message; $("jErr").classList.remove("hide"); }
+  $("jBtn").disabled=false;
+};
+[$("jCode"),$("jName")].forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")$("jBtn").click()}));
+$("outBtn").onclick=()=>{stopTimer();show("vJoin")};
+
+/* ---------- Danh sách bài ---------- */
+async function loadList(){
+  const d=await api(`/api/class/${ME.code}?student=${encodeURIComponent(ME.name)}`);
+  $("lTitle").textContent="Lớp "+d.name; $("tName").textContent=d.teacherName?"GV: "+d.teacherName:"Trung tâm Tiếng Trung Khánh Tiên"; $("lWho").textContent="Học sinh: "+ME.name;
+  if(!d.exams.length){ $("lItems").innerHTML=`<div class="card">Lớp chưa có bài nào. Khi thầy/cô giao bài, bài sẽ hiện ở đây.</div>`; show("vList"); return; }
+  $("lItems").innerHTML=d.exams.map(e=>{
+    let st, act="";
+    if(e.my && e.my.status!=="doing"){
+      st=e.my.score==null?`<span class="tag warn">Đã nộp · chờ chấm tự luận</span>`:`<span class="tag ok">Đã nộp · ${e.my.score}/${e.my.max} điểm</span>`;
+      act=`<button class="btn ghost" data-res="${e.id}">Xem kết quả</button>`;
+    } else if(e.state==="open"){
+      st=e.my?`<span class="tag warn">Đang làm dở</span>`:`<span class="tag">Chưa làm</span>`;
+      act=`<button class="btn" data-go="${e.id}">${e.my?"Làm tiếp":"Bắt đầu làm"}</button>`;
+    } else if(e.state==="upcoming"){ st=`<span class="tag">Mở lúc ${fmt(e.openAt)}</span>`; }
+    else { st=`<span class="tag bad">Đã hết hạn</span>`; if(e.my) act=`<button class="btn" data-go="${e.id}">Nộp bài</button>`; }
+    return `<div class="card"><div class="row"><div class="grow"><h3>${esc(e.title)}</h3>
+      <div class="small muted">${e.count} câu · ${e.durationMin} phút${e.dueAt?` · Hạn nộp ${fmt(e.dueAt)}`:""}</div>
+      <div style="margin-top:6px">${st}</div></div>${act}</div></div>`;
+  }).join("");
+  $("lItems").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>startExam(b.dataset.go));
+  $("lItems").querySelectorAll("[data-res]").forEach(b=>b.onclick=()=>openResult(b.dataset.res));
+  show("vList");
+}
+
+/* ---------- Làm bài ---------- */
+let X=null, timer=null, saveT=null;
+function stopTimer(){clearInterval(timer);timer=null;clearTimeout(saveT)}
+async function startExam(examId){
+  if(!X||X.examId!==examId){
+    if(!confirm("Khi bấm OK, đồng hồ bắt đầu chạy và không dừng lại được. Em sẵn sàng chưa?")) return;
+  }
+  try{
+    const d=await api("/api/start",{body:{examId,classCode:ME.code,student:ME.name}});
+    if(d.submitted){ renderResult(d.result,"",examId); return; }
+    const local=LS.get("kt_ans_"+examId+"_"+d.sub.id)||{};
+    X={examId,subId:d.sub.id,exam:d.exam,answers:Object.assign({},d.sub.answers,local),
+       deadline:Date.parse(d.sub.deadline), offset:Date.parse(d.serverNow)-Date.now(), done:false};
+    renderExam(); show("vExam"); tick(); timer=setInterval(tick,1000);
+  }catch(e){ toast(e.message); }
+}
+function renderExam(){
+  $("eTitle").textContent=X.exam.title;
+  $("eQs").innerHTML=X.exam.questions.map((q,i)=>{
+    const a=X.answers[q.id];
+    let body="";
+    if(q.type==="mcq"||q.type==="fill")
+      body=`<div class="opts">${q.options.map((o,k)=>`<button class="opt zh ${a===k?"sel":""}" data-q="${q.id}" data-k="${k}">${String.fromCharCode(65+k)}. ${esc(o)}</button>`).join("")}</div>`;
+    if(q.type==="order"){
+      const picked=Array.isArray(a)?a:[];
+      body=`<div class="line" data-line="${q.id}">${picked.map((c,k)=>`<button class="chip" data-rm="${q.id}" data-k="${k}">${esc(c)}</button>`).join("")||`<span class="muted small">Chạm vào các thẻ bên dưới để xếp câu</span>`}</div>
+        <div class="pool">${poolFor(q,picked).map(c=>`<button class="chip ${c.used?"used":""}" data-add="${q.id}" data-c="${esc(c.t)}" data-idx="${c.i}">${esc(c.t)}</button>`).join("")}</div>`;
+    }
+    if(q.type==="short") body=`<input class="i zh" data-txt="${q.id}" value="${esc(a||"")}" placeholder="Nhập câu trả lời" style="font-size:22px">`;
+    if(q.type==="essay") body=`<textarea class="i zh" data-txt="${q.id}" placeholder="Viết bài làm ở đây (dùng bộ gõ tiếng Trung)" style="font-size:20px;min-height:140px">${esc(a||"")}</textarea>`;
+    return `<div class="card" id="q_${q.id}"><div class="row" style="align-items:flex-start"><span class="qnum">${i+1}</span>
+      <div class="grow"><div class="prompt zh">${esc(q.prompt)}</div><div class="small muted">${q.points} điểm${q.type==="essay"?" · tự luận":""}</div></div></div>
+      <div style="margin-top:10px">${body}</div></div>`;
+  }).join("");
+  wire();
+}
+function poolFor(q,picked){
+  const used=[...picked]; return q.chunks.map((t,i)=>{const k=used.indexOf(t); if(k>=0){used.splice(k,1);return{t,i,used:true}} return{t,i,used:false}});
+}
+function wire(){
+  $("eQs").querySelectorAll("[data-k][data-q]").forEach(b=>b.onclick=()=>{X.answers[b.dataset.q]=+b.dataset.k;changed();renderExamKeep(b.dataset.q)});
+  $("eQs").querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{const id=b.dataset.add;(X.answers[id]=Array.isArray(X.answers[id])?X.answers[id]:[]).push(b.dataset.c);changed();renderExamKeep(id)});
+  $("eQs").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{X.answers[b.dataset.rm].splice(+b.dataset.k,1);changed();renderExamKeep(b.dataset.rm)});
+  $("eQs").querySelectorAll("[data-txt]").forEach(t=>t.oninput=()=>{X.answers[t.dataset.txt]=t.value;changed()});
+}
+function renderExamKeep(qid){const y=scrollY;renderExam();scrollTo(0,y);const f=document.querySelector(`#q_${qid} button`);if(f)f.focus({preventScroll:true})}
+function changed(){
+  LS.set("kt_ans_"+X.examId+"_"+X.subId,X.answers);
+  $("eSaved").textContent="Đang lưu…";
+  clearTimeout(saveT); saveT=setTimeout(async()=>{
+    try{await api("/api/save",{body:{examId:X.examId,subId:X.subId,answers:X.answers}});$("eSaved").textContent="Đã lưu lúc "+new Date().toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})}
+    catch(e){$("eSaved").textContent="Chưa lưu được lên máy chủ (bài vẫn lưu trên máy)"}
+  },1500);
+}
+function tick(){
+  const left=Math.max(0,Math.round((X.deadline-(Date.now()+X.offset))/1000));
+  const m=Math.floor(left/60),s=left%60;
+  $("eClock").textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  $("eClock").classList.toggle("low",left<=60);
+  if(left===60) toast("Còn 1 phút!");
+  if(left<=0&&!X.done){ toast("Hết giờ! Bài được nộp tự động."); submit(true); }
+}
+function unanswered(){return X.exam.questions.filter(q=>{const a=X.answers[q.id];return a==null||a===""||(Array.isArray(a)&&a.length<(q.chunks||[]).length)}).length}
+async function submit(auto){
+  if(X.done) return;
+  if(!auto){const u=unanswered(); if(!confirm(u?`Em còn ${u} câu chưa làm xong. Vẫn nộp bài?`:"Em chắc chắn nộp bài?")) return;}
+  X.done=true; stopTimer(); $("eSubmit").disabled=$("eSubmit2").disabled=true;
+  for(let t=0;t<3;t++){
+    try{
+      const d=await api("/api/submit",{body:{examId:X.examId,subId:X.subId,answers:X.answers}});
+      LS.del("kt_ans_"+X.examId+"_"+X.subId);
+      $("eSubmit").disabled=$("eSubmit2").disabled=false;
+      const eid=X.examId; renderResult(d.result,X.exam.title,eid); return;
+    }catch(e){ await new Promise(r=>setTimeout(r,1500*(t+1))); }
+  }
+  X.done=false; $("eSubmit").disabled=$("eSubmit2").disabled=false;
+  toast("Chưa nộp được — kiểm tra mạng rồi bấm Nộp bài lại. Bài làm vẫn được giữ.");
+}
+$("eSubmit").onclick=()=>submit(false); $("eSubmit2").onclick=()=>submit(false);
+
+/* ---------- Kết quả ---------- */
+async function openResult(examId){
+  try{const d=await api(`/api/result?examId=${examId}&classCode=${ME.code}&student=${encodeURIComponent(ME.name)}`);renderResult(d.result,d.title,examId)}
+  catch(e){toast(e.message)}
+}
+function renderResult(r,title,examId){
+  X=null;
+  const pending=r.score==null;
+  const pct=r.max&&!pending?Math.round(r.score/r.max*100):null;
+  $("vRes").innerHTML=`<div class="card" style="text-align:center">
+    <h1>${esc(title||"Kết quả")}</h1>
+    ${pending?`<p style="font-size:22px">Phần trắc nghiệm: <b>${r.autoScore}</b> điểm</p><p class="tag warn">Phần tự luận đang được chấm. Em quay lại xem sau nhé.</p>`
+      :`<div style="font-size:56px;font-weight:800;line-height:1">${r.score}/${r.max}</div><div style="font-size:36px">${pct>=90?"★★★":pct>=70?"★★☆":pct>=50?"★☆☆":"☆☆☆"}</div>`}
+    ${r.late?`<p class="tag bad">Nộp muộn</p>`:""}
+    ${r.comment?`<div class="card" style="text-align:left;margin-top:12px"><b>Nhận xét:</b> ${esc(r.comment)}</div>`:""}
+    <div class="row" style="justify-content:center;margin-top:10px">
+      ${pending&&examId?`<button class="btn ghost" id="rReload">Kiểm tra lại</button>`:""}
+      <button class="btn" id="rBack">Về danh sách bài</button></div></div>
+    ${r.detail.map((d,i)=>resRow(d,i)).join("")}`;
+  $("rBack").onclick=()=>loadList().catch(e=>toast(e.message));
+  if($("rReload")) $("rReload").onclick=()=>openResult(examId);
+  show("vRes");
+}
+function resRow(d,i){
+  let body="", mark="";
+  if(d.type==="essay"){
+    body=`<div class="zh" style="white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:10px">${esc(d.answer||"(bỏ trống)")}</div>`;
+    if(d.pending) mark=`<span class="tag warn">Đang chấm</span>`;
+    else{ mark=`<span class="tag">${d.score??"?"}/${d.points} điểm</span>`;
+      if(d.loi&&d.loi.length) body+=`<ul>${d.loi.map(l=>`<li><b>${esc(l.loai)}:</b> ${esc(l.chi_tiet)} → <span class="zh">${esc(l.sua)}</span></li>`).join("")}</ul>`;
+      if(d.nhan_xet) body+=`<p>💬 ${esc(d.nhan_xet)}</p>`; }
+  } else {
+    mark=d.ok?`<span class="tag ok">Đúng · ${d.score}/${d.points}</span>`:`<span class="tag bad">Sai · 0/${d.points}</span>`;
+    let mine=d.answer;
+    if((d.type==="mcq"||d.type==="fill")&&d.options) mine=d.answer==null?"(bỏ trống)":d.options[d.answer];
+    if(Array.isArray(mine)) mine=mine.join("");
+    body=`<div>Em trả lời: <span class="zh">${esc(mine||"(bỏ trống)")}</span></div>`;
+    if(!d.ok){
+      if(d.correct!=null&&d.options) body+=`<div>Đáp án: <b class="zh">${esc(d.options[d.correct])}</b></div>`;
+      if(d.correctText) body+=`<div>Đáp án: <b class="zh">${esc(d.correctText)}</b></div>`;
+    }
+    if(d.explain) body+=`<div class="small">💡 ${esc(d.explain)}</div>`;
+  }
+  return `<div class="card"><div class="row"><span class="qnum">${i+1}</span><div class="grow prompt zh">${esc(d.prompt)}</div>${mark}</div><div style="margin-top:8px">${body}</div></div>`;
+}
+
+/* ---------- Khởi động ---------- */
+if(ME.code&&ME.name&&!q0) loadList().catch(()=>show("vJoin")); else show("vJoin");
+addEventListener("beforeunload",e=>{if(X&&!X.done){e.preventDefault();e.returnValue=""}});
+</script>
+</body>
+</html>
