@@ -1,0 +1,18 @@
+{
+  "title": "HSK 1 – Đề thử số 1",
+  "durationMin": 20,
+  "showAnswers": true,
+  "showAI": false,
+  "questions": [
+    { "type": "mcq", "prompt": "爸爸 nghĩa là gì?", "options": ["mẹ", "bố", "anh trai", "em gái"], "correct": 1, "points": 1 },
+    { "type": "mcq", "prompt": "Chọn phiên âm đúng của 学校", "options": ["xuěxiào", "xuéxiāo", "xuéxiào", "xuèxiào"], "correct": 2, "points": 1 },
+    { "type": "mcq", "prompt": "今天星期几？ — Chọn câu trả lời phù hợp", "options": ["我是学生。", "他在家。", "我喜欢喝茶。", "今天星期三。"], "correct": 3, "points": 1 },
+    { "type": "fill", "prompt": "他＿＿＿中国人。", "options": ["是", "有", "在", "去"], "correct": 0, "points": 1, "explain": "Nói quốc tịch dùng 是." },
+    { "type": "fill", "prompt": "我有三＿＿＿书。", "options": ["口", "本", "岁", "点"], "correct": 1, "points": 1, "explain": "书 dùng lượng từ 本. Người Việt hay quên lượng từ." },
+    { "type": "fill", "prompt": "现在几＿＿＿？", "options": ["本", "口", "点", "岁"], "correct": 2, "points": 1, "explain": "Hỏi giờ dùng 几点." },
+    { "type": "order", "prompt": "Sắp xếp thành câu: Tôi rất thích uống trà.", "chunks": ["我", "很", "喜欢", "喝", "茶"], "accept": [], "points": 2 },
+    { "type": "order", "prompt": "Sắp xếp thành câu: Bạn đi đâu?", "chunks": ["你", "去", "哪儿"], "accept": [], "points": 2 },
+    { "type": "short", "prompt": "Viết chữ Hán của từ “cảm ơn”", "answers": ["谢谢"], "points": 1 },
+    { "type": "essay", "prompt": "Viết 3 câu tiếng Trung giới thiệu bản thân: tên, tuổi, nhà em có mấy người.", "rubric": "3 ý (tên, tuổi, số người trong nhà), mỗi ý đúng 1 điểm. Mỗi lỗi chữ Hán hoặc ngữ pháp trừ 0,5 điểm, không âm. Thiếu lượng từ 岁 hoặc 口 tính là lỗi ngữ pháp.", "sample": "我叫王明。我十岁。我家有四口人。", "points": 3 }
+  ]
+}
