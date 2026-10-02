@@ -52,39 +52,58 @@ export function isTeacher(req: Request): boolean {
 /* ---------- Đề thi: bản gửi cho học sinh (ẩn đáp án) ---------- */
 export function publicQuestion(q: any) {
   const base = { id: q.id, type: q.type, prompt: q.prompt || "", points: q.points || 1 };
+  const shuffle = (a: any[]) => { const c = [...a]; for (let i = c.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [c[i], c[j]] = [c[j], c[i]]; } return c; };
   if (q.type === "mcq" || q.type === "fill") return { ...base, options: q.options };
+  if (q.type === "listen") return { ...base, options: q.options, audioKey: q.audioKey || null, audioText: q.audioKey ? null : (q.audioText || "") };
   if (q.type === "order") {
-    const c = [...q.chunks];
-    for (let i = c.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [c[i], c[j]] = [c[j], c[i]]; }
+    let c = shuffle(q.chunks);
     if (c.join("|") === q.chunks.join("|") && c.length > 1) c.reverse();
     return { ...base, chunks: c };
   }
-  return base; // short, essay
+  if (q.type === "tone") return { ...base, items: (q.items || []).map((it: any) => ({ zh: it.zh, py: it.py })) };
+  if (q.type === "match") return { ...base, left: (q.pairs || []).map((p: any) => p.left), right: shuffle((q.pairs || []).map((p: any) => p.right)) };
+  if (q.type === "speak") return { ...base, text: q.text || "", py: q.showPinyin ? (q.pinyin || "") : "", maxSec: Number(q.maxSec) || 30, modelKey: q.modelKey || null };
+  if (q.type === "short") return { ...base, pinyinPad: !!q.pinyinPad };
+  return base; // essay
 }
 
 /* ---------- Chấm tự động ---------- */
 const normZh = (s: string) => String(s ?? "").replace(/[\s\u3000]/g, "")
   .replace(/[。，、！？；：,.!?;:"'“”‘’（）()]/g, "").toLowerCase();
 
+export const MANUAL_TYPES = ["essay", "speak"];
+const round2 = (x: number) => Math.round(x * 100) / 100;
+
 export function autoGrade(exam: any, answers: Record<string, any>) {
   const items: Record<string, any> = {};
-  let score = 0, max = 0, pendingEssay = 0;
+  let score = 0, max = 0, pendingEssay = 0, pendingSpeak = 0;
   for (const q of exam.questions) {
     const pts = Number(q.points) || 1; max += pts;
     const a = answers?.[q.id];
-    let ok: boolean | null = null;
-    if (q.type === "mcq" || q.type === "fill") ok = Number(a) === Number(q.correct);
+    if (q.type === "essay") { pendingEssay++; items[q.id] = { auto: false, score: null, max: pts }; continue; }
+    if (q.type === "speak") { pendingSpeak++; items[q.id] = { auto: false, score: null, max: pts }; continue; }
+    let ok: boolean | null = null, s = 0, detail: any = undefined;
+    if (q.type === "mcq" || q.type === "fill" || q.type === "listen") ok = a !== null && a !== undefined && a !== "" && Number(a) === Number(q.correct);
     else if (q.type === "order") {
       const got = Array.isArray(a) ? a.join("") : "";
       const accepts = [q.chunks.join(""), ...((q.accept || []) as string[])].map(normZh);
       ok = got !== "" && accepts.includes(normZh(got));
     } else if (q.type === "short") {
       ok = (q.answers || []).map(normZh).includes(normZh(a)) && normZh(a) !== "";
-    } else if (q.type === "essay") { pendingEssay++; items[q.id] = { auto: false, score: null, max: pts }; continue; }
-    const s = ok ? pts : 0; score += s;
-    items[q.id] = { auto: true, ok, score: s, max: pts };
+    } else if (q.type === "tone") {
+      const its = q.items || []; const arr = Array.isArray(a) ? a : [];
+      detail = its.map((it: any, i: number) => arr[i] !== null && arr[i] !== undefined && Number(arr[i]) === Number(it.tone));
+      const n = detail.filter(Boolean).length; s = its.length ? round2(pts * n / its.length) : 0; ok = n === its.length;
+    } else if (q.type === "match") {
+      const ps = q.pairs || []; const arr = Array.isArray(a) ? a : [];
+      detail = ps.map((p: any, i: number) => arr[i] === p.right);
+      const n = detail.filter(Boolean).length; s = ps.length ? round2(pts * n / ps.length) : 0; ok = n === ps.length;
+    }
+    if (q.type !== "tone" && q.type !== "match") s = ok ? pts : 0;
+    score += s;
+    items[q.id] = { auto: true, ok, score: s, max: pts, ...(detail ? { detail } : {}) };
   }
-  return { items, autoScore: score, maxScore: max, pendingEssay };
+  return { items, autoScore: round2(score), maxScore: max, pendingEssay, pendingSpeak };
 }
 
 /* ---------- Gọi AI (Anthropic API) ---------- */
@@ -139,13 +158,13 @@ export function totals(exam: any, sub: any) {
   for (const q of exam.questions) {
     const it = sub.grading?.items?.[q.id]; const pts = Number(q.points) || 1; max += pts;
     if (!it) continue;
-    if (q.type === "essay") {
+    if (q.type === "essay" || q.type === "speak") {
       const t = sub.teacherScores?.[q.id];
-      const v = t != null ? Number(t) : (sub.ai?.items?.[q.id]?.score ?? null);
+      const v = t != null ? Number(t) : (q.type === "essay" ? (sub.ai?.items?.[q.id]?.score ?? null) : null);
       if (v != null) score += v;
     } else score += it.score || 0;
   }
-  return { score, max };
+  return { score: round2(score), max };
 }
 
 /* ---------- Tài khoản giáo viên ---------- */
