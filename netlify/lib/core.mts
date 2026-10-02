@@ -147,3 +147,36 @@ export function totals(exam: any, sub: any) {
   }
   return { score, max };
 }
+
+/* ---------- Tài khoản giáo viên ---------- */
+import { pbkdf2Sync, randomBytes, timingSafeEqual, createHmac } from "node:crypto";
+
+export function hashPw(pw: string, salt = randomBytes(16).toString("hex")) {
+  return { salt, hash: pbkdf2Sync(String(pw), salt, 100_000, 32, "sha256").toString("hex") };
+}
+export function checkPw(pw: string, salt: string, hash: string) {
+  const h = pbkdf2Sync(String(pw), salt, 100_000, 32, "sha256");
+  const ref = Buffer.from(hash, "hex");
+  return ref.length === h.length && timingSafeEqual(h, ref);
+}
+const TOKEN_DAYS = 30;
+function sign(payload: string) { return createHmac("sha256", "kt-session:" + env("TEACHER_PASSWORD")).update(payload).digest("base64url"); }
+export function makeToken(id: string) {
+  const p = Buffer.from(JSON.stringify({ id, exp: Date.now() + TOKEN_DAYS * 864e5 })).toString("base64url");
+  return p + "." + sign(p);
+}
+/** Trả về {id, role, name} hoặc null */
+export async function auth(req: Request): Promise<any> {
+  const m = (req.headers.get("authorization") || "").match(/^Bearer (.+)$/);
+  if (!m || !env("TEACHER_PASSWORD")) return null;
+  const [p, sig] = m[1].split(".");
+  if (!p || !sig || sign(p) !== sig) return null;
+  let d: any; try { d = JSON.parse(Buffer.from(p, "base64url").toString()); } catch { return null; }
+  if (!d.id || Date.now() > d.exp) return null;
+  if (d.id === "admin") return { id: "admin", role: "admin", name: env("ADMIN_NAME") || "Quản trị" };
+  const t = await db().get(`teacher/${d.id}`, { type: "json" });
+  if (!t || t.disabled) return null;
+  return { id: t.id, role: "teacher", name: t.name };
+}
+export const ownerOf = (x: any) => x?.ownerId || "admin";
+export const canSee = (me: any, x: any) => me.role === "admin" || ownerOf(x) === me.id;
