@@ -7,7 +7,7 @@
 <title>Khánh Tiên – Giáo viên</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233B82F6'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>K</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans:wght@500;700&family=Noto+Sans+SC:wght@500;700&family=Noto+Serif+SC:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20261002i">
+<link rel="stylesheet" href="/style.css?v=20261002j">
 <style>
 .qed{border-left:8px solid var(--sky)}
 .qed[data-t=fill]{border-left-color:var(--jade)} .qed[data-t=order]{border-left-color:var(--sun)}
@@ -45,6 +45,7 @@
       <button role="tab" data-tab="tExam"><span class="ai wiggle" aria-hidden="true">📝</span> Đề bài</button>
       <button role="tab" data-tab="tGrade"><span class="ai pulse" aria-hidden="true">✅</span> Chấm bài</button>
       <button role="tab" data-tab="tProg"><span class="ai bounce" aria-hidden="true">📈</span> Tiến độ</button>
+      <button role="tab" data-tab="tMng"><span class="ai bounce" aria-hidden="true">📋</span> Quản lý lớp</button>
       <button role="tab" data-tab="tTeach" class="hide" id="tabTeach"><span class="ai wave" aria-hidden="true">🧑‍🏫</span> Danh sách GV</button>
     </nav>
 
@@ -56,6 +57,7 @@
           <div class="grow" style="min-width:170px"><label class="f">📖 GV Đọc + Viết</label><input class="i" id="cDV" placeholder="VD: Thầy Nam"></div>
           <button class="btn" id="cAdd">Tạo lớp</button></div><select class="hide" id="cOwner"></select>
       </div>
+      <div class="row" style="margin:4px 0 10px"><input class="i" id="cSearch" placeholder="🔍 Tìm lớp theo tên, mã lớp hoặc tên giáo viên…" style="flex:1"><span class="small muted" id="cCount"></span></div>
       <div id="cList"></div>
     </div>
 
@@ -74,6 +76,10 @@
         <p class="small muted" style="margin:0 0 6px">Cả trung tâm dùng chung một tài khoản đăng nhập. Mỗi giáo viên chỉ cần chọn tên mình để vào khu vực lớp riêng.</p>
         <div class="row"><input class="i grow" id="nName" placeholder="VD: Cô Thu Hà" style="flex:1;min-width:200px"><button class="btn" id="nAdd">Thêm</button></div></div>
       <div id="teachList"></div>
+    </div>
+    <div id="tMng" class="hide">
+      <div class="card row"><input class="i" id="mSearch" placeholder="🔍 Tìm lớp: tên, mã lớp, giáo viên…" style="flex:1;min-width:200px"><select class="i grow" id="mClass" style="flex:1;min-width:200px"></select><button class="btn ghost sm" id="mRef">Tải lại</button></div>
+      <div id="mBody"></div>
     </div>
     <div id="tProg" class="hide">
       <div class="card row"><label class="f" for="pClass" style="margin:0">Chọn lớp</label><select class="i grow" id="pClass" style="flex:1"></select><select class="i" id="pSec" style="width:auto"><option value="">Tất cả phân môn</option></select><button class="btn ghost sm" id="pCsv">Tải bảng điểm (CSV)</button></div>
@@ -205,8 +211,8 @@ async function boot(){
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("[data-tab]").forEach(x=>x.setAttribute("aria-selected",x===b));
-  ["tClass","tExam","tGrade","tProg","tTeach"].forEach(t=>$(t).classList.toggle("hide",t!==b.dataset.tab));
-  if(b.dataset.tab==="tGrade")loadSubs(); if(b.dataset.tab==="tProg")loadProg();
+  ["tClass","tExam","tGrade","tProg","tTeach","tMng"].forEach(t=>$(t).classList.toggle("hide",t!==b.dataset.tab));
+  if(b.dataset.tab==="tGrade")loadSubs(); if(b.dataset.tab==="tMng"){fillMngSelect();loadMng()} if(b.dataset.tab==="tProg")loadProg();
 });
 const className=c=>(D.classes.find(x=>x.code===c)||{}).name||c;
 const DEF_SECS=()=>[{id:"nn",name:"Nghe + Nói",teacher:""},{id:"dv",name:"Đọc + Viết",teacher:""}];
@@ -214,7 +220,7 @@ const secsOf=c=>c&&Array.isArray(c.sections)&&c.sections.length?c.sections:DEF_S
 const secIcon=n=>/nghe|nói/i.test(n)?"🎧":/đọc|viết/i.test(n)?"📖":"📂";
 const secOfExam=e=>{const c=D.classes.find(x=>x.code===e.classCode);const ss=secsOf(c);return ss.find(x=>x.id===e.sectionId)||ss[0]};
 const secLabel=e=>{const x=secOfExam(e);return x?`${secIcon(x.name)} ${x.name}${x.teacher?` (${x.teacher})`:""}`:""};
-function showTab(id){document.querySelectorAll("[data-tab]").forEach(x=>x.setAttribute("aria-selected",x.dataset.tab===id));["tClass","tExam","tGrade","tProg","tTeach"].forEach(t=>$(t).classList.toggle("hide",t!==id));scrollTo(0,0)}
+function showTab(id){document.querySelectorAll("[data-tab]").forEach(x=>x.setAttribute("aria-selected",x.dataset.tab===id));["tClass","tExam","tGrade","tProg","tTeach","tMng"].forEach(t=>$(t).classList.toggle("hide",t!==id));scrollTo(0,0)}
 function fillSelects(){
   const ex=$("gExam").value, cl=$("pClass").value;
   $("gExam").innerHTML=myExams().map(e=>`<option value="${e.id}">${esc(className(e.classCode))} › ${esc(secLabel(e))} › ${esc(e.title)}</option>`).join("")||`<option value="">(chưa có đề)</option>`;
@@ -239,9 +245,125 @@ $("nAdd").onclick=async()=>{const name=$("nName").value.trim();if(!name)return t
   try{const t=await api("/api/t/teacher",{body:{name}});D.teachers.push(t);$("nName").value="";
     $("cOwner").innerHTML+=`<option value="${t.id}">${esc(t.name)}</option>`;renderTeachers();toast("Đã thêm "+t.name)}catch(e){toast(e.message)}};
 
+/* ---------- Quản lý lớp: điểm danh · hoàn thành bài tập · đánh giá ---------- */
+const norm=t=>String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/gi,"d").toLowerCase();
+const slugify=t=>norm(t).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,60);
+const classMatch=(c,q)=>{if(!q)return true;const h=norm([c.name,c.code,...secsOf(c).map(x=>x.name+" "+x.teacher)].join(" "));return norm(q).split(/\s+/).every(w=>h.includes(w))};
+const ATT={P:["✅","Có mặt","ok"],L:["⏰","Đi muộn","warn"],E:["📝","Vắng có phép",""],A:["❌","Vắng","bad"]};
+let M=null, MV="att";
+function fillMngSelect(){
+  const q=$("mSearch").value, cur=$("mClass").value;
+  const list=D.classes.filter(c=>classMatch(c,q)).sort((a,b)=>a.name.localeCompare(b.name,"vi"));
+  $("mClass").innerHTML=list.map(c=>`<option value="${c.code}">${esc(c.name)} · ${c.code}</option>`).join("")||`<option value="">(không tìm thấy lớp)</option>`;
+  if(list.some(c=>c.code===cur)) $("mClass").value=cur;
+}
+async function loadMng(){
+  const code=$("mClass").value; if(!code){$("mBody").innerHTML="";return}
+  try{M=await api("/api/t/manage?classCode="+code);M.code=code;renderMng()}catch(e){toast(e.message)}
+}
+function mStudents(){ // danh sách cố định + học viên đã từng nộp bài
+  const map=new Map(M.roster.map(s=>[s.id,{id:s.id,name:s.name,inRoster:true}]));
+  for(const [id,n] of Object.entries(M.names)) if(!map.has(id)) map.set(id,{id,name:n,inRoster:false});
+  return [...map.values()].sort((a,b)=>a.name.localeCompare(b.name,"vi"));
+}
+function mStats(st){
+  const ss=M.sessions; let pts=0,den=0,abs=0,late=0,exc=0;
+  for(const s of ss){const v=s.records[st.id]; if(!v) continue; if(v==="E"){exc++;continue} den++; if(v==="P")pts+=1; else if(v==="L"){pts+=.75;late++} else abs++;}
+  const cc=den?Math.round(pts/den*100):null;
+  const assigned=M.exams.filter(e=>e.started); const r=M.results[st.id]||{};
+  const done=assigned.filter(e=>r[e.id]&&r[e.id].status!=="doing").length;
+  const ht=assigned.length?Math.round(done/assigned.length*100):null;
+  const sc=assigned.map(e=>r[e.id]).filter(x=>x&&x.graded&&x.pct!=null).map(x=>x.pct);
+  const avg=sc.length?Math.round(sc.reduce((a,b)=>a+b,0)/sc.length):null;
+  const parts=[[cc,.3],[ht,.3],[avg,.4]].filter(x=>x[0]!=null); const w=parts.reduce((a,x)=>a+x[1],0);
+  const total=w?Math.round(parts.reduce((a,x)=>a+x[0]*x[1],0)/w):null;
+  const rank=total==null?["—",""]:total>=85?["🌟 Tốt","ok"]:total>=70?["👍 Khá","ok"]:total>=50?["🙂 Trung bình","warn"]:["⚠️ Cần cố gắng","bad"];
+  const flags=[]; if(abs>=2) flags.push(`vắng ${abs} buổi`); const miss=assigned.length-done; if(miss>=2) flags.push(`chưa làm ${miss} bài`); if(avg!=null&&avg<50) flags.push("điểm thấp");
+  return {cc,attended:den-abs,den,abs,late,exc,ht,done,assigned:assigned.length,avg,total,rank,flags};
+}
+function renderMng(){
+  const tabs=[["att","✅ Điểm danh"],["sum","📊 Đánh giá quá trình"],["ros","👥 Danh sách học viên"]];
+  $("mBody").innerHTML=`<div class="tabs" style="margin-top:0">${tabs.map(([k,v])=>`<button data-mv="${k}" aria-selected="${MV===k}">${v}</button>`).join("")}</div><div id="mView"></div>`;
+  $("mBody").querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{MV=b.dataset.mv;renderMng()});
+  ({att:renderAtt,sum:renderSum,ros:renderRos})[MV]();
+}
+function renderAtt(sel){
+  const st=mStudents(), secs=M.cls.sections; const today=new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+  const date=sel?.date||$("aDate")?.value||today, sec=sel?.sectionId||$("aSec")?.value||secs[0].id;
+  const ex=M.sessions.find(x=>x.date===date&&x.sectionId===sec); const rec={...(ex?.records||{})};
+  if(!st.length){$("mView").innerHTML=`<div class="card">Lớp chưa có học viên. Vào <b>👥 Danh sách học viên</b> để thêm tên.</div>`;return}
+  $("mView").innerHTML=`<div class="card"><div class="row" style="align-items:flex-end">
+      <div><label class="f">📅 Ngày học</label><input class="i" type="date" id="aDate" value="${date}"></div>
+      <div class="grow"><label class="f">📂 Buổi / phân môn</label><select class="i" id="aSec">${secs.map(x=>`<option value="${x.id}" ${x.id===sec?"selected":""}>${secIcon(x.name)} ${esc(x.name)}${x.teacher?` (${esc(x.teacher)})`:""}</option>`).join("")}</select></div>
+      <button class="btn ghost sm" id="aAllP">✅ Tất cả có mặt</button></div>
+    ${ex?`<p class="small muted" style="margin:8px 0 0">Đã điểm danh${ex.by?` bởi ${esc(ex.by)}`:""} lúc ${fmt(ex.updatedAt)}. Sửa rồi bấm Lưu để cập nhật.</p>`:""}
+    <div class="attlist">${st.map(s=>`<div class="attrow"><span class="grow"><b>${esc(s.name)}</b>${s.inRoster?"":` <span class="small muted">(tự vào lớp)</span>`}</span>
+      ${Object.entries(ATT).map(([k,[ic,lb]])=>`<button class="ab ${rec[s.id]===k?"on "+k:""}" data-sid="${s.id}" data-v="${k}" title="${lb}" aria-pressed="${rec[s.id]===k}">${ic}<span>${lb}</span></button>`).join("")}</div>`).join("")}</div>
+    <div class="row" style="margin-top:10px"><input class="i grow" id="aBy" placeholder="Người điểm danh (VD: Cô Hà)" value="${esc(ex?.by||localStorage.getItem("kt_by")||"")}" style="flex:1;min-width:160px">
+      <input class="i grow" id="aNote" placeholder="Ghi chú buổi học (không bắt buộc)" value="${esc(ex?.note||"")}" style="flex:2;min-width:200px"><button class="btn green" id="aSave">💾 Lưu điểm danh</button></div></div>
+    <div class="card tablewrap"><h3>Lịch sử điểm danh</h3>${M.sessions.length?`<table><thead><tr><th>Học viên</th>${M.sessions.map(x=>`<th class="small" style="cursor:pointer" data-open="${x.date}|${x.sectionId}" title="Bấm để sửa buổi này">${x.date.slice(8)}/${x.date.slice(5,7)}<br>${secIcon((secs.find(y=>y.id===x.sectionId)||{name:""}).name)}</th>`).join("")}</tr></thead>
+      <tbody>${st.map(s=>`<tr><th>${esc(s.name)}</th>${M.sessions.map(x=>`<td>${x.records[s.id]?ATT[x.records[s.id]][0]:`<span class="muted">·</span>`}</td>`).join("")}</tr>`).join("")}</tbody></table>
+      <p class="small muted">✅ có mặt · ⏰ đi muộn · 📝 vắng có phép · ❌ vắng · bấm vào ngày để sửa</p>`:`<p class="muted">Chưa có buổi nào.</p>`}</div>`;
+  const V=$("mView");
+  V.querySelectorAll(".ab").forEach(b=>b.onclick=()=>{const id=b.dataset.sid;rec[id]=rec[id]===b.dataset.v?null:b.dataset.v;
+    V.querySelectorAll(`.ab[data-sid="${id}"]`).forEach(x=>{const on=rec[id]===x.dataset.v;x.className="ab"+(on?" on "+x.dataset.v:"");x.setAttribute("aria-pressed",on)})});
+  $("aAllP").onclick=()=>{st.forEach(s=>{if(!rec[s.id])rec[s.id]="P"});V.querySelectorAll(".ab").forEach(x=>{const on=rec[x.dataset.sid]===x.dataset.v;x.className="ab"+(on?" on "+x.dataset.v:"")})};
+  $("aDate").onchange=$("aSec").onchange=()=>renderAtt({date:$("aDate").value,sectionId:$("aSec").value});
+  V.querySelectorAll("[data-open]").forEach(th=>th.onclick=()=>{const [d,s2]=th.dataset.open.split("|");renderAtt({date:d,sectionId:s2});scrollTo({top:0,behavior:"smooth"})});
+  $("aSave").onclick=async()=>{const by=$("aBy").value.trim();try{localStorage.setItem("kt_by",by)}catch(e){}
+    const records={};st.forEach(s=>records[s.id]=rec[s.id]||"");
+    if(!Object.values(records).some(Boolean)) return toast("Chưa đánh dấu học viên nào");
+    try{const r=await api("/api/t/attendance",{body:{classCode:M.code,date:$("aDate").value,sectionId:$("aSec").value,records,note:$("aNote").value,by}});
+      M.sessions=M.sessions.filter(x=>!(x.date===r.date&&x.sectionId===r.sectionId)).concat(r).sort((a,b)=>(a.date+a.sectionId).localeCompare(b.date+b.sectionId));
+      const n=Object.values(r.records).filter(v=>v==="A").length;toast(`Đã lưu điểm danh ${r.date}${n?` · ${n} vắng`:""}`);renderAtt({date:r.date,sectionId:r.sectionId})}catch(e){toast(e.message)}};
+}
+function renderSum(){
+  const st=mStudents(); if(!st.length){$("mView").innerHTML=`<div class="card">Lớp chưa có học viên.</div>`;return}
+  const rows=st.map(s=>({s,...mStats(s)}));
+  const avg=(k)=>{const v=rows.map(r=>r[k]).filter(x=>x!=null);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):null};
+  const bar=(v)=>v==null?`<span class="muted">—</span>`:`<div class="minibar"><i style="width:${v}%;background:${v>=80?"var(--jade)":v>=50?"var(--sun)":"var(--coral)"}"></i></div><b>${v}%</b>`;
+  $("mView").innerHTML=`<div class="statgrid">
+      <div class="stat"><span class="ai bounce">✅</span><b>${avg("cc")??"—"}${avg("cc")!=null?"%":""}</b><small>Chuyên cần TB · ${M.sessions.length} buổi</small></div>
+      <div class="stat"><span class="ai bounce">📝</span><b>${avg("ht")??"—"}${avg("ht")!=null?"%":""}</b><small>Hoàn thành bài tập · ${M.exams.filter(e=>e.started).length} bài đã giao</small></div>
+      <div class="stat"><span class="ai bounce">🎯</span><b>${avg("avg")??"—"}${avg("avg")!=null?"%":""}</b><small>Điểm trung bình</small></div>
+      <div class="stat"><span class="ai bounce">⚠️</span><b>${rows.filter(r=>r.flags.length).length}</b><small>Học viên cần chú ý</small></div></div>
+    <div class="card tablewrap"><div class="row"><h3 class="grow" style="margin:0">Đánh giá quá trình học</h3><button class="btn ghost sm" id="sCsv">⬇ Tải Excel (CSV)</button></div>
+    <table><thead><tr><th>Học viên</th><th>Chuyên cần</th><th>Hoàn thành BT</th><th>Điểm TB</th><th>Tổng hợp</th><th>Đánh giá</th><th>Cần chú ý</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><th>${esc(r.s.name)}</th><td>${bar(r.cc)}<div class="small muted">${r.den?`${r.attended}/${r.den} buổi${r.late?` · ${r.late} muộn`:""}${r.exc?` · ${r.exc} có phép`:""}`:"chưa điểm danh"}</div></td>
+      <td>${bar(r.ht)}<div class="small muted">${r.done}/${r.assigned} bài</div></td><td>${bar(r.avg)}</td><td><b>${r.total??"—"}</b></td>
+      <td><span class="tag ${r.rank[1]}">${r.rank[0]}</span></td><td class="small">${r.flags.map(f=>`<span class="tag bad" style="margin:1px">${f}</span>`).join(" ")||"—"}</td></tr>`).join("")}</tbody></table>
+    <p class="small muted">Cách tính: Tổng hợp = 30% chuyên cần + 30% hoàn thành bài tập + 40% điểm trung bình (mục chưa có dữ liệu sẽ bỏ qua).
+      Chuyên cần: có mặt = 1, đi muộn = 0,75, vắng = 0, vắng có phép không tính. Xếp loại: ≥85 Tốt · ≥70 Khá · ≥50 Trung bình · dưới 50 Cần cố gắng.</p></div>`;
+  $("sCsv").onclick=()=>{const L=[["Học viên","Chuyên cần %","Số buổi có mặt","Số buổi vắng","Hoàn thành BT %","Số bài đã làm","Điểm TB %","Tổng hợp","Đánh giá","Cần chú ý"],
+      ...rows.map(r=>[r.s.name,r.cc??"",`${r.attended}/${r.den}`,r.abs,r.ht??"",`${r.done}/${r.assigned}`,r.avg??"",r.total??"",r.rank[0].replace(/^\S+\s/,""),r.flags.join("; ")])];
+    const csv="\ufeff"+L.map(x=>x.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`danh-gia-${M.code}.csv`;a.click()};
+}
+function renderRos(){
+  const st=mStudents();
+  $("mView").innerHTML=`<div class="card"><h3>➕ Thêm học viên</h3><p class="small muted" style="margin:0 0 6px">Mỗi dòng một tên. Nên nhập đúng họ tên mà học viên sẽ gõ khi vào lớp.</p>
+      <textarea class="i" id="rAdd" placeholder="Nguyễn Minh Anh&#10;Trần Bảo Ngọc"></textarea><div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn" id="rGo">Thêm vào lớp</button></div></div>
+    <div class="card"><h3>👥 ${st.length} học viên</h3>${st.map(s=>`<div class="exrow"><span class="grow"><b>${esc(s.name)}</b> ${s.inRoster?"":`<span class="tag warn">tự vào lớp</span>`}</span>
+      ${s.inRoster?`<button class="btn ghost sm" data-rrm="${s.id}">Xoá khỏi danh sách</button>`:`<button class="btn ghost sm" data-radd="${esc(s.name)}">Thêm vào danh sách</button>`}</div>`).join("")||`<p class="muted">Chưa có học viên.</p>`}
+      <p class="small muted">"Tự vào lớp": học viên đã làm bài nhưng chưa có trong danh sách (có thể gõ sai tên). Xoá khỏi danh sách không xoá bài làm.</p></div>`;
+  const send=async(add,remove)=>{try{const r=await api("/api/t/roster",{body:{classCode:M.code,add,remove}});M.roster=r.students;renderRos();toast("Đã cập nhật danh sách")}catch(e){toast(e.message)}};
+  $("rGo").onclick=()=>{const names=$("rAdd").value.split("\n").map(x=>x.trim()).filter(Boolean);if(!names.length)return toast("Nhập tên học viên");send(names,[])};
+  $("mView").querySelectorAll("[data-rrm]").forEach(b=>b.onclick=async()=>{if(await askConfirm("Bài làm và điểm danh cũ vẫn được giữ.",{icon:"👥",title:"Xoá khỏi danh sách?",ok:"Xoá",danger:true}))send([],[b.dataset.rrm])});
+  $("mView").querySelectorAll("[data-radd]").forEach(b=>b.onclick=()=>send([b.dataset.radd],[]));
+}
+
+$("mSearch").oninput=()=>{fillMngSelect();loadMng()}; $("mClass").onchange=loadMng; $("mRef").onclick=loadMng;
+$("cSearch").oninput=()=>renderClasses();
+/* Tự cập nhật dữ liệu mỗi phút để thấy thay đổi của thầy cô khác */
+setInterval(async()=>{ if(!TOK||$("vApp").classList.contains("hide")||!$("exEdit").classList.contains("hide")||document.querySelector(".dlg-ov")) return;
+  if(document.activeElement&&document.activeElement.matches("input,textarea,select")) return;
+  try{const d=await api("/api/t/overview");D.classes=d.classes;D.exams=d.exams;if(!$("tClass").classList.contains("hide"))renderClasses();fillSelects()}catch(e){} },60000);
+
 /* ---------- Lớp ---------- */
 function renderClasses(){
-  $("cList").innerHTML=myClasses().map(c=>{const link=`${location.origin}/?lop=${c.code}`;const ex=D.exams.filter(e=>e.classCode===c.code);
+  const q=$("cSearch").value.trim(); const shown=myClasses().filter(c=>classMatch(c,q)).sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
+  $("cCount").textContent=q?`${shown.length}/${myClasses().length} lớp`:`${myClasses().length} lớp`;
+  $("cList").innerHTML=shown.map(c=>{const link=`${location.origin}/?lop=${c.code}`;const ex=D.exams.filter(e=>e.classCode===c.code);
     return`<div class="card folder"><div class="row" style="align-items:flex-start"><span class="fic ai float" aria-hidden="true">📁</span>
       <div class="grow"><h3 style="margin:0">${esc(c.name)}</h3><div class="row small muted" style="gap:8px">Mã lớp <span class="code" style="font-size:20px;letter-spacing:3px">${c.code}</span> · ${ex.length} đề</div>
       <div class="small muted">Link học sinh: <a href="${link}" target="_blank">${esc(link)}</a></div></div>
@@ -253,7 +375,7 @@ function renderClasses(){
           ${se.length?`<div class="exrows">${se.map(e=>`<div class="exrow"><span class="grow"><b>${esc(e.title)}</b> <span class="small muted">· ${e.questions.length} câu · ${e.durationMin} phút${e.dueAt?` · hạn ${fmt(e.dueAt)}`:""}</span></span>
             <span class="tag ${e.published?"ok":""}">${e.published?"Đã giao":"Nháp"}</span>
             <button class="btn ghost sm" data-ted="${e.id}">Sửa</button><button class="btn ghost sm" data-tgr="${e.id}">Chấm</button><button class="btn ghost sm" data-tdup="${e.id}">Nhân bản</button><button class="btn ghost sm" data-trm="${e.id}">🗑️</button></div>`).join("")}</div>`
-          :`<div class="small muted" style="padding:6px 2px 0 34px">Chưa có đề nào.</div>`}</div>`}).join("")}</div></div>`}).join("")||`<p class="muted">Chưa có lớp nào. Tạo lớp đầu tiên ở trên.</p>`;
+          :`<div class="small muted" style="padding:6px 2px 0 34px">Chưa có đề nào.</div>`}</div>`}).join("")}</div></div>`}).join("")||`<p class="muted">${q?"Không tìm thấy lớp phù hợp.":"Chưa có lớp nào. Tạo lớp đầu tiên ở trên."}</p>`;
   const L=$("cList");
   L.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(b.dataset.copy).then(()=>toast("Đã sao chép link"),()=>toast(b.dataset.copy))});
   L.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{if(!(await askConfirm("Đề và bài làm cũ vẫn được giữ lại.",{icon:"🗑️",title:"Xoá lớp này?",ok:"Xoá lớp",danger:true})))return;await api("/api/t/class/"+b.dataset.del,{method:"DELETE"});D.classes=D.classes.filter(c=>c.code!==b.dataset.del);renderClasses();fillSelects()});
@@ -440,9 +562,9 @@ function validate(){
 async function saveExam(){
   readHead(); const err=validate(); if(err) return toast(err);
   $("xSave").disabled=true;
-  try{const saved=await api("/api/t/exam",{body:E});const k=D.exams.findIndex(x=>x.id===saved.id);if(k>=0)D.exams[k]=saved;else D.exams.unshift(saved);
+  try{const saved=await api("/api/t/exam",{body:{...E,baseUpdatedAt:E.updatedAt||null}});const k=D.exams.findIndex(x=>x.id===saved.id);if(k>=0)D.exams[k]=saved;else D.exams.unshift(saved);
     toast(saved.published?"Đã lưu và giao bài":"Đã lưu nháp");renderExamList();renderClasses();fillSelects();showTab("tClass")}
-  catch(e){toast(e.message);$("xSave").disabled=false}
+  catch(e){$("xSave").disabled=false; if(/người khác sửa/.test(e.message)) tell(e.message,{icon:"👥",title:"Đề đã thay đổi"}); else toast(e.message)}
 }
 
 /* ---------- Chấm bài ---------- */

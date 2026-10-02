@@ -349,3 +349,17 @@ table{font-size:15px}
 .th .fileic{display:grid;place-items:center;height:90px;font-size:44px;text-decoration:none}
 .th .tn{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}
 .th .rmf{position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;border:0;background:var(--coral);color:#fff;font-weight:800;box-shadow:0 2px 0 #E03131}
+
+/* ===== Quản lý lớp ===== */
+.attlist{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.attrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:var(--bg);border-radius:12px;padding:6px 10px}
+.ab{border:2px solid var(--line);background:#fff;border-radius:10px;padding:4px 8px;font-size:14px;display:inline-flex;gap:4px;align-items:center}
+.ab span{font-size:13px}
+.ab.on.P{border-color:var(--jade);background:var(--ok-bg)} .ab.on.L{border-color:var(--orange);background:#FFF1E2}
+.ab.on.E{border-color:var(--sky);background:var(--red-soft)} .ab.on.A{border-color:var(--coral);background:var(--bad-bg)}
+@media (max-width:600px){.ab span{display:none}}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:12px}
+.stat{background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column}
+.stat .ai{font-size:24px} .stat b{font-size:28px;line-height:1.1} .stat small{color:var(--muted)}
+.minibar{display:inline-block;width:70px;height:8px;background:var(--line);border-radius:4px;overflow:hidden;vertical-align:middle;margin-right:6px}
+.minibar i{display:block;height:100%}
