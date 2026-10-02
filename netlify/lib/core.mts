@@ -64,6 +64,8 @@ export function publicQuestion(q: any) {
   if (q.type === "match") return { ...base, left: (q.pairs || []).map((p: any) => p.left), right: shuffle((q.pairs || []).map((p: any) => p.right)) };
   if (q.type === "speak") return { ...base, text: q.text || "", py: q.showPinyin ? (q.pinyin || "") : "", maxSec: Number(q.maxSec) || 30, modelKey: q.modelKey || null };
   if (q.type === "short") return { ...base, pinyinPad: !!q.pinyinPad };
+  if (q.type === "upload") return { ...base, maxFiles: Math.min(10, Number(q.maxFiles) || 5), note: q.note || "" };
+  if (q.type === "essay") return { ...base, allowAttach: !!q.allowAttach };
   return base; // essay
 }
 
@@ -81,7 +83,7 @@ export function autoGrade(exam: any, answers: Record<string, any>) {
     const pts = Number(q.points) || 1; max += pts;
     const a = answers?.[q.id];
     if (q.type === "essay") { pendingEssay++; items[q.id] = { auto: false, score: null, max: pts }; continue; }
-    if (q.type === "speak") { pendingSpeak++; items[q.id] = { auto: false, score: null, max: pts }; continue; }
+    if (q.type === "speak" || q.type === "upload") { pendingSpeak++; items[q.id] = { auto: false, score: null, max: pts }; continue; }
     let ok: boolean | null = null, s = 0, detail: any = undefined;
     if (q.type === "mcq" || q.type === "fill" || q.type === "listen") ok = a !== null && a !== undefined && a !== "" && Number(a) === Number(q.correct);
     else if (q.type === "order") {
@@ -158,7 +160,7 @@ export function totals(exam: any, sub: any) {
   for (const q of exam.questions) {
     const it = sub.grading?.items?.[q.id]; const pts = Number(q.points) || 1; max += pts;
     if (!it) continue;
-    if (q.type === "essay" || q.type === "speak") {
+    if (q.type === "essay" || q.type === "speak" || q.type === "upload") {
       const t = sub.teacherScores?.[q.id];
       const v = t != null ? Number(t) : (q.type === "essay" ? (sub.ai?.items?.[q.id]?.score ?? null) : null);
       if (v != null) score += v;
