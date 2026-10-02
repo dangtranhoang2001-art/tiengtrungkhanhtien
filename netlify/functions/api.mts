@@ -22,9 +22,11 @@ function examWindow(exam: any, now = Date.now()) {
 /* Kết quả học sinh được phép xem */
 function studentView(exam: any, sub: any) {
   const reviewed = sub.status === "reviewed";
-  const essayVisible = reviewed || (exam.showAI && sub.status === "ai_done");
-  const t = totals(exam, sub);
+  const hasSpeak = exam.questions.some((q: any) => q.type === "speak");
   const hasEssay = exam.questions.some((q: any) => q.type === "essay");
+  const essayVisible = reviewed || (exam.showAI && sub.status === "ai_done");
+  const allVisible = reviewed || (!hasSpeak && essayVisible);
+  const t = totals(exam, sub);
   const detail = exam.questions.map((q: any) => {
     const it = sub.grading?.items?.[q.id] || {};
     const row: any = { id: q.id, type: q.type, prompt: q.prompt, points: q.points || 1, answer: sub.answers?.[q.id] ?? null };
@@ -34,13 +36,22 @@ function studentView(exam: any, sub: any) {
         row.score = sub.teacherScores?.[q.id] ?? ai?.score ?? null;
         row.loi = ai?.loi || []; row.nhan_xet = sub.teacherComments?.[q.id] || ai?.nhan_xet || "";
       } else row.pending = true;
+    } else if (q.type === "speak") {
+      row.text = q.text || "";
+      if (reviewed) { row.score = sub.teacherScores?.[q.id] ?? null; row.nhan_xet = sub.teacherComments?.[q.id] || ""; }
+      else row.pending = true;
     } else {
       row.ok = it.ok; row.score = it.score;
-      if (q.type === "mcq" || q.type === "fill") row.options = q.options;
+      if (q.type === "mcq" || q.type === "fill" || q.type === "listen") row.options = q.options;
+      if (q.type === "tone") { row.items = (q.items || []).map((x: any) => ({ zh: x.zh, py: x.py })); row.itemOk = it.detail || []; }
+      if (q.type === "match") { row.left = (q.pairs || []).map((x: any) => x.left); row.itemOk = it.detail || []; }
       if (exam.showAnswers) {
-        if (q.type === "mcq" || q.type === "fill") row.correct = q.correct;
+        if (q.type === "mcq" || q.type === "fill" || q.type === "listen") row.correct = q.correct;
         if (q.type === "order") row.correctText = q.chunks.join("");
         if (q.type === "short") row.correctText = (q.answers || [])[0] || "";
+        if (q.type === "tone") row.correctTones = (q.items || []).map((x: any) => Number(x.tone));
+        if (q.type === "match") row.correctRight = (q.pairs || []).map((x: any) => x.right);
+        if (q.type === "listen" && !q.audioKey) row.script = q.audioText || "";
         row.explain = q.explain || "";
       }
     }
@@ -49,10 +60,21 @@ function studentView(exam: any, sub: any) {
   return {
     status: sub.status, late: !!sub.late, submittedAt: sub.submittedAt,
     autoScore: sub.grading?.autoScore ?? 0,
-    score: hasEssay && !essayVisible ? null : t.score, max: t.max,
-    comment: essayVisible ? (sub.teacherNote || sub.ai?.nhan_xet_chung || "") : (reviewed ? sub.teacherNote || "" : ""),
+    score: (hasEssay || hasSpeak) && !allVisible ? null : t.score, max: t.max,
+    comment: allVisible || reviewed ? (sub.teacherNote || sub.ai?.nhan_xet_chung || "") : "",
     detail,
   };
+}
+
+const AUDIO_MAX = 4 * 1024 * 1024;
+async function readBinary(req: Request) {
+  const buf = await req.arrayBuffer();
+  return { buf, type: (req.headers.get("content-type") || "application/octet-stream").split(";")[0].slice(0, 60) };
+}
+async function serveBinary(s: any, key: string) {
+  const r = await s.getWithMetadata(key, { type: "arrayBuffer" });
+  if (!r || !r.data) return bad("Không tìm thấy tệp âm thanh.", 404);
+  return new Response(r.data, { headers: { "content-type": r.metadata?.type || "audio/webm", "cache-control": "private, max-age=86400" } });
 }
 
 export default async (req: Request) => {
@@ -61,7 +83,8 @@ export default async (req: Request) => {
   const m = req.method;
   const s = db();
   let body: any = {};
-  if (m === "POST" || m === "PUT") { try { body = await req.json(); } catch { body = {}; } }
+  const isBinary = (p[0] === "audio" && m === "POST") || (p[0] === "t" && p[1] === "media" && m === "POST");
+  if ((m === "POST" || m === "PUT") && !isBinary) { try { body = await req.json(); } catch { body = {}; } }
 
   try {
     /* ================= HỌC SINH ================= */
@@ -116,6 +139,28 @@ export default async (req: Request) => {
       return json({ ok: true });
     }
 
+    /* --- Ghi âm của học sinh --- */
+    if (p[0] === "audio" && m === "POST") {
+      const examId = url.searchParams.get("examId") || "", subId = slug(url.searchParams.get("subId") || ""), qid = url.searchParams.get("qid") || "";
+      const exam = await s.get(`exam/${examId}`, { type: "json" });
+      const sub = await s.get(`sub/${examId}/${subId}`, { type: "json" });
+      if (!exam || !sub || sub.status !== "doing") return bad("Bài làm đã nộp hoặc không tồn tại.", 403);
+      if (Date.now() > Date.parse(sub.deadline) + GRACE_MS) return bad("Đã hết giờ làm bài.", 403);
+      const q = exam.questions.find((x: any) => x.id === qid && x.type === "speak");
+      if (!q) return bad("Câu hỏi không hợp lệ.");
+      const { buf, type } = await readBinary(req);
+      if (!buf.byteLength) return bad("Bản ghi trống.");
+      if (buf.byteLength > AUDIO_MAX) return bad("Bản ghi quá dài.");
+      const key = `audio/${examId}/${subId}/${qid}-${rid(8)}`;
+      await s.set(key, buf, { metadata: { type } });
+      return json({ key });
+    }
+    if ((p[0] === "audio" || p[0] === "media") && m === "GET") {
+      const key = url.searchParams.get("key") || "";
+      if (!/^(audio|media)\/[A-Za-z0-9_\-\/]+$/.test(key) || !key.startsWith(p[0] + "/")) return bad("Khoá không hợp lệ.");
+      return serveBinary(s, key);
+    }
+
     if (p[0] === "submit" && m === "POST") {
       const { examId, subId, answers } = body;
       const exam = await s.get(`exam/${examId}`, { type: "json" });
@@ -128,7 +173,7 @@ export default async (req: Request) => {
       sub.late = now > Date.parse(sub.deadline) + GRACE_MS;
       sub.grading = autoGrade(exam, sub.answers);
       const aiOn = !!env("ANTHROPIC_API_KEY");
-      sub.status = sub.grading.pendingEssay ? (aiOn ? "waiting_ai" : "waiting_teacher") : "done";
+      sub.status = sub.grading.pendingEssay ? (aiOn ? "waiting_ai" : "waiting_teacher") : (sub.grading.pendingSpeak ? "waiting_teacher" : "done");
       await s.setJSON(`sub/${examId}/${sub.id}`, sub);
       if (sub.status === "waiting_ai") await trigger(req, "grade-background", { examId, subId: sub.id });
       return json({ result: studentView(exam, sub) });
@@ -194,6 +239,17 @@ export default async (req: Request) => {
         if (!checkPw(body.oldPassword || "", t.salt, t.hash)) return bad("Mật khẩu cũ không đúng.");
         if (String(body.newPassword || "").length < 6) return bad("Mật khẩu mới cần từ 6 ký tự.");
         Object.assign(t, hashPw(body.newPassword)); await s.setJSON(`teacher/${me.id}`, t); return json({ ok: true });
+      }
+
+      /* --- Tệp âm thanh của giáo viên (bài nghe, giọng mẫu) --- */
+      if (r === "media" && m === "POST") {
+        const { buf, type } = await readBinary(req);
+        if (!buf.byteLength) return bad("Tệp trống.");
+        if (buf.byteLength > 5 * 1024 * 1024) return bad("Tệp âm thanh tối đa 5 MB.");
+        if (!/^audio\//.test(type)) return bad("Chỉ nhận tệp âm thanh (mp3, m4a, wav…).");
+        const key = `media/${rid(14)}`;
+        await s.set(key, buf, { metadata: { type, owner: me.id } });
+        return json({ key });
       }
 
       /* --- Lớp --- */
