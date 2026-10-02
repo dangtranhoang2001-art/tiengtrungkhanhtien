@@ -1,0 +1,8 @@
+{
+  "name": "khanhtien-tiengtrung",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@netlify/blobs": "latest"
+  }
+}
