@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Khánh Tiên Online – Giáo viên</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏮</text></svg>">
+<title>Khánh Tiên – Giáo viên</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23D72134'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>K</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans:wght@500;700&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
 <style>
@@ -22,13 +22,15 @@
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="brand"><span class="seal">汉</span><span>Khánh Tiên Online<small>Khu vực giáo viên · Đặng Hoàng</small></span></div>
-  <button class="btn ghost sm hide" id="logout">Đăng xuất</button>
-</header>
+<header class="topbar"><div class="top">
+  <div class="brand"><img src="/logo.png" alt="Khánh Tiên Chinese Education Center"><span class="sep" aria-hidden="true"></span><span>Khu vực giáo viên<small id="whoami"></small></span></div>
+  <div class="row"><button class="btn ghost sm hide" id="chpw">Đổi mật khẩu</button><button class="btn ghost sm hide" id="logout">Đăng xuất</button></div>
+</div></header>
 <main class="wrap">
   <section id="vLogin" class="card" style="max-width:420px;margin:24px auto">
     <h1>Đăng nhập giáo viên</h1>
+    <label class="f" for="un">Tên đăng nhập</label>
+    <input class="i" id="un" autocomplete="username" placeholder="Quản trị: để trống">
     <label class="f" for="pw">Mật khẩu</label>
     <input class="i" type="password" id="pw" autocomplete="current-password">
     <div class="err hide" id="lErr"></div>
@@ -42,11 +44,12 @@
       <button role="tab" data-tab="tExam">Đề bài</button>
       <button role="tab" data-tab="tGrade">Chấm bài</button>
       <button role="tab" data-tab="tProg">Tiến độ</button>
+      <button role="tab" data-tab="tTeach" class="hide" id="tabTeach">Giáo viên</button>
     </nav>
 
     <div id="tClass">
       <div class="card"><h3>Tạo lớp mới</h3>
-        <div class="row"><input class="i grow" id="cName" placeholder="VD: YCT5 – Thứ 3, 5" style="flex:1;min-width:200px"><button class="btn" id="cAdd">Tạo lớp</button></div>
+        <div class="row"><input class="i grow" id="cName" placeholder="VD: YCT5 – Thứ 3, 5" style="flex:1;min-width:200px"><select class="i hide" id="cOwner" style="width:auto"></select><button class="btn" id="cAdd">Tạo lớp</button></div>
       </div>
       <div id="cList"></div>
     </div>
@@ -61,6 +64,14 @@
       <div class="split"><div id="gSubs"></div><div id="gDetail"></div></div>
     </div>
 
+    <div id="tTeach" class="hide">
+      <div class="card"><h3>Tạo tài khoản giáo viên</h3>
+        <div class="row"><div class="grow"><label class="f">Họ tên</label><input class="i" id="nName" placeholder="VD: Nguyễn Thu Hà"></div>
+        <div class="grow"><label class="f">Tên đăng nhập</label><input class="i" id="nUser" placeholder="VD: thuha"></div>
+        <div class="grow"><label class="f">Mật khẩu (từ 6 ký tự)</label><input class="i" id="nPw"></div></div>
+        <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" id="nAdd">Tạo tài khoản</button></div></div>
+      <div id="teachList"></div>
+    </div>
     <div id="tProg" class="hide">
       <div class="card row"><label class="f" for="pClass" style="margin:0">Chọn lớp</label><select class="i grow" id="pClass" style="flex:1"></select><button class="btn ghost sm" id="pCsv">Tải bảng điểm (CSV)</button></div>
       <div id="pBody"></div>
@@ -73,11 +84,11 @@
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),2800)}
-let PW=""; try{PW=sessionStorage.getItem("kt_pw")||""}catch(e){}
+let TOK=""; try{TOK=localStorage.getItem("kt_tok")||""}catch(e){}
 async function api(path,opt={}){
-  const r=await fetch(path,{method:opt.method||(opt.body?"POST":"GET"),headers:{"content-type":"application/json","x-teacher-key":PW},body:opt.body?JSON.stringify(opt.body):undefined});
+  const r=await fetch(path,{method:opt.method||(opt.body?"POST":"GET"),headers:{"content-type":"application/json","authorization":"Bearer "+TOK},body:opt.body?JSON.stringify(opt.body):undefined});
   const d=await r.json().catch(()=>({error:"Máy chủ không phản hồi đúng."}));
-  if(r.status===401){logout();throw new Error(d.error)}
+  if(r.status===401&&!path.endsWith("/login")){logout();throw new Error(d.error)}
   if(!r.ok) throw new Error(d.error||"Có lỗi xảy ra.");
   return d;
 }
@@ -88,22 +99,31 @@ const STATUS={doing:["Đang làm",""],done:["Đã chấm","ok"],waiting_ai:["AI 
 const TYPE={mcq:"Trắc nghiệm",fill:"Điền từ",order:"Sắp xếp câu",short:"Trả lời ngắn",essay:"Tự luận (AI chấm)"};
 
 /* ---------- Đăng nhập ---------- */
-function logout(){PW="";try{sessionStorage.removeItem("kt_pw")}catch(e){};$("vApp").classList.add("hide");$("vLogin").classList.remove("hide");$("logout").classList.add("hide")}
+function logout(){TOK="";try{localStorage.removeItem("kt_tok")}catch(e){};$("vApp").classList.add("hide");$("vLogin").classList.remove("hide");$("logout").classList.add("hide");$("chpw").classList.add("hide");$("whoami").textContent=""}
 $("logout").onclick=logout;
-$("lBtn").onclick=async()=>{PW=$("pw").value;$("lErr").classList.add("hide");
-  try{await boot();try{sessionStorage.setItem("kt_pw",PW)}catch(e){}}catch(e){$("lErr").textContent=e.message;$("lErr").classList.remove("hide")}};
+$("lBtn").onclick=async()=>{$("lErr").classList.add("hide");
+  try{const d=await api("/api/login",{body:{username:$("un").value.trim(),password:$("pw").value}});TOK=d.token;try{localStorage.setItem("kt_tok",TOK)}catch(e){};$("pw").value="";await boot()}
+  catch(e){$("lErr").textContent=e.message;$("lErr").classList.remove("hide")}};
+$("chpw").onclick=async()=>{const o=prompt("Mật khẩu hiện tại:");if(o==null)return;const n=prompt("Mật khẩu mới (từ 6 ký tự):");if(!n)return;
+  try{await api("/api/t/password",{body:{oldPassword:o,newPassword:n}});toast("Đã đổi mật khẩu")}catch(e){toast(e.message)}};
 $("pw").addEventListener("keydown",e=>{if(e.key==="Enter")$("lBtn").click()});
 
-let D={classes:[],exams:[],aiEnabled:false};
+let D={classes:[],exams:[],teachers:[],me:{},aiEnabled:false};
+const isAdmin=()=>D.me.role==="admin";
+const teacherName=id=>!id||id==="admin"?(isAdmin()?D.me.name:"Quản trị"):(D.teachers.find(t=>t.id===id)||{}).name||id;
 async function boot(){
   D=await api("/api/t/overview");
   $("vLogin").classList.add("hide");$("vApp").classList.remove("hide");$("logout").classList.remove("hide");
+  $("whoami").textContent=(isAdmin()?"Quản trị · ":"Giáo viên · ")+D.me.name;
+  $("chpw").classList.toggle("hide",isAdmin()); $("tabTeach").classList.toggle("hide",!isAdmin()); $("cOwner").classList.toggle("hide",!isAdmin());
+  $("cOwner").innerHTML=`<option value="admin">Lớp của tôi</option>`+D.teachers.filter(t=>!t.disabled).map(t=>`<option value="${t.id}">GV: ${esc(t.name)}</option>`).join("");
+  renderTeachers();
   $("aiBanner").innerHTML=D.aiEnabled?"":`<div class="card" style="background:var(--warn-bg)"><b>AI chấm tự luận chưa bật.</b> Câu tự luận sẽ chờ giáo viên chấm tay. Thêm biến ANTHROPIC_API_KEY trên Netlify để bật.</div>`;
   renderClasses();renderExamList();fillSelects();
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("[data-tab]").forEach(x=>x.setAttribute("aria-selected",x===b));
-  ["tClass","tExam","tGrade","tProg"].forEach(t=>$(t).classList.toggle("hide",t!==b.dataset.tab));
+  ["tClass","tExam","tGrade","tProg","tTeach"].forEach(t=>$(t).classList.toggle("hide",t!==b.dataset.tab));
   if(b.dataset.tab==="tGrade")loadSubs(); if(b.dataset.tab==="tProg")loadProg();
 });
 const className=c=>(D.classes.find(x=>x.code===c)||{}).name||c;
@@ -114,16 +134,37 @@ function fillSelects(){
   if(ex)$("gExam").value=ex; if(cl)$("pClass").value=cl;
 }
 
+/* ---------- Giáo viên (quản trị) ---------- */
+function renderTeachers(){
+  if(!isAdmin()) return;
+  $("teachList").innerHTML=D.teachers.map(t=>{const n=D.classes.filter(c=>c.ownerId===t.id).length;return`<div class="card row"><div class="grow"><h3>${esc(t.name)} ${t.disabled?`<span class="tag bad">Đã khoá</span>`:""}</h3>
+    <div class="small muted">Tên đăng nhập: <b>${esc(t.id)}</b> · ${n} lớp</div></div>
+    <div class="row"><button class="btn ghost sm" data-tpw="${t.id}">Đặt lại mật khẩu</button><button class="btn ghost sm" data-tlock="${t.id}">${t.disabled?"Mở khoá":"Khoá"}</button></div></div>`}).join("")||`<p class="muted">Chưa có giáo viên nào.</p>`;
+  $("teachList").querySelectorAll("[data-tpw]").forEach(b=>b.onclick=async()=>{const pw=prompt("Mật khẩu mới cho "+b.dataset.tpw+" (từ 6 ký tự):");if(!pw)return;
+    try{await api("/api/t/teacher",{body:{username:b.dataset.tpw,password:pw}});toast("Đã đặt lại mật khẩu")}catch(e){toast(e.message)}});
+  $("teachList").querySelectorAll("[data-tlock]").forEach(b=>b.onclick=async()=>{const t=D.teachers.find(x=>x.id===b.dataset.tlock);
+    if(!t.disabled&&!confirm(`Khoá tài khoản ${t.name}? Giáo viên này sẽ không đăng nhập được, dữ liệu lớp vẫn giữ nguyên.`))return;
+    try{const u=await api("/api/t/teacher",{body:{username:t.id,disabled:!t.disabled}});Object.assign(t,u);renderTeachers()}catch(e){toast(e.message)}});
+}
+$("nAdd").onclick=async()=>{
+  const name=$("nName").value.trim(),username=$("nUser").value.trim(),password=$("nPw").value;
+  if(!name||!username||password.length<6) return toast("Nhập đủ họ tên, tên đăng nhập và mật khẩu từ 6 ký tự");
+  if(D.teachers.some(t=>t.id===username.toLowerCase())) return toast("Tên đăng nhập đã tồn tại");
+  try{const t=await api("/api/t/teacher",{body:{name,username,password}});D.teachers.push(t);["nName","nUser","nPw"].forEach(i=>$(i).value="");
+    renderTeachers();toast(`Đã tạo: ${t.name} — đăng nhập bằng "${t.id}"`);
+    $("cOwner").innerHTML=`<option value="admin">Lớp của tôi</option>`+D.teachers.filter(t=>!t.disabled).map(t=>`<option value="${t.id}">GV: ${esc(t.name)}</option>`).join("")}
+  catch(e){toast(e.message)}};
+
 /* ---------- Lớp ---------- */
 function renderClasses(){
   $("cList").innerHTML=D.classes.map(c=>{const link=`${location.origin}/?lop=${c.code}`;return`<div class="card row">
-    <div class="grow"><h3>${esc(c.name)}</h3><div class="code">${c.code}</div>
+    <div class="grow"><h3>${esc(c.name)}</h3>${isAdmin()?`<div class="small muted">Giáo viên: ${esc(teacherName(c.ownerId))}</div>`:""}<div class="code">${c.code}</div>
     <div class="small muted">Link cho học sinh: <a href="${link}" target="_blank">${esc(link)}</a></div></div>
     <div class="row"><button class="btn ghost sm" data-copy="${esc(link)}">Sao chép link</button><button class="btn ghost sm" data-del="${c.code}">Xoá lớp</button></div></div>`}).join("")||`<p class="muted">Chưa có lớp nào. Tạo lớp đầu tiên ở trên.</p>`;
   $("cList").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(b.dataset.copy).then(()=>toast("Đã sao chép link"),()=>toast(b.dataset.copy))});
   $("cList").querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{if(!confirm("Xoá lớp này? Đề và bài làm cũ vẫn được giữ."))return;await api("/api/t/class/"+b.dataset.del,{method:"DELETE"});D.classes=D.classes.filter(c=>c.code!==b.dataset.del);renderClasses();fillSelects()});
 }
-$("cAdd").onclick=async()=>{const n=$("cName").value.trim();if(!n)return toast("Nhập tên lớp");try{const c=await api("/api/t/class",{body:{name:n}});D.classes.push(c);$("cName").value="";renderClasses();fillSelects();toast("Đã tạo lớp "+c.code)}catch(e){toast(e.message)}};
+$("cAdd").onclick=async()=>{const n=$("cName").value.trim();if(!n)return toast("Nhập tên lớp");try{const c=await api("/api/t/class",{body:{name:n,ownerId:isAdmin()?$("cOwner").value:undefined}});D.classes.push(c);$("cName").value="";renderClasses();fillSelects();toast("Đã tạo lớp "+c.code)}catch(e){toast(e.message)}};
 
 /* ---------- Danh sách đề ---------- */
 function renderExamList(){
@@ -318,7 +359,7 @@ function renderDetail(id){
   if($("dRe")) $("dRe").onclick=async()=>{try{await api("/api/t/regrade",{body:{examId:ex.id,subId:s.id}});toast("AI đang chấm lại…");setTimeout(loadSubs,8000)}catch(e){toast(e.message)}};
   $("dRetake").onclick=async()=>{if(!confirm(`Xoá bài làm của ${s.student} để em làm lại?`))return;await api(`/api/t/sub?examId=${ex.id}&subId=${s.id}`,{method:"DELETE"});G.cur=null;$("gDetail").innerHTML="";loadSubs()};
 }
-setInterval(()=>{if(!$("tGrade").classList.contains("hide")&&PW&&!document.activeElement?.matches("input,textarea"))loadSubs()},20000);
+setInterval(()=>{if(!$("tGrade").classList.contains("hide")&&TOK&&!document.activeElement?.matches("input,textarea"))loadSubs()},20000);
 
 /* ---------- Tiến độ ---------- */
 let P=null;
@@ -388,7 +429,7 @@ $("pCsv").onclick=()=>{
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`bang-diem-${$("pClass").value}.csv`;a.click();
 };
 
-if(PW) boot().catch(()=>logout());
+if(TOK) boot().catch(()=>logout());
 </script>
 </body>
 </html>
