@@ -1,4 +1,24 @@
 import { db, env, json, bad, slug, rid, classCode, listJSON, publicQuestion, autoGrade, totals, auth, hashPw, checkPw, makeToken, ownerOf, canSee } from "../lib/core.mts";
+import { createHash, randomInt } from "node:crypto";
+
+const FILE_MAX = 5 * 1024 * 1024;
+const FILE_TYPES = /^(image\/(jpeg|png|webp|gif|heic|heif)|application\/pdf|application\/msword|application\/vnd\.openxmlformats-officedocument\.(wordprocessingml\.document|presentationml\.presentation|spreadsheetml\.sheet)|audio\/[a-z0-9.+-]+|text\/plain)$/;
+const sha = (x: string) => createHash("sha256").update(x).digest("hex");
+const maskEmail = (e: string) => e.replace(/^(.)(.*)(.@.*)$/, (_m, a, b, c) => a + "*".repeat(Math.min(b.length, 8)) + c);
+async function adminPwOk(s: any, pw: string) {
+  const cfg = await s.get("config/admin", { type: "json" });
+  if (cfg && cfg.hash) return checkPw(pw, cfg.salt, cfg.hash);
+  return pw === env("TEACHER_PASSWORD");
+}
+async function sendMail(to: string, subject: string, html: string) {
+  const key = env("RESEND_API_KEY");
+  if (!key) throw new Error("NO_MAIL");
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST", headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+    body: JSON.stringify({ from: env("MAIL_FROM") || "Khánh Tiên Online <onboarding@resend.dev>", to: [to], subject, html }),
+  });
+  if (!r.ok) throw new Error("MAIL_" + r.status + ": " + (await r.text()).slice(0, 200));
+}
 
 const GRACE_MS = 90_000;
 
@@ -22,20 +42,23 @@ function examWindow(exam: any, now = Date.now()) {
 /* Kết quả học sinh được phép xem */
 function studentView(exam: any, sub: any) {
   const reviewed = sub.status === "reviewed";
-  const hasSpeak = exam.questions.some((q: any) => q.type === "speak");
+  const hasSpeak = exam.questions.some((q: any) => q.type === "speak" || q.type === "upload");
   const hasEssay = exam.questions.some((q: any) => q.type === "essay");
   const essayVisible = reviewed;
   const allVisible = reviewed || (!hasSpeak && essayVisible);
   const t = totals(exam, sub);
   const detail = exam.questions.map((q: any) => {
     const it = sub.grading?.items?.[q.id] || {};
-    const row: any = { id: q.id, type: q.type, prompt: q.prompt, points: q.points || 1, answer: sub.answers?.[q.id] ?? null };
+    const row: any = { id: q.id, type: q.type, prompt: q.prompt, points: q.points || 1, answer: sub.answers?.[q.id] ?? null, files: sub.answers?.["_f_" + q.id] || null };
     if (q.type === "essay") {
       if (essayVisible) {
         const ai = sub.ai?.items?.[q.id];
         row.score = sub.teacherScores?.[q.id] ?? ai?.score ?? null;
         row.loi = ai?.loi || []; row.nhan_xet = sub.teacherComments?.[q.id] || ai?.nhan_xet || "";
       } else row.pending = true;
+    } else if (q.type === "upload") {
+      if (reviewed) { row.score = sub.teacherScores?.[q.id] ?? null; row.nhan_xet = sub.teacherComments?.[q.id] || ""; }
+      else row.pending = true;
     } else if (q.type === "speak") {
       row.text = q.text || "";
       if (reviewed) { row.score = sub.teacherScores?.[q.id] ?? null; row.nhan_xet = sub.teacherComments?.[q.id] || ""; }
@@ -66,6 +89,18 @@ function studentView(exam: any, sub: any) {
   };
 }
 
+const DEFAULT_SECTIONS = () => [{ id: "nn", name: "Nghe + Nói", teacher: "" }, { id: "dv", name: "Đọc + Viết", teacher: "" }];
+const sectionsOf = (c: any) => Array.isArray(c?.sections) && c.sections.length ? c.sections : DEFAULT_SECTIONS();
+function cleanSections(list: any, old: any[] = []) {
+  const arr = Array.isArray(list) ? list : [];
+  const out = arr.slice(0, 8).map((x: any, i: number) => ({
+    id: String(x.id || old[i]?.id || rid(5)).replace(/[^a-z0-9]/gi, "").slice(0, 12) || rid(5),
+    name: String(x.name || "").trim().slice(0, 40) || `Phân môn ${i + 1}`,
+    teacher: String(x.teacher || "").trim().slice(0, 60),
+  }));
+  return out.length ? out : DEFAULT_SECTIONS();
+}
+
 const AUDIO_MAX = 4 * 1024 * 1024;
 async function readBinary(req: Request) {
   const buf = await req.arrayBuffer();
@@ -83,7 +118,7 @@ export default async (req: Request) => {
   const m = req.method;
   const s = db();
   let body: any = {};
-  const isBinary = (p[0] === "audio" && m === "POST") || (p[0] === "t" && p[1] === "media" && m === "POST");
+  const isBinary = (p[0] === "audio" && m === "POST") || (p[0] === "file" && m === "POST") || (p[0] === "t" && p[1] === "media" && m === "POST");
   if ((m === "POST" || m === "PUT") && !isBinary) { try { body = await req.json(); } catch { body = {}; } }
 
   try {
@@ -98,14 +133,14 @@ export default async (req: Request) => {
       const rows = await Promise.all(exams.map(async (e: any) => {
         const sub = who ? await s.get(`sub/${e.id}/${who}`, { type: "json" }) : null;
         return {
-          id: e.id, title: e.title, durationMin: e.durationMin, openAt: e.openAt || null, dueAt: e.dueAt || null,
+          id: e.id, title: e.title, sectionId: e.sectionId || null, durationMin: e.durationMin, openAt: e.openAt || null, dueAt: e.dueAt || null,
           count: e.questions.length, state: examWindow(e),
           my: sub ? { status: sub.status, score: sub.status === "doing" ? null : studentView(e, sub).score, max: totals(e, sub).max } : null,
         };
       }));
       let teacherName = env("ADMIN_NAME") || "";
       if (cls.ownerId) { const t = await s.get(`teacher/${cls.ownerId}`, { type: "json" }); if (t) teacherName = t.name; }
-      return json({ code, name: cls.name, teacherName, exams: rows });
+      return json({ code, name: cls.name, teacherName, sections: sectionsOf(cls), exams: rows });
     }
 
     if (p[0] === "start" && m === "POST") {
@@ -137,6 +172,34 @@ export default async (req: Request) => {
       if (!sub || sub.status !== "doing") return json({ ok: false });
       sub.answers = answers || {}; await s.setJSON(`sub/${examId}/${sub.id}`, sub);
       return json({ ok: true });
+    }
+
+    /* --- Ảnh / tệp học sinh nộp --- */
+    if (p[0] === "file" && m === "POST") {
+      const examId = url.searchParams.get("examId") || "", subId = slug(url.searchParams.get("subId") || ""), qid = url.searchParams.get("qid") || "";
+      const exam = await s.get(`exam/${examId}`, { type: "json" });
+      const sub = await s.get(`sub/${examId}/${subId}`, { type: "json" });
+      if (!exam || !sub || sub.status !== "doing") return bad("Bài làm đã nộp hoặc không tồn tại.", 403);
+      if (Date.now() > Date.parse(sub.deadline) + GRACE_MS) return bad("Đã hết giờ làm bài.", 403);
+      const q = exam.questions.find((x: any) => x.id === qid && (x.type === "upload" || (x.type === "essay" && x.allowAttach)));
+      if (!q) return bad("Câu hỏi không nhận tệp.");
+      const { buf, type } = await readBinary(req);
+      if (!buf.byteLength) return bad("Tệp trống.");
+      if (buf.byteLength > FILE_MAX) return bad("Tệp quá lớn (tối đa 5 MB).");
+      if (!FILE_TYPES.test(type)) return bad("Loại tệp chưa hỗ trợ. Hãy gửi ảnh, PDF, Word, PowerPoint hoặc Excel.");
+      const name = decodeURIComponent(url.searchParams.get("name") || "tep").slice(0, 120);
+      const key = `upload/${examId}/${subId}/${qid}-${rid(10)}`;
+      await s.set(key, buf, { metadata: { type, name } });
+      return json({ key, name, type, size: buf.byteLength });
+    }
+    if (p[0] === "file" && m === "GET") {
+      const key = url.searchParams.get("key") || "";
+      if (!/^upload\/[A-Za-z0-9_\-\/]+$/.test(key)) return bad("Khoá không hợp lệ.");
+      const r = await s.getWithMetadata(key, { type: "arrayBuffer" });
+      if (!r || !r.data) return bad("Không tìm thấy tệp.", 404);
+      const nm = String(r.metadata?.name || "tep").replace(/["\r\n]/g, "");
+      return new Response(r.data, { headers: { "content-type": r.metadata?.type || "application/octet-stream", "cache-control": "private, max-age=86400",
+        "content-disposition": `${url.searchParams.get("dl") ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(nm)}` } });
     }
 
     /* --- Ghi âm của học sinh --- */
@@ -195,26 +258,48 @@ export default async (req: Request) => {
       const adminUser = slug(env("ADMIN_USERNAME") || "admin");
       if (!u) return bad("Vui lòng nhập tên đăng nhập.", 401);
       if (u === adminUser) {
-        if (pw !== env("TEACHER_PASSWORD")) return bad("Sai tên đăng nhập hoặc mật khẩu.", 401);
+        if (!(await adminPwOk(s, pw))) return bad("Sai tên đăng nhập hoặc mật khẩu.", 401);
         return json({ token: makeToken("admin"), id: "admin", role: "admin", name: env("ADMIN_NAME") || "Quản trị" });
       }
       const t = await s.get(`teacher/${u}`, { type: "json" });
-      if (!t || t.disabled || !checkPw(pw, t.salt, t.hash)) return bad("Sai tên đăng nhập hoặc mật khẩu.", 401);
+      if (!t || !t.hash) return bad("Sai tên đăng nhập hoặc mật khẩu. Trung tâm dùng chung một tài khoản đăng nhập.", 401);
+      if (t.disabled || !checkPw(pw, t.salt, t.hash)) return bad("Sai tên đăng nhập hoặc mật khẩu.", 401);
       t.lastLogin = new Date().toISOString(); t.loginCount = (t.loginCount || 0) + 1;
       t.logins = [t.lastLogin, ...(t.logins || [])].slice(0, 10);
       await s.setJSON(`teacher/${t.id}`, t);
       return json({ token: makeToken(t.id), id: t.id, role: "teacher", name: t.name });
     }
 
+    /* --- Quên mật khẩu: gửi mã 6 số về email quản trị --- */
+    if (p[0] === "forgot" && m === "GET") {
+      const em = env("ADMIN_EMAIL"); return json({ email: em ? maskEmail(em) : "", mailReady: !!env("RESEND_API_KEY") });
+    }
     if (p[0] === "forgot" && m === "POST") {
-      const u = slug(body.username || ""); const adminUser = slug(env("ADMIN_USERNAME") || "admin");
-      const adminEmail = env("ADMIN_EMAIL") || "";
-      if (u && u === adminUser) return json({ admin: true, adminEmail });
-      if (u) {
-        const t = await s.get(`teacher/${u}`, { type: "json" });
-        if (t) await s.setJSON(`reset/${u}`, { id: u, name: t.name, at: new Date().toISOString() });
+      const em = env("ADMIN_EMAIL"); if (!em) return bad("Chưa cài email quản trị (ADMIN_EMAIL).", 500);
+      const old = await s.get("reset/admin", { type: "json" });
+      if (old && Date.now() - Date.parse(old.sentAt) < 60_000) return bad("Vừa gửi mã. Vui lòng đợi 1 phút rồi gửi lại.", 429);
+      const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
+      try {
+        await sendMail(em, `Mã đặt lại mật khẩu: ${code}`, `<div style="font-family:Arial,sans-serif;font-size:16px;color:#1F2A44">
+          <h2 style="color:#3B82F6">Khánh Tiên Online</h2><p>Mã xác nhận đặt lại mật khẩu khu vực giáo viên:</p>
+          <p style="font-size:34px;font-weight:bold;letter-spacing:8px;background:#F2F8FF;padding:12px 20px;display:inline-block;border-radius:12px">${code}</p>
+          <p>Mã có hiệu lực trong <b>15 phút</b>. Nếu thầy/cô không yêu cầu, hãy bỏ qua email này.</p></div>`);
+      } catch (e: any) {
+        if (e.message === "NO_MAIL") return bad("Chức năng gửi email chưa được cài (thiếu RESEND_API_KEY).", 503);
+        console.error(e); return bad("Không gửi được email, vui lòng thử lại sau.", 502);
       }
-      return json({ ok: true, adminEmail }); // không tiết lộ tài khoản có tồn tại hay không
+      await s.setJSON("reset/admin", { codeHash: sha(code + env("TEACHER_PASSWORD")), sentAt: new Date().toISOString(), exp: Date.now() + 15 * 60_000, tries: 0 });
+      return json({ ok: true, email: maskEmail(em) });
+    }
+    if (p[0] === "reset" && m === "POST") {
+      const r = await s.get("reset/admin", { type: "json" });
+      if (!r || Date.now() > r.exp) return bad("Mã đã hết hạn. Vui lòng gửi mã mới.", 400);
+      if (r.tries >= 5) { await s.delete("reset/admin"); return bad("Nhập sai quá 5 lần. Vui lòng gửi mã mới.", 429); }
+      if (sha(String(body.code || "").trim() + env("TEACHER_PASSWORD")) !== r.codeHash) { r.tries++; await s.setJSON("reset/admin", r); return bad(`Mã không đúng (còn ${5 - r.tries} lần thử).`, 400); }
+      const np = String(body.newPassword || ""); if (np.length < 6) return bad("Mật khẩu mới cần từ 6 ký tự.");
+      await s.setJSON("config/admin", { ...hashPw(np), updatedAt: new Date().toISOString() });
+      await s.delete("reset/admin");
+      return json({ ok: true });
     }
 
     /* ================= GIÁO VIÊN ================= */
@@ -238,10 +323,17 @@ export default async (req: Request) => {
       if (r === "teacher") {
         if (me.role !== "admin") return bad("Chỉ quản trị mới quản lý tài khoản giáo viên.", 403);
         if (m === "POST") {
-          const id = slug(body.username || ""); const name = String(body.name || "").trim().slice(0, 60);
-          if (!id || id === "admin" || id === slug(env("ADMIN_USERNAME") || "admin")) return bad("Tên đăng nhập không hợp lệ hoặc trùng tài khoản quản trị.");
+          const name = String(body.name || "").trim().slice(0, 60);
+          let id = slug(body.username || "");
+          const reserved = (x: string) => x === "admin" || x === "all" || x === slug(env("ADMIN_USERNAME") || "admin");
+          if (!id) { // thêm giáo viên mới chỉ bằng tên
+            if (!name) return bad("Nhập tên giáo viên.");
+            const base = slug(name) || "gv"; id = base; let k = 2;
+            while (reserved(id) || await s.get(`teacher/${id}`)) id = `${base}-${k++}`;
+          }
+          if (reserved(id)) return bad("Tên không hợp lệ.");
           const old = await s.get(`teacher/${id}`, { type: "json" });
-          if (!old && (!name || String(body.password || "").length < 6)) return bad("Cần họ tên và mật khẩu từ 6 ký tự.");
+          if (!old && !name) return bad("Nhập tên giáo viên.");
           const t: any = old || { id, createdAt: new Date().toISOString() };
           if (name) t.name = name;
           if (body.password) { if (String(body.password).length < 6) return bad("Mật khẩu cần từ 6 ký tự."); Object.assign(t, hashPw(body.password)); await s.delete(`reset/${id}`); }
@@ -262,7 +354,11 @@ export default async (req: Request) => {
         }
       }
       if (r === "password" && m === "POST") {
-        if (me.role === "admin") return bad("Mật khẩu quản trị đổi trên Netlify (biến TEACHER_PASSWORD).");
+        if (me.role === "admin") {
+          if (!(await adminPwOk(s, body.oldPassword || ""))) return bad("Mật khẩu hiện tại không đúng.");
+          if (String(body.newPassword || "").length < 6) return bad("Mật khẩu mới cần từ 6 ký tự.");
+          await s.setJSON("config/admin", { ...hashPw(body.newPassword), updatedAt: new Date().toISOString() }); return json({ ok: true });
+        }
         const t = await s.get(`teacher/${me.id}`, { type: "json" });
         if (!checkPw(body.oldPassword || "", t.salt, t.hash)) return bad("Mật khẩu cũ không đúng.");
         if (String(body.newPassword || "").length < 6) return bad("Mật khẩu mới cần từ 6 ký tự.");
@@ -286,8 +382,15 @@ export default async (req: Request) => {
         let ownerId = me.id;
         if (me.role === "admin" && body.ownerId) ownerId = slug(body.ownerId) || "admin";
         let code = classCode(); while (await s.get(`class/${code}`)) code = classCode();
-        const cls = { code, name, ownerId, createdAt: new Date().toISOString() };
+        const cls = { code, name, ownerId, sections: cleanSections(body.sections), createdAt: new Date().toISOString() };
         await s.setJSON(`class/${code}`, cls); return json(cls);
+      }
+      if (r === "class" && m === "PUT" && p[2]) {
+        const c = await s.get(`class/${p[2].toUpperCase()}`, { type: "json" });
+        if (!c || !canSee(me, c)) return bad("Không có quyền với lớp này.", 403);
+        if (body.name) c.name = String(body.name).trim().slice(0, 80);
+        if (body.sections) c.sections = cleanSections(body.sections, sectionsOf(c));
+        await s.setJSON(`class/${c.code}`, c); return json(c);
       }
       if (r === "class" && m === "DELETE" && p[2]) {
         const c = await s.get(`class/${p[2].toUpperCase()}`, { type: "json" });
@@ -306,6 +409,7 @@ export default async (req: Request) => {
         if (old && !canSee(me, old)) return bad("Không có quyền sửa đề này.", 403);
         const exam = {
           id, title: String(e.title).slice(0, 120), classCode: cls.code, ownerId: ownerOf(cls),
+          sectionId: sectionsOf(cls).some((x: any) => x.id === e.sectionId) ? e.sectionId : sectionsOf(cls)[0].id,
           durationMin: Math.max(1, Math.min(300, Number(e.durationMin) || 15)),
           openAt: e.openAt || null, dueAt: e.dueAt || null, published: !!e.published,
           showAnswers: !!e.showAnswers, showAI: !!e.showAI,
@@ -375,7 +479,7 @@ export default async (req: Request) => {
         const reports = await listJSON(`report/${code}/`);
         const hard = Object.values(wrongStats).filter((w: any) => w.total >= 2 && w.wrong / w.total >= 0.5)
           .sort((a: any, b: any) => b.wrong / b.total - a.wrong / a.total).slice(0, 10);
-        return json({ exams: exams.map((e: any) => ({ id: e.id, title: e.title, createdAt: e.createdAt })), students: Object.values(students), reports, hard });
+        return json({ sections: sectionsOf(cls), exams: exams.map((e: any) => ({ id: e.id, title: e.title, sectionId: e.sectionId || null, createdAt: e.createdAt })), students: Object.values(students), reports, hard });
       }
       if (r === "report" && m === "POST") {
         if (!env("ANTHROPIC_API_KEY")) return bad("Chưa cài API key AI.");
