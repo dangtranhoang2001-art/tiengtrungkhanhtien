@@ -407,6 +407,8 @@ export default async (req: Request) => {
         const id = e.id || rid();
         const old = e.id ? await s.get(`exam/${id}`, { type: "json" }) : null;
         if (old && !canSee(me, old)) return bad("Không có quyền sửa đề này.", 403);
+        if (old && e.baseUpdatedAt && old.updatedAt && e.baseUpdatedAt !== old.updatedAt)
+          return json({ error: `Đề này vừa được người khác sửa lúc ${new Date(old.updatedAt).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}. Hãy tải lại trang để xem bản mới trước khi lưu.`, conflict: true }, 409);
         const exam = {
           id, title: String(e.title).slice(0, 120), classCode: cls.code, ownerId: ownerOf(cls),
           sectionId: sectionsOf(cls).some((x: any) => x.id === e.sectionId) ? e.sectionId : sectionsOf(cls)[0].id,
@@ -452,6 +454,62 @@ export default async (req: Request) => {
         const examId = url.searchParams.get("examId") || "";
         if (!(await getExam(examId))) return bad("Không có quyền.", 403);
         await s.delete(`sub/${examId}/${url.searchParams.get("subId")}`); return json({ ok: true });
+      }
+
+      /* --- Quản lý lớp: danh sách học viên, điểm danh, hoàn thành bài tập --- */
+      if (r === "manage" && m === "GET") {
+        const code = (url.searchParams.get("classCode") || "").toUpperCase();
+        const cls = await s.get(`class/${code}`, { type: "json" });
+        if (!cls || !canSee(me, cls)) return bad("Không có quyền với lớp này.", 403);
+        const roster = (await s.get(`roster/${code}`, { type: "json" })) || { students: [] };
+        const now = Date.now();
+        const exams = (await listJSON("exam/")).filter((e: any) => e.classCode === code && e.published)
+          .sort((a: any, b: any) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+        const results: Record<string, any> = {}; const names: Record<string, string> = {};
+        for (const e of exams) for (const sub of await listJSON(`sub/${e.id}/`)) {
+          names[sub.id] = names[sub.id] || sub.student;
+          const t = totals(e, sub);
+          (results[sub.id] ||= {})[e.id] = { status: sub.status, late: !!sub.late, pct: sub.status === "doing" ? null : (t.max ? Math.round(t.score / t.max * 100) : 0), graded: ["done", "reviewed"].includes(sub.status) };
+        }
+        const sessions = (await listJSON(`att/${code}/`)).sort((a: any, b: any) => (a.date + a.sectionId).localeCompare(b.date + b.sectionId));
+        return json({ cls: { ...cls, sections: sectionsOf(cls) }, roster: roster.students || [], names,
+          exams: exams.map((e: any) => ({ id: e.id, title: e.title, sectionId: e.sectionId || null, openAt: e.openAt, dueAt: e.dueAt, started: !e.openAt || Date.parse(e.openAt) <= now })),
+          results, sessions });
+      }
+      if (r === "roster" && m === "POST") {
+        const code = String(body.classCode || "").toUpperCase();
+        const cls = await s.get(`class/${code}`, { type: "json" });
+        if (!cls || !canSee(me, cls)) return bad("Không có quyền với lớp này.", 403);
+        const ro = (await s.get(`roster/${code}`, { type: "json" })) || { students: [] };
+        const list: any[] = ro.students || [];
+        for (const n of (Array.isArray(body.add) ? body.add : [])) {
+          const name = String(n || "").trim().replace(/\s+/g, " ").slice(0, 60); const id = slug(name);
+          if (id && !list.some(x => x.id === id)) list.push({ id, name, addedAt: new Date().toISOString() });
+        }
+        const rm = new Set((Array.isArray(body.remove) ? body.remove : []).map((x: any) => slug(x)));
+        const out = list.filter(x => !rm.has(x.id)).sort((a, b) => a.name.localeCompare(b.name, "vi"));
+        await s.setJSON(`roster/${code}`, { students: out, updatedAt: new Date().toISOString() });
+        return json({ students: out });
+      }
+      if (r === "attendance" && m === "POST") {
+        const code = String(body.classCode || "").toUpperCase();
+        const cls = await s.get(`class/${code}`, { type: "json" });
+        if (!cls || !canSee(me, cls)) return bad("Không có quyền với lớp này.", 403);
+        const date = String(body.date || ""); if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return bad("Ngày không hợp lệ.");
+        const sec = sectionsOf(cls).some((x: any) => x.id === body.sectionId) ? body.sectionId : "chung";
+        const key = `att/${code}/${date}_${sec}`;
+        const old = (await s.get(key, { type: "json" })) || { date, sectionId: sec, records: {} };
+        const recs = { ...(old.records || {}) };
+        for (const [k, v] of Object.entries(body.records || {})) { const id = slug(k); if (!id) continue; if (["P", "L", "E", "A"].includes(v as string)) recs[id] = v; else delete recs[id]; }
+        const sess = { date, sectionId: sec, records: recs, note: body.note != null ? String(body.note).slice(0, 300) : (old.note || ""), by: String(body.by || old.by || "").slice(0, 60), updatedAt: new Date().toISOString() };
+        await s.setJSON(key, sess); return json(sess);
+      }
+      if (r === "attendance" && m === "DELETE") {
+        const code = (url.searchParams.get("classCode") || "").toUpperCase();
+        const cls = await s.get(`class/${code}`, { type: "json" });
+        if (!cls || !canSee(me, cls)) return bad("Không có quyền với lớp này.", 403);
+        const k = String(url.searchParams.get("key") || ""); if (!/^\d{4}-\d{2}-\d{2}_[a-z0-9]+$/i.test(k)) return bad("Khoá không hợp lệ.");
+        await s.delete(`att/${code}/${k}`); return json({ ok: true });
       }
 
       /* --- Tiến độ --- */
