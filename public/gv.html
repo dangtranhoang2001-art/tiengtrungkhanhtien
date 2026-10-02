@@ -128,13 +128,25 @@ $("cAdd").onclick=async()=>{const n=$("cName").value.trim();if(!n)return toast("
 /* ---------- Danh sách đề ---------- */
 function renderExamList(){
   $("exEdit").classList.add("hide");$("exList").classList.remove("hide");
-  $("exList").innerHTML=`<div class="row" style="margin-bottom:12px"><button class="btn" id="exNew">+ Tạo đề mới</button><button class="btn ghost" id="exSample">Tạo đề mẫu</button></div>`+
+  $("exList").innerHTML=`<div class="row" style="margin-bottom:12px"><button class="btn" id="exNew">+ Tạo đề mới</button><button class="btn ghost" id="exSample">Tạo đề mẫu</button><button class="btn ghost" id="exImport">⬆ Nhập đề từ file</button></div>
+   <div class="card hide" id="impBox"><h3>Nhập đề</h3><p class="small muted">Chọn file đề (.json) hoặc dán nội dung đề vào ô bên dưới, rồi bấm <b>Đọc đề</b>.</p>
+     <input type="file" id="impFile" accept=".json,.txt,application/json" class="i">
+     <textarea class="i zh" id="impText" style="min-height:140px;margin-top:8px" placeholder='{"title": "...", "durationMin": 20, "questions": [...]}'></textarea>
+     <div class="err hide" id="impErr"></div>
+     <div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn ghost" id="impCancel">Đóng</button><button class="btn" id="impGo">Đọc đề</button></div></div>`+
    (D.exams.map(e=>`<div class="card row"><div class="grow"><h3>${esc(e.title)}</h3>
      <div class="small muted">${esc(className(e.classCode))} · ${e.questions.length} câu · ${e.durationMin} phút · Hạn: ${fmt(e.dueAt)}</div>
      <span class="tag ${e.published?"ok":""}">${e.published?"Đã giao":"Bản nháp"}</span></div>
-     <div class="row"><button class="btn sm" data-ed="${e.id}">Sửa</button><button class="btn ghost sm" data-dup="${e.id}">Nhân bản</button><button class="btn ghost sm" data-rm="${e.id}">Xoá</button></div></div>`).join("")||`<p class="muted">Chưa có đề nào.</p>`);
+     <div class="row"><button class="btn sm" data-ed="${e.id}">Sửa</button><button class="btn ghost sm" data-dup="${e.id}">Nhân bản</button><button class="btn ghost sm" data-exp="${e.id}">Xuất file</button><button class="btn ghost sm" data-rm="${e.id}">Xoá</button></div></div>`).join("")||`<p class="muted">Chưa có đề nào.</p>`);
   $("exNew").onclick=()=>editExam(null);
   $("exSample").onclick=()=>editExam(sampleExam());
+  $("exImport").onclick=()=>{$("impBox").classList.remove("hide");$("impText").focus()};
+  $("impCancel").onclick=()=>$("impBox").classList.add("hide");
+  $("impFile").onchange=async()=>{const f=$("impFile").files[0];if(f)$("impText").value=await f.text()};
+  $("impGo").onclick=()=>{try{editExam(parseImport($("impText").value));toast("Đã đọc đề — kiểm tra lại rồi bấm Lưu đề")}catch(e){$("impErr").textContent=e.message;$("impErr").classList.remove("hide")}};
+  $("exList").querySelectorAll("[data-exp]").forEach(b=>b.onclick=()=>{const e=D.exams.find(x=>x.id===b.dataset.exp);
+    const out={title:e.title,durationMin:e.durationMin,showAnswers:e.showAnswers,showAI:e.showAI,questions:e.questions.map(({id,...q})=>q)};
+    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:"application/json"}));a.download=e.title.replace(/[^\p{L}\p{N}]+/gu,"-")+".json";a.click()});
   $("exList").querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>editExam(structuredClone(D.exams.find(e=>e.id===b.dataset.ed))));
   $("exList").querySelectorAll("[data-dup]").forEach(b=>b.onclick=()=>{const e=structuredClone(D.exams.find(x=>x.id===b.dataset.dup));delete e.id;e.title+=" (bản sao)";e.published=false;editExam(e)});
   $("exList").querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{if(!confirm("Xoá đề này?"))return;await api("/api/t/exam/"+b.dataset.rm,{method:"DELETE"});D.exams=D.exams.filter(e=>e.id!==b.dataset.rm);renderExamList();fillSelects()});
@@ -148,6 +160,23 @@ function sampleExam(){return{title:"Kiểm tra: Chào hỏi & gia đình",classC
   {type:"short",prompt:"Viết chữ Hán của từ “tạm biệt”",answers:["再见"],points:1},
   {type:"essay",prompt:"Viết 3 câu tiếng Trung giới thiệu bản thân: tên, em là học sinh, nhà em có mấy người.",rubric:"3 ý, mỗi ý đúng được 1 điểm. Mỗi lỗi chữ Hán hoặc ngữ pháp trừ 0,5 điểm (không âm). Thiếu lượng từ 口 khi nói số người trong nhà tính là lỗi ngữ pháp.",sample:"你好！我叫麦克。我是学生。我家有四口人。",points:3}
 ]}}
+
+/* ---------- Nhập đề ---------- */
+function parseImport(txt){
+  let d; try{d=JSON.parse(String(txt).trim().replace(/^\uFEFF/,""))}catch(e){throw new Error("Nội dung không đúng định dạng đề. Hãy dán nguyên văn, không sửa dấu ngoặc.")}
+  if(!d||!Array.isArray(d.questions)||!d.questions.length) throw new Error("Không thấy danh sách câu hỏi (questions).");
+  const qs=d.questions.map((q,i)=>{
+    const n=`Câu ${i+1}: `;
+    if(!TYPE[q.type]) throw new Error(n+"dạng câu không hợp lệ ("+q.type+").");
+    const b={...blankQ(q.type),...q,points:Number(q.points)||1};
+    delete b.id;
+    if((b.type==="mcq"||b.type==="fill")&&(!Array.isArray(b.options)||b.options.length<2)) throw new Error(n+"cần ít nhất 2 phương án.");
+    if((b.type==="mcq"||b.type==="fill")&&!(b.correct>=0&&b.correct<b.options.length)) throw new Error(n+"đáp án đúng (correct) phải là số thứ tự phương án, bắt đầu từ 0.");
+    return b;
+  });
+  return{title:String(d.title||"Đề nhập từ file"),classCode:D.classes[0]?.code||"",durationMin:Number(d.durationMin)||15,
+    published:false,showAnswers:d.showAnswers!==false,showAI:!!d.showAI,questions:qs};
+}
 
 /* ---------- Soạn đề ---------- */
 let E=null;
