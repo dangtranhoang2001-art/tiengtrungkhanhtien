@@ -97,8 +97,8 @@ async function api(path,opt={}){
 const fmt=iso=>iso?new Date(iso).toLocaleString("vi-VN",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit",year:"numeric"}):"—";
 const toLocalInput=iso=>{if(!iso)return"";const d=new Date(iso);const p=n=>String(n).padStart(2,"0");return`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`};
 const pctColor=p=>p==null?"":p>=80?"background:var(--ok-bg);color:var(--jade)":p>=50?"background:var(--warn-bg)":"background:var(--bad-bg);color:var(--lantern)";
-const STATUS={doing:["Đang làm",""],done:["Đã chấm","ok"],waiting_ai:["AI đang chấm","warn"],ai_done:["AI đã chấm · chờ duyệt","warn"],waiting_teacher:["Chờ GV chấm","bad"],reviewed:["Đã duyệt","ok"]};
-const TYPE={mcq:"Trắc nghiệm",tf:"Đúng / Sai",fill:"Điền từ",listen:"🎧 Nghe chọn đáp án",tone:"〰️ Chọn thanh điệu",match:"🔗 Nối từ – nghĩa",order:"Sắp xếp câu",short:"Trả lời ngắn",speak:"🎤 Ghi âm đọc (ngữ âm)",essay:"Tự luận (AI chấm)"};
+const STATUS={doing:["Đang làm",""],done:["Đã chấm","ok"],waiting_ai:["Chờ GV chấm","bad"],ai_done:["Chờ GV chấm","bad"],waiting_teacher:["Chờ GV chấm","bad"],reviewed:["Đã duyệt","ok"]};
+const TYPE={mcq:"Trắc nghiệm",tf:"Đúng / Sai",fill:"Điền từ",listen:"🎧 Nghe chọn đáp án",tone:"〰️ Chọn thanh điệu",match:"🔗 Nối từ – nghĩa",order:"Sắp xếp câu",short:"Trả lời ngắn",speak:"🎤 Ghi âm đọc (ngữ âm)",essay:"Tự luận (GV chấm)"};
 const TL={1:"Thanh 1",2:"Thanh 2",3:"Thanh 3",4:"Thanh 4",0:"Thanh nhẹ"};
 
 /* ---------- Hộp thoại thông báo đẹp (thay hộp thoại mặc định của trình duyệt) ---------- */
@@ -159,7 +159,7 @@ async function boot(){
   $("chpw").classList.toggle("hide",isAdmin()); $("tabTeach").classList.toggle("hide",!isAdmin()); $("cOwner").classList.toggle("hide",!isAdmin());
   $("cOwner").innerHTML=`<option value="admin">Lớp của tôi</option>`+D.teachers.filter(t=>!t.disabled).map(t=>`<option value="${t.id}">GV: ${esc(t.name)}</option>`).join("");
   renderTeachers();
-  $("aiBanner").innerHTML=D.aiEnabled?"":`<div class="card" style="background:var(--warn-bg)"><b>AI chấm tự luận chưa bật.</b> Câu tự luận sẽ chờ giáo viên chấm tay. Thêm biến ANTHROPIC_API_KEY trên Netlify để bật.</div>`;
+  $("aiBanner").innerHTML="";
   renderClasses();renderExamList();fillSelects();
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
@@ -287,7 +287,6 @@ function renderEditor(){
     <div class="row"><div class="grow"><label class="f">Mở lúc (để trống = mở ngay)</label><input class="i" type="datetime-local" id="xOpen" value="${toLocalInput(E.openAt)}"></div>
       <div class="grow"><label class="f">Hạn nộp (để trống = không hạn)</label><input class="i" type="datetime-local" id="xDue" value="${toLocalInput(E.dueAt)}"></div></div>
     <label class="row" style="margin-top:10px"><input type="checkbox" id="xAns" ${E.showAnswers?"checked":""}> Cho học sinh xem đáp án đúng sau khi nộp</label>
-    <label class="row"><input type="checkbox" id="xAI" ${E.showAI?"checked":""}> Trả điểm tự luận do AI chấm ngay, không chờ giáo viên duyệt</label>
     <label class="row"><input type="checkbox" id="xPub" ${E.published?"checked":""}> <b>Giao bài</b> (bỏ chọn = lưu nháp, học sinh chưa thấy)</label></div>
     <div id="xQs"></div>
     <div class="card"><b>Thêm câu hỏi:</b><div class="row" style="margin-top:8px">${Object.entries(TYPE).map(([k,v])=>`<button class="btn ghost sm" data-addq="${k}">+ ${v}</button>`).join("")}</div></div>
@@ -300,7 +299,7 @@ function renderEditor(){
 function blankQ(t){if(t==="tf")return{type:"mcq",prompt:"",points:1,options:["Đúng","Sai"],correct:0};return{type:t,prompt:"",points:t==="essay"||t==="speak"?3:t==="tone"||t==="match"?2:1,...(t==="mcq"||t==="fill"||t==="listen"?{options:["","","",""],correct:0}:{}),...(t==="listen"?{audioText:"",audioKey:null}:{}),...(t==="tone"?{items:[]}:{}),...(t==="match"?{pairs:[]}:{}),...(t==="speak"?{text:"",pinyin:"",showPinyin:true,maxSec:30,modelKey:null,rubric:""}:{}),...(t==="order"?{chunks:[],accept:[]}:{}),...(t==="short"?{answers:[]}:{}),...(t==="essay"?{rubric:"",sample:""}:{})}}
 function readHead(){E.title=$("xTitle").value.trim();E.classCode=$("xClass").value;E.durationMin=+$("xDur").value||15;
   E.openAt=$("xOpen").value?new Date($("xOpen").value).toISOString():null;E.dueAt=$("xDue").value?new Date($("xDue").value).toISOString():null;
-  E.showAnswers=$("xAns").checked;E.showAI=$("xAI").checked;E.published=$("xPub").checked}
+  E.showAnswers=$("xAns").checked;E.showAI=false;E.published=$("xPub").checked}
 function renderQs(){
   $("xQs").innerHTML=E.questions.map((q,i)=>{
     let f="";
@@ -327,7 +326,7 @@ function renderQs(){
       <label class="f">Câu khác cũng chấp nhận (mỗi dòng một câu, không bắt buộc)</label><textarea class="i zh" data-i="${i}" data-lines="accept">${esc((q.accept||[]).join("\n"))}</textarea>`;
     if(q.type==="short") f=`<label class="f">Đáp án chấp nhận (mỗi dòng một đáp án; bỏ qua dấu câu và khoảng trắng)</label><textarea class="i zh" data-i="${i}" data-lines="answers">${esc((q.answers||[]).join("\n"))}</textarea>
       <label class="row small" style="margin-top:6px"><input type="checkbox" data-i="${i}" data-chk="pinyinPad" ${q.pinyinPad?"checked":""}> Hiện bàn phím phiên âm có dấu (ā á ǎ à…) cho học sinh</label>`;
-    if(q.type==="essay") f=`<label class="f">Tiêu chí chấm cho AI</label><textarea class="i" data-i="${i}" data-k="rubric" placeholder="VD: đủ 3 ý, mỗi ý 1 điểm; mỗi lỗi ngữ pháp trừ 0,5">${esc(q.rubric||"")}</textarea>
+    if(q.type==="essay") f=`<label class="f">Tiêu chí chấm (chỉ giáo viên thấy, không bắt buộc)</label><textarea class="i" data-i="${i}" data-k="rubric" placeholder="VD: đủ 3 ý, mỗi ý 1 điểm; mỗi lỗi ngữ pháp trừ 0,5">${esc(q.rubric||"")}</textarea>
       <label class="f">Bài mẫu / đáp án tham khảo</label><textarea class="i zh" data-i="${i}" data-k="sample">${esc(q.sample||"")}</textarea>`;
     return `<div class="card qed" data-t="${q.type}"><div class="row"><span class="qnum">${i+1}</span><b class="grow">${TYPE[q.type]}</b>
       <label class="small">Điểm <input class="i" type="number" step="0.5" min="0.5" style="width:80px" data-i="${i}" data-k="points" value="${q.points}"></label>
@@ -372,7 +371,6 @@ function validate(){
     if(q.type==="fill"&&!q.prompt.includes("＿")) return n+"chưa có dấu ＿＿＿ cho chỗ trống.";
     if(q.type==="order"&&q.chunks.length<2) return n+"cần ít nhất 2 thẻ.";
     if(q.type==="short"&&!q.answers.length) return n+"chưa có đáp án.";
-    if(q.type==="essay"&&!q.rubric.trim()) return n+"chưa có tiêu chí chấm.";
   }
   return "";
 }
@@ -392,7 +390,7 @@ async function loadSubs(){
   try{const d=await api("/api/t/subs?examId="+id);G.exam=d.exam;G.subs=d.subs.sort((a,b)=>a.student.localeCompare(b.student,"vi"));renderSubs();if(G.cur)renderDetail(G.cur)}catch(e){toast(e.message)}
 }
 function renderSubs(){
-  const waiting=G.exam&&G.exam.questions.some(q=>q.type==="speak")?0:G.subs.filter(s=>s.status==="ai_done").length;
+  const waiting=0;
   $("gSubs").innerHTML=`<div class="card"><b>${G.subs.length}</b> học sinh đã vào làm ${waiting?`<button class="btn sm green" id="gBulk" style="margin-top:8px;width:100%">Duyệt nhanh ${waiting} bài AI đã chấm</button>`:""}</div>`+
     (G.subs.map(s=>{const st=STATUS[s.status]||[s.status,""];return`<button class="subitem ${G.cur===s.id?"on":""}" data-s="${s.id}">
       <b>${esc(s.student)}</b> ${s.late?`<span class="tag bad">muộn</span>`:""}<br>
@@ -414,9 +412,8 @@ function renderDetail(id){
   if(s.status==="doing"){$("gDetail").innerHTML=`<div class="card"><h3>${esc(s.student)}</h3><p>Đang làm bài. Bắt đầu lúc ${fmt(s.startedAt)}, hết giờ lúc ${fmt(s.deadline)}.</p></div>`;return}
   $("gDetail").innerHTML=`<div class="card"><div class="row"><div class="grow"><h3>${esc(s.student)}</h3>
       <div class="small muted">Nộp lúc ${fmt(s.submittedAt)} ${s.late?"· <b>nộp muộn</b>":""} · Trắc nghiệm: ${s.grading.autoScore} điểm</div></div>
-      <div class="row">${D.aiEnabled&&ex.questions.some(q=>q.type==="essay")?`<button class="btn ghost sm" id="dRe">AI chấm lại</button>`:""}<button class="btn ghost sm" id="dRetake">Cho làm lại</button></div></div>
-      ${s.aiError?`<div class="err small">AI chưa chấm được: ${esc(s.aiError)}</div>`:""}
-      ${s.ai?.nhan_xet_chung?`<p>🤖 <b>AI nhận xét:</b> ${esc(s.ai.nhan_xet_chung)}</p>`:""}</div>`+
+      <div class="row"><button class="btn ghost sm" id="dRetake">Cho làm lại</button></div></div>
+</div>`+
    ex.questions.map((q,i)=>{
      const it=s.grading.items[q.id]||{};
      if(q.type==="tone"||q.type==="match"){
@@ -437,25 +434,24 @@ function renderDetail(id){
        return`<div class="card"><div class="row"><span class="qnum">${i+1}</span><span class="grow zh">${esc(q.prompt)}</span><span class="tag ${it.ok?"ok":"bad"}">${it.ok?"Đúng":"Sai"} · ${it.score}/${q.points}</span></div>
          <div class="zh" style="margin-top:6px">HS: ${esc(answerText(q,s.answers[q.id]))}${!it.ok?` · <span class="muted">Đáp án: ${esc(q.type==="order"?q.chunks.join(""):q.type==="short"?q.answers[0]:q.options[q.correct])}${q.type==="listen"&&q.audioText?` · nội dung nghe: ${esc(q.audioText)}`:""}</span>`:""}</div></div>`;
      }
-     const ai=s.ai?.items?.[q.id]; const tv=s.teacherScores?.[q.id]; const tc=s.teacherComments?.[q.id];
-     return`<div class="card qed" data-t="essay"><div class="row"><span class="qnum">${i+1}</span><span class="grow zh">${esc(q.prompt)}</span>${ai?.can_gv_xem?`<span class="tag warn">AI đề nghị GV xem kỹ</span>`:""}</div>
-       <div class="zh" style="white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:10px;margin:8px 0">${esc(s.answers[q.id]||"(bỏ trống)")}</div>
-       ${ai?`<div><b>AI chấm: ${ai.score}/${q.points}</b></div>${ai.loi.length?`<ul>${ai.loi.map(l=>`<li><b>${esc(l.loai)}:</b> ${esc(l.chi_tiet)} → <span class="zh">${esc(l.sua)}</span></li>`).join("")}</ul>`:"<p>Không phát hiện lỗi.</p>"}${ai.nhan_xet?`<p>💬 ${esc(ai.nhan_xet)}</p>`:""}`:`<p class="muted">${s.status==="waiting_ai"?"AI đang chấm… bấm Tải lại sau ít giây.":"Chưa có điểm AI."}</p>`}
-       <div class="row"><label>Điểm GV <input class="i" type="number" step="0.5" min="0" max="${q.points}" style="width:90px" data-ts="${q.id}" value="${tv??ai?.score??""}"></label>
-       <input class="i grow" data-tc="${q.id}" placeholder="Nhận xét của GV cho câu này (không bắt buộc)" value="${esc(tc||"")}" style="flex:1"></div></div>`;
+     const tv=s.teacherScores?.[q.id]; const tc=s.teacherComments?.[q.id];
+     return`<div class="card qed" data-t="essay"><div class="row"><span class="qnum">${i+1}</span><span class="grow zh">${esc(q.prompt)}</span><span class="tag">${q.points} điểm</span></div>
+       <div class="zh" style="white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:10px;margin:8px 0;font-size:18px">${esc(s.answers[q.id]||"(bỏ trống)")}</div>
+       ${q.rubric?`<div class="small"><b>Tiêu chí:</b> ${esc(q.rubric)}</div>`:""}${q.sample?`<div class="small"><b>Bài mẫu:</b> <span class="zh">${esc(q.sample)}</span></div>`:""}
+       <div class="row" style="margin-top:8px"><label>Điểm GV <input class="i" type="number" step="0.5" min="0" max="${q.points}" style="width:90px" data-ts="${q.id}" value="${tv??""}"></label>
+       <input class="i grow" data-tc="${q.id}" placeholder="Nhận xét, chữa lỗi cho câu này (học sinh sẽ thấy)" value="${esc(tc||"")}" style="flex:1"></div></div>`;
    }).join("")+
-   `<div class="card"><label class="f">Nhận xét chung gửi học sinh</label><textarea class="i" id="dNote" placeholder="${esc(s.ai?.nhan_xet_chung||"")}">${esc(s.teacherNote||"")}</textarea>
+   `<div class="card"><label class="f">Nhận xét chung gửi học sinh</label><textarea class="i" id="dNote" placeholder="VD: Em làm tốt phần nghe, cần luyện thêm thanh 3.">${esc(s.teacherNote||"")}</textarea>
      <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn green" id="dOk">${s.status==="reviewed"?"Cập nhật":"Duyệt & trả điểm"}</button></div></div>`;
   $("dOk").onclick=async()=>{
     const ts={},tc={};let bad="";
     document.querySelectorAll("[data-ts]").forEach(el=>{if(el.value!==""){const v=+el.value,q=ex.questions.find(x=>x.id===el.dataset.ts);if(v<0||v>q.points)bad=`Điểm phải từ 0 đến ${q.points}`;ts[el.dataset.ts]=v}});
     if(bad) return toast(bad);
-    if(ex.questions.some(q=>q.type==="essay"&&ts[q.id]==null&&s.ai?.items?.[q.id]?.score==null)) return toast("Còn câu tự luận chưa có điểm");
+    if(ex.questions.some(q=>q.type==="essay"&&ts[q.id]==null)) return toast("Còn câu tự luận chưa chấm điểm");
     if(ex.questions.some(q=>q.type==="speak"&&ts[q.id]==null)) return toast("Còn câu ghi âm chưa chấm điểm");
     document.querySelectorAll("[data-tc]").forEach(el=>{if(el.value.trim())tc[el.dataset.tc]=el.value.trim()});
-    try{await api("/api/t/review",{body:{examId:ex.id,subId:s.id,teacherScores:ts,teacherComments:tc,teacherNote:$("dNote").value.trim()||s.ai?.nhan_xet_chung||""}});toast("Đã trả điểm cho "+s.student);loadSubs()}catch(e){toast(e.message)}
+    try{await api("/api/t/review",{body:{examId:ex.id,subId:s.id,teacherScores:ts,teacherComments:tc,teacherNote:$("dNote").value.trim()}});toast("Đã trả điểm cho "+s.student);loadSubs()}catch(e){toast(e.message)}
   };
-  if($("dRe")) $("dRe").onclick=async()=>{try{await api("/api/t/regrade",{body:{examId:ex.id,subId:s.id}});toast("AI đang chấm lại…");setTimeout(loadSubs,8000)}catch(e){toast(e.message)}};
   $("dRetake").onclick=async()=>{if(!(await askConfirm(`Bài làm hiện tại của ${s.student} sẽ bị xoá để em làm lại từ đầu.`,{icon:"🔄",title:"Cho làm lại?",ok:"Cho làm lại",danger:true})))return;await api(`/api/t/sub?examId=${ex.id}&subId=${s.id}`,{method:"DELETE"});G.cur=null;$("gDetail").innerHTML="";loadSubs()};
 }
 setInterval(()=>{if(!$("tGrade").classList.contains("hide")&&TOK&&!document.activeElement?.matches("input,textarea"))loadSubs()},20000);
@@ -483,15 +479,14 @@ function renderProg(){
     const rep=P.reports.find(r=>r.studentId===s.id);
     return`<tr><th>${esc(s.name)}</th>${vals.map((v,k)=>`<td>${v==null?`<span class="muted">—</span>`:`<span class="pct" style="${pctColor(v)}" title="${esc(ex[k].title)}">${v}%</span>${s.results[ex[k].id].late?" ⏰":""}`}</td>`).join("")}
       <td><b>${s.avg??"—"}${s.avg!=null?"%":""}</b></td><td>${s.done}/${ex.length}</td><td>${spark(vals)}</td>
-      <td><button class="btn ghost sm" data-rep="${s.id}" ${D.aiEnabled?"":"disabled title='Cần bật AI'"}>${rep?.status==="working"?"Đang viết…":rep?"Xem / cập nhật":"AI nhận xét"}</button></td></tr>`;
+</tr>`;
   }).join("");
   const classAvg=Math.round(P.students.filter(s=>s.avg!=null).reduce((a,s)=>a+s.avg,0)/Math.max(1,P.students.filter(s=>s.avg!=null).length));
   $("pBody").innerHTML=`<div class="card row"><div class="grow"><b>${P.students.length}</b> học sinh · <b>${ex.length}</b> bài đã giao · Điểm trung bình lớp: <span class="pct" style="${pctColor(classAvg)}">${classAvg}%</span></div></div>
-    <div class="card tablewrap"><table><thead><tr><th>Học sinh</th>${ex.map((e,i)=>`<th title="${esc(e.title)}">Bài ${i+1}</th>`).join("")}<th>TB</th><th>Đã làm</th><th>Xu hướng</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="card tablewrap"><table><thead><tr><th>Học sinh</th>${ex.map((e,i)=>`<th title="${esc(e.title)}">Bài ${i+1}</th>`).join("")}<th>TB</th><th>Đã làm</th><th>Xu hướng</th></tr></thead><tbody>${rows}</tbody></table>
     <p class="small muted">${ex.map((e,i)=>`Bài ${i+1}: ${esc(e.title)}`).join(" · ")} · ⏰ = nộp muộn</p></div>
     ${P.hard.length?`<div class="card"><h3>Câu cả lớp sai nhiều (≥ 50%)</h3><table><tr><th>Câu</th><th>Bài</th><th>Tỉ lệ sai</th></tr>${P.hard.map(h=>`<tr><td class="zh">${esc(h.prompt)}</td><td>${esc(h.exam)}</td><td><span class="pct" style="${pctColor(100-Math.round(h.wrong/h.total*100))}">${h.wrong}/${h.total}</span></td></tr>`).join("")}</table></div>`:""}
     <div id="pRep"></div>`;
-  $("pBody").querySelectorAll("[data-rep]").forEach(b=>b.onclick=()=>openReport(b.dataset.rep));
 }
 async function openReport(sid){
   const s=P.students.find(x=>x.id===sid); const rep=P.reports.find(r=>r.studentId===sid);
