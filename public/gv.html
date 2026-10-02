@@ -7,7 +7,7 @@
 <title>Khánh Tiên – Giáo viên</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233B82F6'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>K</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans:wght@500;700&family=Noto+Sans+SC:wght@500;700&family=Noto+Serif+SC:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20261002b">
+<link rel="stylesheet" href="/style.css?v=20261002d">
 <style>
 .qed{border-left:8px solid var(--sky)}
 .qed[data-t=fill]{border-left-color:var(--jade)} .qed[data-t=order]{border-left-color:var(--sun)}
@@ -96,7 +96,8 @@ const fmt=iso=>iso?new Date(iso).toLocaleString("vi-VN",{hour:"2-digit",minute:"
 const toLocalInput=iso=>{if(!iso)return"";const d=new Date(iso);const p=n=>String(n).padStart(2,"0");return`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`};
 const pctColor=p=>p==null?"":p>=80?"background:var(--ok-bg);color:var(--jade)":p>=50?"background:var(--warn-bg)":"background:var(--bad-bg);color:var(--lantern)";
 const STATUS={doing:["Đang làm",""],done:["Đã chấm","ok"],waiting_ai:["AI đang chấm","warn"],ai_done:["AI đã chấm · chờ duyệt","warn"],waiting_teacher:["Chờ GV chấm","bad"],reviewed:["Đã duyệt","ok"]};
-const TYPE={mcq:"Trắc nghiệm",fill:"Điền từ",order:"Sắp xếp câu",short:"Trả lời ngắn",essay:"Tự luận (AI chấm)"};
+const TYPE={mcq:"Trắc nghiệm",tf:"Đúng / Sai",fill:"Điền từ",listen:"🎧 Nghe chọn đáp án",tone:"〰️ Chọn thanh điệu",match:"🔗 Nối từ – nghĩa",order:"Sắp xếp câu",short:"Trả lời ngắn",speak:"🎤 Ghi âm đọc (ngữ âm)",essay:"Tự luận (AI chấm)"};
+const TL={1:"Thanh 1",2:"Thanh 2",3:"Thanh 3",4:"Thanh 4",0:"Thanh nhẹ"};
 
 /* ---------- Đăng nhập ---------- */
 function logout(){TOK="";try{localStorage.removeItem("kt_tok")}catch(e){};$("vApp").classList.add("hide");$("vLogin").classList.remove("hide");$("logout").classList.add("hide");$("chpw").classList.add("hide");$("whoami").textContent=""}
@@ -210,6 +211,7 @@ function parseImport(txt){
     const n=`Câu ${i+1}: `;
     if(!TYPE[q.type]) throw new Error(n+"dạng câu không hợp lệ ("+q.type+").");
     const b={...blankQ(q.type),...q,points:Number(q.points)||1};
+    if(b.type==="tf") b.type="mcq";
     delete b.id;
     if((b.type==="mcq"||b.type==="fill")&&(!Array.isArray(b.options)||b.options.length<2)) throw new Error(n+"cần ít nhất 2 phương án.");
     if((b.type==="mcq"||b.type==="fill")&&!(b.correct>=0&&b.correct<b.options.length)) throw new Error(n+"đáp án đúng (correct) phải là số thứ tự phương án, bắt đầu từ 0.");
@@ -244,7 +246,7 @@ function renderEditor(){
   $("xCancel").onclick=renderExamList;
   $("xSave").onclick=saveExam;
 }
-function blankQ(t){return{type:t,prompt:"",points:t==="essay"?3:1,...(t==="mcq"||t==="fill"?{options:["","","",""],correct:0}:{}),...(t==="order"?{chunks:[],accept:[]}:{}),...(t==="short"?{answers:[]}:{}),...(t==="essay"?{rubric:"",sample:""}:{})}}
+function blankQ(t){if(t==="tf")return{type:"mcq",prompt:"",points:1,options:["Đúng","Sai"],correct:0};return{type:t,prompt:"",points:t==="essay"||t==="speak"?3:t==="tone"||t==="match"?2:1,...(t==="mcq"||t==="fill"||t==="listen"?{options:["","","",""],correct:0}:{}),...(t==="listen"?{audioText:"",audioKey:null}:{}),...(t==="tone"?{items:[]}:{}),...(t==="match"?{pairs:[]}:{}),...(t==="speak"?{text:"",pinyin:"",showPinyin:true,maxSec:30,modelKey:null,rubric:""}:{}),...(t==="order"?{chunks:[],accept:[]}:{}),...(t==="short"?{answers:[]}:{}),...(t==="essay"?{rubric:"",sample:""}:{})}}
 function readHead(){E.title=$("xTitle").value.trim();E.classCode=$("xClass").value;E.durationMin=+$("xDur").value||15;
   E.openAt=$("xOpen").value?new Date($("xOpen").value).toISOString():null;E.dueAt=$("xDue").value?new Date($("xDue").value).toISOString():null;
   E.showAnswers=$("xAns").checked;E.showAI=$("xAI").checked;E.published=$("xPub").checked}
@@ -252,11 +254,28 @@ function renderQs(){
   $("xQs").innerHTML=E.questions.map((q,i)=>{
     let f="";
     const hint=q.type==="fill"?"Dùng ＿＿＿ đánh dấu chỗ trống":q.type==="order"?"Nghĩa tiếng Việt / yêu cầu":"";
-    if(q.type==="mcq"||q.type==="fill") f=`<label class="f">Phương án (chọn ô tròn cho đáp án đúng)</label>${q.options.map((o,k)=>`<div class="optrow"><input type="radio" name="c${i}" data-i="${i}" data-cor="${k}" ${q.correct===k?"checked":""} aria-label="Đáp án đúng ${k+1}"><input class="i zh" data-i="${i}" data-opt="${k}" value="${esc(o)}"><button class="btn ghost sm" data-i="${i}" data-optdel="${k}" aria-label="Xoá phương án">✕</button></div>`).join("")}<button class="btn ghost sm" data-i="${i}" data-optadd>+ Phương án</button>
+    if(q.type==="listen") f=`<div class="card" style="background:var(--bg)"><b>Âm thanh bài nghe</b>
+        ${q.audioKey?`<div class="row" style="margin-top:6px"><audio controls src="/api/media?key=${encodeURIComponent(q.audioKey)}"></audio><button class="btn ghost sm" data-i="${i}" data-rmaudio="audioKey">Xoá tệp</button></div>`
+          :`<label class="f">Cách 1: tải tệp âm thanh (mp3, m4a, wav… tối đa 5 MB)</label><input type="file" accept="audio/*" class="i" data-i="${i}" data-upload="audioKey">
+            <label class="f">Cách 2: gõ câu tiếng Trung để máy đọc (giọng đọc của thiết bị học sinh)</label><input class="i zh" data-i="${i}" data-k="audioText" value="${esc(q.audioText||"")}" placeholder="VD: 我喜欢喝茶。">`}</div>`;
+    if(q.type==="tone") f=`<label class="f">Mỗi dòng một chữ: <b>chữ Hán · pinyin không dấu · số thanh</b> (1–4, thanh nhẹ ghi 0)</label>
+      <textarea class="i zh" data-i="${i}" data-tone placeholder="妈 ma 1&#10;麻 ma 2&#10;马 ma 3&#10;骂 ma 4">${esc((q.items||[]).map(x=>`${x.zh} ${x.py} ${x.tone}`).join("\n"))}</textarea><div class="small muted" id="tprev${i}">${(q.items||[]).length} chữ</div>`;
+    if(q.type==="match") f=`<label class="f">Mỗi dòng một cặp: <b>vế trái = vế phải</b></label>
+      <textarea class="i zh" data-i="${i}" data-pairs placeholder="爸爸 = bố&#10;妈妈 = mẹ&#10;学校 = trường học">${esc((q.pairs||[]).map(x=>`${x.left} = ${x.right}`).join("\n"))}</textarea><div class="small muted">Học sinh chọn vế phải cho từng vế trái (vế phải được xáo trộn).</div>`;
+    if(q.type==="speak") f=`<label class="f">Nội dung học sinh cần đọc (chữ Hán)</label><textarea class="i zh" style="min-height:60px" data-i="${i}" data-k="text" placeholder="VD: 妈 麻 马 骂">${esc(q.text||"")}</textarea>
+      <label class="f">Phiên âm</label><input class="i" data-i="${i}" data-k="pinyin" value="${esc(q.pinyin||"")}" placeholder="VD: mā má mǎ mà">
+      <label class="row small" style="margin-top:6px"><input type="checkbox" data-i="${i}" data-chk="showPinyin" ${q.showPinyin?"checked":""}> Hiện phiên âm cho học sinh</label>
+      <div class="row"><label class="small">Thời gian ghi tối đa (giây) <input class="i" type="number" min="5" max="120" style="width:90px" data-i="${i}" data-k="maxSec" value="${q.maxSec||30}"></label></div>
+      <div class="card" style="background:var(--bg);margin-top:8px"><b>Giọng đọc mẫu</b> <span class="small muted">(không bắt buộc. Nếu bỏ trống, học sinh nghe giọng máy đọc nội dung trên)</span>
+        ${q.modelKey?`<div class="row" style="margin-top:6px"><audio controls src="/api/media?key=${encodeURIComponent(q.modelKey)}"></audio><button class="btn ghost sm" data-i="${i}" data-rmaudio="modelKey">Xoá tệp</button></div>`
+          :`<input type="file" accept="audio/*" class="i" style="margin-top:6px" data-i="${i}" data-upload="modelKey">`}</div>
+      <label class="f">Ghi chú tiêu chí chấm (chỉ giáo viên thấy)</label><input class="i" data-i="${i}" data-k="rubric" value="${esc(q.rubric||"")}" placeholder="VD: đúng thanh điệu 2đ, âm đầu – vần 1đ">`;
+    if(q.type==="mcq"||q.type==="fill"||q.type==="listen") f+=`<label class="f">Phương án (chọn ô tròn cho đáp án đúng)</label>${q.options.map((o,k)=>`<div class="optrow"><input type="radio" name="c${i}" data-i="${i}" data-cor="${k}" ${q.correct===k?"checked":""} aria-label="Đáp án đúng ${k+1}"><input class="i zh" data-i="${i}" data-opt="${k}" value="${esc(o)}"><button class="btn ghost sm" data-i="${i}" data-optdel="${k}" aria-label="Xoá phương án">✕</button></div>`).join("")}<button class="btn ghost sm" data-i="${i}" data-optadd>+ Phương án</button>
       <label class="f">Giải thích (hiện sau khi nộp, không bắt buộc)</label><input class="i" data-i="${i}" data-k="explain" value="${esc(q.explain||"")}">`;
     if(q.type==="order") f=`<label class="f">Các thẻ theo thứ tự ĐÚNG, cách nhau bằng dấu /</label><input class="i zh" data-i="${i}" data-chunks value="${esc((q.chunks||[]).join(" / "))}" placeholder="你家 / 有 / 几 / 口 / 人">
       <label class="f">Câu khác cũng chấp nhận (mỗi dòng một câu, không bắt buộc)</label><textarea class="i zh" data-i="${i}" data-lines="accept">${esc((q.accept||[]).join("\n"))}</textarea>`;
-    if(q.type==="short") f=`<label class="f">Đáp án chấp nhận (mỗi dòng một đáp án; bỏ qua dấu câu và khoảng trắng)</label><textarea class="i zh" data-i="${i}" data-lines="answers">${esc((q.answers||[]).join("\n"))}</textarea>`;
+    if(q.type==="short") f=`<label class="f">Đáp án chấp nhận (mỗi dòng một đáp án; bỏ qua dấu câu và khoảng trắng)</label><textarea class="i zh" data-i="${i}" data-lines="answers">${esc((q.answers||[]).join("\n"))}</textarea>
+      <label class="row small" style="margin-top:6px"><input type="checkbox" data-i="${i}" data-chk="pinyinPad" ${q.pinyinPad?"checked":""}> Hiện bàn phím phiên âm có dấu (ā á ǎ à…) cho học sinh</label>`;
     if(q.type==="essay") f=`<label class="f">Tiêu chí chấm cho AI</label><textarea class="i" data-i="${i}" data-k="rubric" placeholder="VD: đủ 3 ý, mỗi ý 1 điểm; mỗi lỗi ngữ pháp trừ 0,5">${esc(q.rubric||"")}</textarea>
       <label class="f">Bài mẫu / đáp án tham khảo</label><textarea class="i zh" data-i="${i}" data-k="sample">${esc(q.sample||"")}</textarea>`;
     return `<div class="card qed" data-t="${q.type}"><div class="row"><span class="qnum">${i+1}</span><b class="grow">${TYPE[q.type]}</b>
@@ -273,6 +292,15 @@ function renderQs(){
   X.querySelectorAll("[data-optdel]").forEach(b=>b.onclick=()=>{const q=E.questions[b.dataset.i],k=+b.dataset.optdel;if(q.options.length<=2)return toast("Cần ít nhất 2 phương án");q.options.splice(k,1);if(q.correct>=q.options.length||q.correct===k)q.correct=0;else if(q.correct>k)q.correct--;renderQs()});
   X.querySelectorAll("[data-chunks]").forEach(el=>el.oninput=()=>E.questions[el.dataset.i].chunks=el.value.split("/").map(s=>s.trim()).filter(Boolean));
   X.querySelectorAll("[data-lines]").forEach(el=>el.oninput=()=>E.questions[el.dataset.i][el.dataset.lines]=el.value.split("\n").map(s=>s.trim()).filter(Boolean));
+  X.querySelectorAll("[data-chk]").forEach(el=>el.onchange=()=>E.questions[el.dataset.i][el.dataset.chk]=el.checked);
+  X.querySelectorAll("[data-tone]").forEach(el=>el.oninput=()=>{const items=[];
+    el.value.split("\n").map(l=>l.trim()).filter(Boolean).forEach(l=>{const m=l.match(/^(\S+)\s+([a-züv]+)\s*([0-4])$/i);if(m)items.push({zh:m[1],py:m[2].toLowerCase().replace(/v/g,"ü"),tone:+m[3]})});
+    E.questions[el.dataset.i].items=items;const pv=$("tprev"+el.dataset.i);if(pv)pv.textContent=`${items.length} chữ đọc được`+(items.length<el.value.split("\n").filter(l=>l.trim()).length?" · có dòng sai định dạng":"")});
+  X.querySelectorAll("[data-pairs]").forEach(el=>el.oninput=()=>{E.questions[el.dataset.i].pairs=el.value.split("\n").map(l=>l.split("=")).filter(a=>a.length===2&&a[0].trim()&&a[1].trim()).map(a=>({left:a[0].trim(),right:a[1].trim()}))});
+  X.querySelectorAll("[data-upload]").forEach(el=>el.onchange=async()=>{const f=el.files[0];if(!f)return;if(f.size>5*1024*1024)return toast("Tệp tối đa 5 MB");
+    toast("Đang tải tệp âm thanh…");try{const r=await fetch("/api/t/media",{method:"POST",headers:{"content-type":f.type||"audio/mpeg","authorization":"Bearer "+TOK},body:f});const d=await r.json();if(!r.ok)throw new Error(d.error);
+      readHead();E.questions[el.dataset.i][el.dataset.upload]=d.key;renderQs();toast("Đã tải lên")}catch(e){toast(e.message)}});
+  X.querySelectorAll("[data-rmaudio]").forEach(b=>b.onclick=()=>{readHead();E.questions[b.dataset.i][b.dataset.rmaudio]=null;renderQs()});
   X.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{const i=+b.dataset.mv,j=i+ +b.dataset.d;if(j<0||j>=E.questions.length)return;[E.questions[i],E.questions[j]]=[E.questions[j],E.questions[i]];renderQs()});
   X.querySelectorAll("[data-qdel]").forEach(b=>b.onclick=()=>{if(confirm("Xoá câu này?")){E.questions.splice(+b.dataset.qdel,1);renderQs()}});
 }
@@ -284,7 +312,12 @@ function validate(){
   for(const [i,q] of E.questions.entries()){
     const n=`Câu ${i+1}: `;
     if(!q.prompt.trim()) return n+"chưa có đề bài.";
-    if((q.type==="mcq"||q.type==="fill")&&q.options.some(o=>!o.trim())) return n+"còn phương án trống.";
+    if((q.type==="mcq"||q.type==="fill"||q.type==="listen")&&q.options.some(o=>!String(o).trim())) return n+"còn phương án trống.";
+    if(q.type==="listen"&&!q.audioKey&&!(q.audioText||"").trim()) return n+"chưa có âm thanh bài nghe.";
+    if(q.type==="tone"&&!(q.items||[]).length) return n+"chưa có chữ nào (mỗi dòng: chữ pinyin số_thanh).";
+    if(q.type==="match"&&(q.pairs||[]).length<2) return n+"cần ít nhất 2 cặp (mỗi dòng: trái = phải).";
+    if(q.type==="match"&&new Set(q.pairs.map(p=>p.right)).size<q.pairs.length) return n+"các vế phải không được trùng nhau.";
+    if(q.type==="speak"&&!(q.text||"").trim()) return n+"chưa có nội dung cần đọc.";
     if(q.type==="fill"&&!q.prompt.includes("＿")) return n+"chưa có dấu ＿＿＿ cho chỗ trống.";
     if(q.type==="order"&&q.chunks.length<2) return n+"cần ít nhất 2 thẻ.";
     if(q.type==="short"&&!q.answers.length) return n+"chưa có đáp án.";
@@ -308,7 +341,7 @@ async function loadSubs(){
   try{const d=await api("/api/t/subs?examId="+id);G.exam=d.exam;G.subs=d.subs.sort((a,b)=>a.student.localeCompare(b.student,"vi"));renderSubs();if(G.cur)renderDetail(G.cur)}catch(e){toast(e.message)}
 }
 function renderSubs(){
-  const waiting=G.subs.filter(s=>s.status==="ai_done").length;
+  const waiting=G.exam&&G.exam.questions.some(q=>q.type==="speak")?0:G.subs.filter(s=>s.status==="ai_done").length;
   $("gSubs").innerHTML=`<div class="card"><b>${G.subs.length}</b> học sinh đã vào làm ${waiting?`<button class="btn sm green" id="gBulk" style="margin-top:8px;width:100%">Duyệt nhanh ${waiting} bài AI đã chấm</button>`:""}</div>`+
     (G.subs.map(s=>{const st=STATUS[s.status]||[s.status,""];return`<button class="subitem ${G.cur===s.id?"on":""}" data-s="${s.id}">
       <b>${esc(s.student)}</b> ${s.late?`<span class="tag bad">muộn</span>`:""}<br>
@@ -320,7 +353,7 @@ function renderSubs(){
 }
 function answerText(q,a){
   if(a==null||a==="") return "(bỏ trống)";
-  if(q.type==="mcq"||q.type==="fill") return q.options[a]??"(bỏ trống)";
+  if(q.type==="mcq"||q.type==="fill"||q.type==="listen") return q.options[a]??"(bỏ trống)";
   if(Array.isArray(a)) return a.join("");
   return a;
 }
@@ -335,9 +368,23 @@ function renderDetail(id){
       ${s.ai?.nhan_xet_chung?`<p>🤖 <b>AI nhận xét:</b> ${esc(s.ai.nhan_xet_chung)}</p>`:""}</div>`+
    ex.questions.map((q,i)=>{
      const it=s.grading.items[q.id]||{};
+     if(q.type==="tone"||q.type==="match"){
+       const arr=Array.isArray(s.answers[q.id])?s.answers[q.id]:[];
+       const rows=q.type==="tone"?(q.items||[]).map((x,k)=>`<span class="tag ${it.detail&&it.detail[k]?"ok":"bad"}" style="margin:2px">${esc(x.zh)} ${esc(x.py)}: ${arr[k]==null?"—":TL[arr[k]]}${it.detail&&!it.detail[k]?` (đúng: ${TL[x.tone]})`:""}</span>`).join("")
+         :(q.pairs||[]).map((x,k)=>`<div class="${it.detail&&it.detail[k]?"":"muted"}">${it.detail&&it.detail[k]?"✅":"❌"} <span class="zh">${esc(x.left)}</span> → ${esc(arr[k]||"(trống)")}${it.detail&&!it.detail[k]?` · đúng: ${esc(x.right)}`:""}</div>`).join("");
+       return`<div class="card"><div class="row"><span class="qnum">${i+1}</span><span class="grow zh">${esc(q.prompt)}</span><span class="tag ${it.ok?"ok":"bad"}">${it.score}/${q.points}</span></div><div style="margin-top:6px">${rows}</div></div>`;
+     }
+     if(q.type==="speak"){
+       const a=s.answers[q.id]; const tv=s.teacherScores?.[q.id]; const tc=s.teacherComments?.[q.id];
+       return`<div class="card qed" data-t="essay"><div class="row"><span class="qnum">${i+1}</span><span class="grow">${esc(q.prompt)} 🎤</span></div>
+         <div class="zh" style="font-size:24px;margin:6px 0">${esc(q.text)}</div>${q.pinyin?`<div class="small muted">${esc(q.pinyin)}</div>`:""}${q.rubric?`<div class="small">Tiêu chí: ${esc(q.rubric)}</div>`:""}
+         ${a&&a.audio?`<div style="margin:8px 0"><audio controls preload="none" src="/api/audio?key=${encodeURIComponent(a.audio)}"></audio> <span class="small muted">${a.sec}s</span></div>`:`<p class="muted">(Học sinh chưa ghi âm)</p>`}
+         <div class="row"><label>Điểm GV <input class="i" type="number" step="0.5" min="0" max="${q.points}" style="width:90px" data-ts="${q.id}" value="${tv??""}"></label>
+         <input class="i grow" data-tc="${q.id}" placeholder="Nhận xét phát âm (VD: thanh 3 chưa xuống đủ thấp)" value="${esc(tc||"")}" style="flex:1"></div></div>`;
+     }
      if(q.type!=="essay"){
        return`<div class="card"><div class="row"><span class="qnum">${i+1}</span><span class="grow zh">${esc(q.prompt)}</span><span class="tag ${it.ok?"ok":"bad"}">${it.ok?"Đúng":"Sai"} · ${it.score}/${q.points}</span></div>
-         <div class="zh" style="margin-top:6px">HS: ${esc(answerText(q,s.answers[q.id]))}${!it.ok?` · <span class="muted">Đáp án: ${esc(q.type==="order"?q.chunks.join(""):q.type==="short"?q.answers[0]:q.options[q.correct])}</span>`:""}</div></div>`;
+         <div class="zh" style="margin-top:6px">HS: ${esc(answerText(q,s.answers[q.id]))}${!it.ok?` · <span class="muted">Đáp án: ${esc(q.type==="order"?q.chunks.join(""):q.type==="short"?q.answers[0]:q.options[q.correct])}${q.type==="listen"&&q.audioText?` · nội dung nghe: ${esc(q.audioText)}`:""}</span>`:""}</div></div>`;
      }
      const ai=s.ai?.items?.[q.id]; const tv=s.teacherScores?.[q.id]; const tc=s.teacherComments?.[q.id];
      return`<div class="card qed" data-t="essay"><div class="row"><span class="qnum">${i+1}</span><span class="grow zh">${esc(q.prompt)}</span>${ai?.can_gv_xem?`<span class="tag warn">AI đề nghị GV xem kỹ</span>`:""}</div>
@@ -353,6 +400,7 @@ function renderDetail(id){
     document.querySelectorAll("[data-ts]").forEach(el=>{if(el.value!==""){const v=+el.value,q=ex.questions.find(x=>x.id===el.dataset.ts);if(v<0||v>q.points)bad=`Điểm phải từ 0 đến ${q.points}`;ts[el.dataset.ts]=v}});
     if(bad) return toast(bad);
     if(ex.questions.some(q=>q.type==="essay"&&ts[q.id]==null&&s.ai?.items?.[q.id]?.score==null)) return toast("Còn câu tự luận chưa có điểm");
+    if(ex.questions.some(q=>q.type==="speak"&&ts[q.id]==null)) return toast("Còn câu ghi âm chưa chấm điểm");
     document.querySelectorAll("[data-tc]").forEach(el=>{if(el.value.trim())tc[el.dataset.tc]=el.value.trim()});
     try{await api("/api/t/review",{body:{examId:ex.id,subId:s.id,teacherScores:ts,teacherComments:tc,teacherNote:$("dNote").value.trim()||s.ai?.nhan_xet_chung||""}});toast("Đã trả điểm cho "+s.student);loadSubs()}catch(e){toast(e.message)}
   };

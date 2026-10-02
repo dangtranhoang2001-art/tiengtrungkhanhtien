@@ -6,7 +6,7 @@
 <title>Khánh Tiên – Học sinh</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233B82F6'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>K</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans:wght@500;700&family=Noto+Sans+SC:wght@500;700&family=Noto+Serif+SC:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20261002b">
+<link rel="stylesheet" href="/style.css?v=20261002d">
 </head>
 <body>
 <header class="topbar"><div class="top">
@@ -114,7 +114,7 @@ async function loadList(){
       <div style="margin-top:6px">${st}</div></div>${act}</div></div>`;
   }).join("");
   $("lItems").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>startExam(b.dataset.go));
-  $("lItems").querySelectorAll("[data-res]").forEach(b=>b.onclick=()=>openResult(b.dataset.res));
+  $("lItems").querySelectorAll("[data-res]").forEach(b=>b.onclick=()=>{unlockSound();openResult(b.dataset.res)});
   show("vList");
 }
 
@@ -139,17 +139,29 @@ function renderExam(){
   $("eQs").innerHTML=X.exam.questions.map((q,i)=>{
     const a=X.answers[q.id];
     let body="";
-    if(q.type==="mcq"||q.type==="fill")
-      body=`<div class="opts">${q.options.map((o,k)=>`<button class="opt zh ${a===k?"sel":""}" data-q="${q.id}" data-k="${k}">${String.fromCharCode(65+k)}. ${esc(o)}</button>`).join("")}</div>`;
+    if(q.type==="listen") body=`<div class="row" style="margin-bottom:10px"><button class="btn sm" data-play="${q.id}">🔊 Nghe</button><span class="small muted">Có thể bấm nghe lại</span></div>`;
+    if(q.type==="mcq"||q.type==="fill"||q.type==="listen")
+      body+=`<div class="opts">${q.options.map((o,k)=>`<button class="opt zh ${a===k?"sel":""}" data-q="${q.id}" data-k="${k}">${String.fromCharCode(65+k)}. ${esc(o)}</button>`).join("")}</div>`;
     if(q.type==="order"){
       const picked=Array.isArray(a)?a:[];
       body=`<div class="line" data-line="${q.id}">${picked.map((c,k)=>`<button class="chip" data-rm="${q.id}" data-k="${k}">${esc(c)}</button>`).join("")||`<span class="muted small">Chạm vào các thẻ bên dưới để xếp câu</span>`}</div>
         <div class="pool">${poolFor(q,picked).map(c=>`<button class="chip ${c.used?"used":""}" data-add="${q.id}" data-c="${esc(c.t)}" data-idx="${c.i}">${esc(c.t)}</button>`).join("")}</div>`;
     }
-    if(q.type==="short") body=`<input class="i zh" data-txt="${q.id}" value="${esc(a||"")}" placeholder="Nhập câu trả lời" style="font-size:22px">`;
+    if(q.type==="short") body=`<input class="i zh" data-txt="${q.id}" id="in_${q.id}" value="${esc(a||"")}" placeholder="Nhập câu trả lời" style="font-size:22px" autocomplete="off">`+(q.pinyinPad?pinyinPad(q.id):"");
+    if(q.type==="tone"){ const arr=Array.isArray(a)?a:[];
+      body=`<div class="tones">${q.items.map((it,k)=>`<div class="toneitem"><div class="zh tz">${esc(it.zh)}</div><div class="py tp">${esc(it.py)}</div>
+        <div class="tbtns">${[1,2,3,4,0].map(v=>`<button class="tb ${arr[k]===v?"sel":""}" data-tq="${q.id}" data-ti="${k}" data-tv="${v}" aria-label="${TL[v]}">${TMARK[v]}</button>`).join("")}</div></div>`).join("")}</div>`; }
+    if(q.type==="match"){ const arr=Array.isArray(a)?a:[];
+      body=`<div class="match">${q.left.map((l,k)=>`<div class="mrow"><span class="zh ml">${esc(l)}</span><span aria-hidden="true">→</span>
+        <select class="i" data-mq="${q.id}" data-mi="${k}"><option value="">— chọn —</option>${q.right.map(r=>`<option ${arr[k]===r?"selected":""}>${esc(r)}</option>`).join("")}</select></div>`).join("")}</div>`; }
+    if(q.type==="speak"){ const rec=REC.qid===q.id;
+      body=`<div class="speakbox"><div class="zh speaktext">${esc(q.text)}</div>${q.py?`<div class="py">${esc(q.py)}</div>`:""}
+        <div class="row" style="justify-content:center;margin-top:12px"><button class="btn sm" data-model="${q.id}">🔊 Nghe mẫu</button>
+        <button class="btn sm ${rec?"dark":"red"} ${rec?"recording":""}" data-rec="${q.id}">${rec?`⏹ Dừng (${REC.left}s)`:(a&&a.audio?"🎤 Ghi lại":"🎤 Bắt đầu ghi âm")}</button></div>
+        ${a&&a.audio?`<div class="row" style="justify-content:center;margin-top:10px"><audio controls preload="none" src="/api/audio?key=${encodeURIComponent(a.audio)}"></audio><span class="tag ok">Đã lưu · ${a.sec}s</span></div>`:`<p class="small muted" style="text-align:center;margin:8px 0 0">Ghi tối đa ${q.maxSec} giây. Đọc to, rõ ràng, để điện thoại gần miệng.</p>`}</div>`; }
     if(q.type==="essay") body=`<textarea class="i zh" data-txt="${q.id}" placeholder="Viết bài làm ở đây (dùng bộ gõ tiếng Trung)" style="font-size:20px;min-height:140px">${esc(a||"")}</textarea>`;
     return `<div class="card" id="q_${q.id}"><div class="row" style="align-items:flex-start"><span class="qnum">${i+1}</span>
-      <div class="grow"><div class="prompt zh">${esc(q.prompt)}</div><div class="small muted">${q.points} điểm${q.type==="essay"?" · tự luận":""}</div></div></div>
+      <div class="grow"><div class="prompt zh">${esc(q.prompt)}</div><div class="small muted">${q.points} điểm${q.type==="essay"?" · tự luận":q.type==="speak"?" · ghi âm":""}</div></div></div>
       <div style="margin-top:10px">${body}</div></div>`;
   }).join("");
   wire();
@@ -162,6 +174,56 @@ function wire(){
   $("eQs").querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{const id=b.dataset.add;(X.answers[id]=Array.isArray(X.answers[id])?X.answers[id]:[]).push(b.dataset.c);changed();renderExamKeep(id)});
   $("eQs").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{X.answers[b.dataset.rm].splice(+b.dataset.k,1);changed();renderExamKeep(b.dataset.rm)});
   $("eQs").querySelectorAll("[data-txt]").forEach(t=>t.oninput=()=>{X.answers[t.dataset.txt]=t.value;changed()});
+  $("eQs").querySelectorAll("[data-tq]").forEach(b=>b.onclick=()=>{const q=X.exam.questions.find(x=>x.id===b.dataset.tq);
+    let arr=Array.isArray(X.answers[q.id])?X.answers[q.id]:Array(q.items.length).fill(null); arr[+b.dataset.ti]=+b.dataset.tv; X.answers[q.id]=arr; changed(); renderExamKeep(q.id)});
+  $("eQs").querySelectorAll("[data-mq]").forEach(sl=>sl.onchange=()=>{const q=X.exam.questions.find(x=>x.id===sl.dataset.mq);
+    let arr=Array.isArray(X.answers[q.id])?X.answers[q.id]:Array(q.left.length).fill(null); arr[+sl.dataset.mi]=sl.value||null; X.answers[q.id]=arr; changed()});
+  $("eQs").querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>{const q=X.exam.questions.find(x=>x.id===b.dataset.play); playSrc(q.audioKey,q.audioText)});
+  $("eQs").querySelectorAll("[data-model]").forEach(b=>b.onclick=()=>{const q=X.exam.questions.find(x=>x.id===b.dataset.model); playSrc(q.modelKey,q.text)});
+  $("eQs").querySelectorAll("[data-rec]").forEach(b=>b.onclick=()=>toggleRec(X.exam.questions.find(x=>x.id===b.dataset.rec)));
+  $("eQs").querySelectorAll("[data-ins]").forEach(b=>b.onclick=()=>{const inp=$("in_"+b.dataset.ins);const st=inp.selectionStart??inp.value.length,en=inp.selectionEnd??st;
+    inp.value=inp.value.slice(0,st)+b.dataset.ch+inp.value.slice(en);inp.focus();inp.setSelectionRange(st+1,st+1);X.answers[b.dataset.ins]=inp.value;changed()});
+}
+/* ---------- Âm thanh: nghe, giọng mẫu, ghi âm ---------- */
+const TMARK={1:"ˉ",2:"ˊ",3:"ˇ",4:"ˋ",0:"nhẹ"}, TL={1:"Thanh 1",2:"Thanh 2",3:"Thanh 3",4:"Thanh 4",0:"Thanh nhẹ"};
+const PY_CH="āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü";
+function pinyinPad(id){return `<div class="pypad" aria-label="Bàn phím phiên âm">${[...PY_CH].map(c=>`<button type="button" class="pk" data-ins="${id}" data-ch="${c}">${c}</button>`).join("")}</div>`}
+let zhVoice=null; function pickVoice(){if(!("speechSynthesis" in window))return;const v=speechSynthesis.getVoices();zhVoice=v.find(x=>/zh[-_]CN/i.test(x.lang))||v.find(x=>/^zh/i.test(x.lang))||null}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+let player=null;
+function playSrc(key,text){
+  if(player){player.pause();player=null}
+  if(key){player=new Audio("/api/media?key="+encodeURIComponent(key));player.play().catch(()=>toast("Không phát được âm thanh."));return}
+  if(!text) return;
+  if(!zhVoice){toast("Máy này chưa có giọng đọc tiếng Trung. Em thử trên điện thoại/máy khác nhé.");return}
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.voice=zhVoice;u.lang=zhVoice.lang;u.rate=.8;speechSynthesis.speak(u);
+}
+let REC={qid:null};
+async function toggleRec(q){
+  if(REC.qid===q.id){REC.mr.stop();return}
+  if(REC.qid) return toast("Em đang ghi âm câu khác, bấm Dừng trước nhé.");
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder) return toast("Trình duyệt không hỗ trợ ghi âm. Hãy dùng Chrome hoặc Safari bản mới.");
+  let stream; try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){return toast("Em cần bấm Cho phép (Allow) dùng micro để ghi âm.")}
+  const mime=["audio/webm;codecs=opus","audio/mp4","audio/ogg;codecs=opus","audio/webm"].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||"";
+  const mr=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
+  REC={qid:q.id,mr,chunks:[],t0:Date.now(),left:q.maxSec,timer:null};
+  mr.ondataavailable=e=>{if(e.data&&e.data.size)REC.chunks.push(e.data)};
+  mr.onstop=async()=>{clearInterval(REC.timer);stream.getTracks().forEach(t=>t.stop());
+    const sec=Math.max(1,Math.round((Date.now()-REC.t0)/1000));const blob=new Blob(REC.chunks,{type:(mr.mimeType||mime||"audio/webm").split(";")[0]});
+    const qid=REC.qid;REC={qid:null};renderExamKeep(qid);
+    if(blob.size<500) return toast("Bản ghi quá ngắn, em ghi lại nhé.");
+    await uploadRec(qid,blob,sec)};
+  mr.start(250);
+  REC.timer=setInterval(()=>{REC.left=q.maxSec-Math.floor((Date.now()-REC.t0)/1000);
+    if(REC.left<=0){mr.state!=="inactive"&&mr.stop()} else {const b=document.querySelector(`[data-rec="${q.id}"]`);if(b)b.textContent=`⏹ Dừng (${REC.left}s)`}},300);
+  renderExamKeep(q.id);
+}
+async function uploadRec(qid,blob,sec){
+  toast("Đang lưu bản ghi…");
+  try{const r=await fetch(`/api/audio?examId=${encodeURIComponent(X.examId)}&subId=${encodeURIComponent(X.subId)}&qid=${encodeURIComponent(qid)}`,{method:"POST",headers:{"content-type":blob.type||"audio/webm"},body:blob});
+    const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.error||"lỗi mạng");
+    X.answers[qid]={audio:d.key,sec}; changed(); renderExamKeep(qid); toast("Đã lưu bản ghi ✔");}
+  catch(e){toast("Chưa lưu được bản ghi ("+e.message+"). Em bấm Ghi lại nhé.")}
 }
 function renderExamKeep(qid){const y=scrollY;renderExam();scrollTo(0,y);const f=document.querySelector(`#q_${qid} button`);if(f)f.focus({preventScroll:true})}
 function changed(){
@@ -180,9 +242,14 @@ function tick(){
   if(left===60) toast("Còn 1 phút!");
   if(left<=0&&!X.done){ toast("Hết giờ! Bài được nộp tự động."); submit(true); }
 }
-function unanswered(){return X.exam.questions.filter(q=>{const a=X.answers[q.id];return a==null||a===""||(Array.isArray(a)&&a.length<(q.chunks||[]).length)}).length}
+function unanswered(){return X.exam.questions.filter(q=>{const a=X.answers[q.id];
+  if(q.type==="speak") return !(a&&a.audio);
+  if(q.type==="tone") return !Array.isArray(a)||a.length<q.items.length||a.some(v=>v==null);
+  if(q.type==="match") return !Array.isArray(a)||a.length<q.left.length||a.some(v=>!v);
+  return a==null||a===""||(Array.isArray(a)&&a.length<(q.chunks||[]).length)}).length}
 async function submit(auto){
   if(X.done) return;
+  if(REC.qid){ if(!auto) return toast("Em bấm Dừng ghi âm trước khi nộp bài nhé."); try{REC.mr.stop()}catch(e){} }
   if(!auto){const u=unanswered(); if(!confirm(u?`Em còn ${u} câu chưa làm xong. Vẫn nộp bài?`:"Em chắc chắn nộp bài?")) return;}
   X.done=true; stopTimer(); $("eSubmit").disabled=$("eSubmit2").disabled=true;
   for(let t=0;t<3;t++){
@@ -196,7 +263,7 @@ async function submit(auto){
   X.done=false; $("eSubmit").disabled=$("eSubmit2").disabled=false;
   toast("Chưa nộp được — kiểm tra mạng rồi bấm Nộp bài lại. Bài làm vẫn được giữ.");
 }
-$("eSubmit").onclick=()=>submit(false); $("eSubmit2").onclick=()=>submit(false);
+$("eSubmit").onclick=()=>{unlockSound();submit(false)}; $("eSubmit2").onclick=()=>{unlockSound();submit(false)};
 
 /* ---------- Kết quả ---------- */
 async function openResult(examId){
@@ -209,7 +276,7 @@ function renderResult(r,title,examId){
   const pct=r.max&&!pending?Math.round(r.score/r.max*100):null;
   $("vRes").innerHTML=`<div class="card" style="text-align:center">
     <h1>${esc(title||"Kết quả")}</h1>
-    ${pending?`<p style="font-size:22px">Phần trắc nghiệm: <b>${r.autoScore}</b> điểm</p><p class="tag warn">Phần tự luận đang được chấm. Em quay lại xem sau nhé.</p>`
+    ${pending?`<p style="font-size:22px">Phần máy chấm: <b>${r.autoScore}</b> điểm</p><p class="tag warn">Phần ghi âm / tự luận đang chờ thầy cô chấm. Em quay lại xem sau nhé.</p>`
       :`<div class="praise">${pct>=90?"太棒了！Xuất sắc!":pct>=70?"很好！Làm tốt lắm!":pct>=50?"加油！Cố lên nhé!":"别放弃！Đừng bỏ cuộc!"}</div><div style="font-size:56px;font-weight:800;line-height:1">${r.score}/${r.max}</div><div style="font-size:36px">${pct>=90?"★★★":pct>=70?"★★☆":pct>=50?"★☆☆":"☆☆☆"}</div>`}
     ${r.late?`<p class="tag bad">Nộp muộn</p>`:""}
     ${r.comment?`<div class="card" style="text-align:left;margin-top:12px"><b>Nhận xét:</b> ${esc(r.comment)}</div>`:""}
@@ -220,11 +287,25 @@ function renderResult(r,title,examId){
   $("rBack").onclick=()=>loadList().catch(e=>toast(e.message));
   if($("rReload")) $("rReload").onclick=()=>openResult(examId);
   show("vRes");
-  if(pct!=null&&pct>=80) confetti();
+  if(pct!=null) celebrate(pct, r.score, r.max);
 }
 function resRow(d,i){
   let body="", mark="";
-  if(d.type==="essay"){
+  if(d.type==="speak"){
+    const au=d.answer&&d.answer.audio;
+    body=`<div class="zh" style="font-size:22px">${esc(d.text)}</div>`+(au?`<audio controls preload="none" src="/api/audio?key=${encodeURIComponent(au)}" style="margin-top:8px"></audio>`:`<p class="muted">(Em chưa ghi âm)</p>`);
+    if(d.pending) mark=`<span class="tag warn">Chờ thầy/cô nghe</span>`;
+    else { mark=`<span class="tag">${d.score??"?"}/${d.points} điểm</span>`; if(d.nhan_xet) body+=`<p>💬 ${esc(d.nhan_xet)}</p>`; }
+  } else if(d.type==="tone"){
+    mark=`<span class="tag ${d.ok?"ok":"bad"}">${d.score}/${d.points}</span>`;
+    const arr=Array.isArray(d.answer)?d.answer:[];
+    body=`<div class="tones">${(d.items||[]).map((it,k)=>`<div class="toneitem ${d.itemOk[k]?"good":"wrong"}"><div class="zh tz">${esc(it.zh)}</div><div class="py tp">${esc(it.py)}</div>
+      <div class="small">Em chọn: <b>${arr[k]==null?"—":TL[arr[k]]}</b>${!d.itemOk[k]&&d.correctTones?`<br>Đúng: <b>${TL[d.correctTones[k]]}</b>`:""}</div></div>`).join("")}</div>`;
+  } else if(d.type==="match"){
+    mark=`<span class="tag ${d.ok?"ok":"bad"}">${d.score}/${d.points}</span>`;
+    const arr=Array.isArray(d.answer)?d.answer:[];
+    body=(d.left||[]).map((l,k)=>`<div class="mrow"><span class="zh ml">${esc(l)}</span> → <span class="${d.itemOk[k]?"okt":"badt"}">${esc(arr[k]||"(bỏ trống)")}</span>${!d.itemOk[k]&&d.correctRight?` <span class="muted">· đúng: ${esc(d.correctRight[k])}</span>`:""}</div>`).join("");
+  } else if(d.type==="essay"){
     body=`<div class="zh" style="white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:10px">${esc(d.answer||"(bỏ trống)")}</div>`;
     if(d.pending) mark=`<span class="tag warn">Đang chấm</span>`;
     else{ mark=`<span class="tag">${d.score??"?"}/${d.points} điểm</span>`;
@@ -233,13 +314,14 @@ function resRow(d,i){
   } else {
     mark=d.ok?`<span class="tag ok">Đúng · ${d.score}/${d.points}</span>`:`<span class="tag bad">Sai · 0/${d.points}</span>`;
     let mine=d.answer;
-    if((d.type==="mcq"||d.type==="fill")&&d.options) mine=d.answer==null?"(bỏ trống)":d.options[d.answer];
+    if((d.type==="mcq"||d.type==="fill"||d.type==="listen")&&d.options) mine=d.answer==null?"(bỏ trống)":d.options[d.answer];
     if(Array.isArray(mine)) mine=mine.join("");
     body=`<div>Em trả lời: <span class="zh">${esc(mine||"(bỏ trống)")}</span></div>`;
     if(!d.ok){
       if(d.correct!=null&&d.options) body+=`<div>Đáp án: <b class="zh">${esc(d.options[d.correct])}</b></div>`;
       if(d.correctText) body+=`<div>Đáp án: <b class="zh">${esc(d.correctText)}</b></div>`;
     }
+    if(d.script) body+=`<div class="small">🎧 Nội dung bài nghe: <span class="zh">${esc(d.script)}</span></div>`;
     if(d.explain) body+=`<div class="small">💡 ${esc(d.explain)}</div>`;
   }
   return `<div class="card"><div class="row"><span class="qnum">${i+1}</span><div class="grow prompt zh">${esc(d.prompt)}</div>${mark}</div><div style="margin-top:8px">${body}</div></div>`;
@@ -263,13 +345,85 @@ function drawSlogan(){
 drawSlogan(); setInterval(()=>{sIdx++;drawSlogan()},7000);
 
 /* ---------- Pháo giấy khi điểm cao ---------- */
-function confetti(){
+function confetti(n=80){
   if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const colors=["#FF6B6B","#FFD43B","#20C997","#3B82F6","#8B5CF6","#FF922B"];
   const box=document.createElement("div");box.className="confetti";box.setAttribute("aria-hidden","true");
-  for(let i=0;i<80;i++){const c=document.createElement("i");c.style.left=Math.random()*100+"vw";c.style.background=colors[i%colors.length];
+  for(let i=0;i<n;i++){const c=document.createElement("i");c.style.left=Math.random()*100+"vw";c.style.background=colors[i%colors.length];
     c.style.animationDelay=(Math.random()*0.6)+"s";c.style.animationDuration=(2.2+Math.random()*1.6)+"s";c.style.transform=`rotate(${Math.random()*360}deg)`;box.appendChild(c)}
   document.body.appendChild(box); setTimeout(()=>box.remove(),4500);
+}
+
+
+/* ---------- Ăn mừng điểm cao ---------- */
+let AC=null;
+function unlockSound(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume()}catch(e){}}
+function tone(f,t,d,type="triangle",v=.18){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(0,AC.currentTime+t);g.gain.linearRampToValueAtTime(v,AC.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+t+d);
+  o.connect(g);g.connect(AC.destination);o.start(AC.currentTime+t);o.stop(AC.currentTime+t+d+.05)}
+function jingle(level){ if(!AC||muted()) return;
+  if(level>=3){[523,659,784,1047,784,1047].forEach((f,i)=>tone(f,i*.12,.25));tone(1319,.8,.6,"sine",.15);[1568,2093].forEach((f,i)=>tone(f,1.0+i*.08,.3,"sine",.08))}
+  else if(level===2){[523,659,784,1047].forEach((f,i)=>tone(f,i*.13,.28))}
+  else if(level===1){[440,554,659].forEach((f,i)=>tone(f,i*.15,.3))}
+  else {[392,494].forEach((f,i)=>tone(f,i*.2,.35,"sine",.12))}}
+const muted=()=>{try{return localStorage.getItem("kt_mute")==="1"}catch(e){return false}};
+const PANDA=(mood)=>`<svg class="panda ${mood}" viewBox="0 0 200 210" aria-hidden="true">
+  <g class="arm-l"><ellipse cx="42" cy="150" rx="18" ry="30" fill="#1F2A44"/></g>
+  <g class="arm-r"><ellipse cx="158" cy="150" rx="18" ry="30" fill="#1F2A44"/></g>
+  <ellipse cx="100" cy="165" rx="52" ry="42" fill="#fff" stroke="#1F2A44" stroke-width="4"/>
+  <ellipse cx="100" cy="172" rx="26" ry="22" fill="#FFE3EC"/>
+  <circle cx="52" cy="40" r="22" fill="#1F2A44"/><circle cx="148" cy="40" r="22" fill="#1F2A44"/>
+  <circle cx="100" cy="82" r="62" fill="#fff" stroke="#1F2A44" stroke-width="4"/>
+  <ellipse cx="74" cy="80" rx="16" ry="21" transform="rotate(-25 74 80)" fill="#1F2A44"/>
+  <ellipse cx="126" cy="80" rx="16" ry="21" transform="rotate(25 126 80)" fill="#1F2A44"/>
+  ${mood==="sad"?`<path d="M66 82 q8 -6 16 0" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M118 82 q8 -6 16 0" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>`
+   :`<circle cx="77" cy="80" r="7" fill="#fff"/><circle cx="123" cy="80" r="7" fill="#fff"/><circle cx="79" cy="78" r="3" fill="#1F2A44"/><circle cx="125" cy="78" r="3" fill="#1F2A44"/>`}
+  <ellipse cx="100" cy="100" rx="8" ry="6" fill="#1F2A44"/>
+  ${mood==="sad"?`<path d="M88 118 q12 -8 24 0" stroke="#1F2A44" stroke-width="4" fill="none" stroke-linecap="round"/>`
+   :`<path d="M84 110 q16 18 32 0" stroke="#1F2A44" stroke-width="4" fill="#FF6B6B" stroke-linecap="round"/>`}
+  <circle cx="58" cy="104" r="9" fill="#FF8FAB" opacity=".7"/><circle cx="142" cy="104" r="9" fill="#FF8FAB" opacity=".7"/>
+  ${mood==="super"?`<path d="M70 22 l10 -18 l10 14 l10 -18 l10 18 l10 -14 l10 18 z" fill="#FFD43B" stroke="#F59F00" stroke-width="3"/>`:""}
+</svg>`;
+const TIERS=[
+  {min:100,lv:3,zh:"满分！",py:"Mǎnfēn!",vi:"Tuyệt đối! Em là siêu sao lớp mình!",mood:"super",fx:["confetti","fireworks","rain"],emoji:["🏆","🌟","🐼","🎉","💯"]},
+  {min:90,lv:3,zh:"太棒了！",py:"Tài bàng le!",vi:"Xuất sắc! Cả lớp phải học hỏi em đấy!",mood:"super",fx:["confetti","fireworks","rain"],emoji:["🌟","🎉","🏅","✨"]},
+  {min:80,lv:2,zh:"真棒！",py:"Zhēn bàng!",vi:"Giỏi quá! Chỉ còn một chút nữa là tuyệt đối!",mood:"happy",fx:["confetti","rain"],emoji:["⭐","🎈","👏"]},
+  {min:70,lv:2,zh:"很好！",py:"Hěn hǎo!",vi:"Làm tốt lắm! Cố thêm chút nữa nhé!",mood:"happy",fx:["confetti"],emoji:["👍","⭐"]},
+  {min:50,lv:1,zh:"不错！",py:"Bú cuò!",vi:"Khá lắm! Xem lại câu sai để lần sau cao hơn nhé!",mood:"happy",fx:["balloons"],emoji:["🎈"]},
+  {min:0,lv:0,zh:"加油！",py:"Jiāyóu!",vi:"Đừng nản nhé! Ôn lại rồi làm lần sau sẽ tốt hơn!",mood:"sad",fx:["hearts"],emoji:["💪"]},
+];
+function celebrate(pct,score,max){
+  const T=TIERS.find(t=>pct>=t.min); const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const stars=pct>=90?3:pct>=70?2:pct>=50?1:0;
+  const ov=document.createElement("div"); ov.className="celebrate lv"+T.lv; ov.setAttribute("role","dialog"); ov.setAttribute("aria-label","Kết quả: "+score+" trên "+max+" điểm");
+  ov.innerHTML=`<div class="cel-card">
+    ${T.fx.includes("fireworks")&&!reduce?`<div class="fw f1"></div><div class="fw f2"></div><div class="fw f3"></div>`:""}
+    <div class="cel-panda">${PANDA(T.mood)}</div>
+    <div class="cel-zh">${T.zh}</div><div class="cel-py">${T.py}</div>
+    <div class="cel-stars">${[0,1,2].map(i=>`<span class="cs ${i<stars?"on":""}" style="animation-delay:${.5+i*.35}s">★</span>`).join("")}</div>
+    <div class="cel-score">${score}<small>/${max}</small></div>
+    <div class="cel-vi">${T.vi}</div>
+    ${pct===100?`<div class="stamp">100</div>`:""}
+    <div class="row" style="justify-content:center;margin-top:12px"><button class="btn" id="celOk">Xem bài làm</button>
+    <button class="btn ghost sm" id="celMute" aria-pressed="${muted()}">${muted()?"🔇 Bật tiếng":"🔊 Tắt tiếng"}</button></div></div>`;
+  document.body.appendChild(ov);
+  const close=()=>{ov.classList.add("out");setTimeout(()=>ov.remove(),300)};
+  $("celOk").onclick=close; ov.addEventListener("click",e=>{if(e.target===ov)close()});
+  document.addEventListener("keydown",function k(e){if(e.key==="Escape"){close();document.removeEventListener("keydown",k)}});
+  $("celMute").onclick=()=>{try{localStorage.setItem("kt_mute",muted()?"0":"1")}catch(e){} $("celMute").textContent=muted()?"🔇 Bật tiếng":"🔊 Tắt tiếng"};
+  $("celOk").focus();
+  jingle(T.lv);
+  if(reduce) return;
+  if(T.fx.includes("confetti")) confetti(T.lv>=3?160:80);
+  if(T.fx.includes("rain")) rain(T.emoji, T.lv>=3?26:14);
+  if(T.fx.includes("balloons")) rain(["🎈","🎈","🎈","🎉"],12,true);
+  if(T.fx.includes("hearts")) rain(["💖","💪","🌈"],8,true);
+}
+function rain(list,n,up){
+  const box=document.createElement("div");box.className="emoji-rain"+(up?" up":"");box.setAttribute("aria-hidden","true");
+  for(let i=0;i<n;i++){const e=document.createElement("span");e.textContent=list[i%list.length];e.style.left=(Math.random()*94)+"vw";
+    e.style.fontSize=(26+Math.random()*30)+"px";e.style.animationDelay=(Math.random()*1.4)+"s";e.style.animationDuration=(2.6+Math.random()*2)+"s";box.appendChild(e)}
+  document.body.appendChild(box);setTimeout(()=>box.remove(),6000);
 }
 
 /* ---------- Khởi động ---------- */

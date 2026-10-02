@@ -174,3 +174,76 @@ main.wrap{flex:1;width:100%}
 .examcard.st-done{border-left-color:var(--jade)!important} .examcard.st-done .ico{background:var(--ok-bg)!important;color:var(--jade)!important}
 .code{color:var(--violet)!important}
 .toast{background:var(--violet)}
+
+/* ===== Dạng bài mới ===== */
+.tones{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.toneitem{background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.toneitem.good{border-color:var(--jade);background:var(--ok-bg)} .toneitem.wrong{border-color:var(--coral);background:var(--bad-bg)}
+.tz{font-size:34px;line-height:1.2} .tp{font-size:18px;color:var(--muted)}
+.tbtns{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.tb{min-width:38px;height:38px;border-radius:10px;border:2px solid var(--line);background:#fff;font-size:20px;font-weight:800;padding:0 6px}
+.tb.sel{background:var(--violet);border-color:var(--violet);color:#fff}
+.match{display:flex;flex-direction:column;gap:8px}
+.mrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mrow select{flex:1;min-width:160px}
+.ml{font-size:24px;min-width:90px}
+.okt{color:var(--jade);font-weight:700} .badt{color:var(--coral);font-weight:700}
+.speakbox{background:linear-gradient(135deg,#FFF9DB,#E8F1FF);border:2px dashed var(--sky);border-radius:16px;padding:18px;text-align:center}
+.speaktext{font-size:32px;letter-spacing:2px;line-height:1.5}
+.speakbox .py{font-size:18px;color:var(--muted)}
+.recording{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,107,107,.35)}}
+audio{max-width:100%}
+.pypad{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.pk{min-width:34px;height:34px;border-radius:8px;border:2px solid var(--line);background:#fff;font-family:var(--py);font-size:17px}
+.pk:hover{border-color:var(--sky)}
+
+/* ===== Ăn mừng kết quả ===== */
+.celebrate{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:16px;background:rgba(31,42,68,.55);backdrop-filter:blur(3px);animation:fadeIn .25s ease}
+.celebrate.out{animation:fadeOut .3s ease forwards}
+@keyframes fadeIn{from{opacity:0}} @keyframes fadeOut{to{opacity:0}}
+.cel-card{position:relative;background:#fff;border-radius:28px;padding:22px 26px 24px;max-width:400px;width:100%;text-align:center;overflow:visible;
+  box-shadow:0 30px 60px rgba(0,0,0,.25);border:5px solid var(--sun);animation:popIn .55s cubic-bezier(.2,1.6,.4,1) both}
+.lv3 .cel-card{border:6px solid transparent;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(90deg,var(--coral),var(--orange),var(--sun),var(--mint),var(--sky),var(--violet)) border-box}
+.lv0 .cel-card{border-color:var(--sky)}
+@keyframes popIn{from{transform:scale(.4) rotate(-6deg);opacity:0}}
+.cel-panda{width:150px;margin:-70px auto 0}
+.panda{width:100%;overflow:visible;filter:drop-shadow(0 6px 8px rgba(0,0,0,.15))}
+.panda.super{animation:jump .7s ease-in-out infinite}
+.panda.happy{animation:wiggle 1.2s ease-in-out infinite}
+.panda.sad{animation:breathe 2.4s ease-in-out infinite}
+.panda .arm-l,.panda .arm-r{transform-box:fill-box}
+.panda.super .arm-l{transform-origin:70% 20%;animation:waveL .35s ease-in-out infinite alternate}
+.panda.super .arm-r{transform-origin:30% 20%;animation:waveR .35s ease-in-out infinite alternate}
+.panda.happy .arm-r{transform-origin:30% 20%;animation:waveR .5s ease-in-out infinite alternate}
+@keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes wiggle{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes breathe{50%{transform:scale(1.04)}}
+@keyframes waveL{to{transform:rotate(-60deg)}} @keyframes waveR{to{transform:rotate(60deg)}}
+.cel-zh{font-family:'Noto Serif SC',var(--zh);font-size:44px;font-weight:700;line-height:1.1;margin-top:4px;
+  background:linear-gradient(90deg,var(--coral),var(--orange),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lv0 .cel-zh{background:linear-gradient(90deg,var(--sky),var(--mint));-webkit-background-clip:text;background-clip:text}
+.cel-py{font-family:var(--py);color:var(--muted);font-size:17px}
+.cel-stars{font-size:46px;letter-spacing:6px;margin:4px 0;line-height:1}
+.cs{color:#E2E8F0;display:inline-block}
+.cs.on{color:var(--sun);text-shadow:0 0 12px rgba(255,212,59,.8);animation:starPop .5s cubic-bezier(.2,1.8,.4,1) both}
+@keyframes starPop{0%{transform:scale(0) rotate(-90deg)}80%{transform:scale(1.35)}100%{transform:scale(1)}}
+.cel-score{font-family:var(--head,inherit);font-size:52px;font-weight:800;line-height:1;color:var(--ink)}
+.cel-score small{font-size:24px;color:var(--muted)}
+.cel-vi{font-weight:700;margin-top:6px}
+.stamp{position:absolute;right:-12px;top:30px;width:84px;height:84px;border-radius:50%;border:5px solid var(--coral);color:var(--coral);
+  display:grid;place-items:center;font-weight:900;font-size:28px;transform:rotate(18deg);background:rgba(255,255,255,.9);animation:stamp .5s 1.4s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes stamp{from{transform:scale(3) rotate(0);opacity:0}}
+.fw{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none}
+.fw::before{content:"";position:absolute;inset:-60px;border-radius:50%;
+  background:radial-gradient(circle,transparent 30%,currentColor 31%,transparent 34%) ,radial-gradient(circle,currentColor 0 6%,transparent 7%);
+  opacity:0;animation:burst 1.4s ease-out infinite}
+.fw.f1{left:-20px;top:10px;color:var(--coral)} .fw.f2{right:-24px;top:-10px;color:var(--sky)} .fw.f2::before{animation-delay:.45s}
+.fw.f3{left:50%;bottom:-30px;color:var(--mint)} .fw.f3::before{animation-delay:.9s}
+@keyframes burst{0%{transform:scale(.2);opacity:1}100%{transform:scale(1.4);opacity:0}}
+.emoji-rain{position:fixed;inset:0;pointer-events:none;z-index:45;overflow:hidden}
+.emoji-rain span{position:absolute;top:-60px;animation:drop linear forwards}
+.emoji-rain.up span{top:auto;bottom:-70px;animation-name:rise}
+@keyframes drop{to{transform:translateY(110vh) rotate(360deg)}}
+@keyframes rise{0%{transform:translateY(0)}50%{transform:translateY(-55vh) translateX(20px)}100%{transform:translateY(-115vh) translateX(-10px)}}
+@media (prefers-reduced-motion:reduce){.cel-card,.panda,.cs.on,.stamp,.panda *{animation:none!important}}
