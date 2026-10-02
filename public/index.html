@@ -4,33 +4,46 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Khánh Tiên – Học sinh</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23D72134'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>K</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans:wght@500;700&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233B82F6'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>K</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans:wght@500;700&family=Noto+Sans+SC:wght@500;700&family=Noto+Serif+SC:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=20261002b">
 </head>
 <body>
 <header class="topbar"><div class="top">
-  <div class="brand"><img src="/logo.png" alt="Khánh Tiên Chinese Education Center"><span class="sep" aria-hidden="true"></span><span>Luyện tập online<small id="tName">Trung tâm Tiếng Trung Khánh Tiên</small></span></div>
+  <div class="brand"><a href="/"><img src="/logo.png" alt="Khánh Tiên Chinese Education Center"></a><span class="sep" aria-hidden="true"></span><span>Luyện tập online<small id="tName">Trung tâm Tiếng Trung Khánh Tiên</small></span></div>
   <button class="btn ghost sm hide" id="outBtn">Đổi lớp</button>
 </div></header>
 
+<div class="deco" aria-hidden="true"><span>学</span><span>中</span><span>文</span><span>汉</span><span>字</span><span>你</span><span>好</span><span>书</span></div>
 <main class="wrap">
   <!-- Vào lớp -->
-  <section id="vJoin" class="card" style="max-width:460px;margin:24px auto">
-    <h1>Vào lớp làm bài</h1>
-    <label class="f" for="jCode">Mã lớp</label>
-    <input class="i" id="jCode" maxlength="6" autocomplete="off" placeholder="VD: K7M2QP" style="text-transform:uppercase;letter-spacing:3px;font-weight:800">
-    <label class="f" for="jName">Họ và tên</label>
-    <input class="i" id="jName" maxlength="60" autocomplete="name" placeholder="VD: Nguyễn Minh Anh">
-    <p class="small muted">Nhập đúng họ tên giống nhau ở mọi lần để thầy/cô theo dõi tiến độ của em.</p>
-    <div id="jErr" class="err hide"></div>
-    <button class="btn" id="jBtn" style="width:100%">Vào lớp</button>
+  <section id="vJoin" class="joinwrap">
+    <div class="hero">
+      <div class="hero-in">
+        <span class="kick">KHÁNH TIÊN CHINESE EDUCATION CENTER</span>
+        <h1 class="h-big">Vững nền tảng,<br>vươn xa cùng tiếng Trung</h1>
+        <p class="h-sub">Học chăm hôm nay, tự tin nói ngày mai!</p>
+        <div class="slogan" id="slogan1" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="card joincard">
+      <h2 class="jt">Vào lớp làm bài</h2>
+      <label class="f" for="jCode">Mã lớp</label>
+      <input class="i" id="jCode" maxlength="6" autocomplete="off" placeholder="VD: K7M2QP" style="text-transform:uppercase;letter-spacing:4px;font-weight:800;font-size:22px">
+      <label class="f" for="jName">Họ và tên</label>
+      <input class="i" id="jName" maxlength="60" autocomplete="name" placeholder="VD: Nguyễn Minh Anh">
+      <p class="small muted">Nhập đúng họ tên giống nhau ở mọi lần để thầy/cô theo dõi tiến độ của em.</p>
+      <div id="jErr" class="err hide"></div>
+      <button class="btn big" id="jBtn" style="width:100%">Vào lớp 🚀</button>
+    </div>
   </section>
 
   <!-- Danh sách bài -->
   <section id="vList" class="hide">
-    <h1 id="lTitle"></h1>
-    <p class="muted" id="lWho"></p>
+    <div class="banner">
+      <div><h1 id="lTitle"></h1><p id="lWho"></p></div>
+      <div class="slogan sm" id="slogan2" aria-live="polite"></div>
+    </div>
     <div id="lItems"></div>
   </section>
 
@@ -96,7 +109,7 @@ async function loadList(){
       act=`<button class="btn" data-go="${e.id}">${e.my?"Làm tiếp":"Bắt đầu làm"}</button>`;
     } else if(e.state==="upcoming"){ st=`<span class="tag">Mở lúc ${fmt(e.openAt)}</span>`; }
     else { st=`<span class="tag bad">Đã hết hạn</span>`; if(e.my) act=`<button class="btn" data-go="${e.id}">Nộp bài</button>`; }
-    return `<div class="card"><div class="row"><div class="grow"><h3>${esc(e.title)}</h3>
+    return `<div class="card examcard st-${e.my&&e.my.status!=="doing"?"done":e.state}"><div class="row"><div class="ico" aria-hidden="true">${e.my&&e.my.status!=="doing"?"✓":e.state==="open"?"✎":e.state==="upcoming"?"⏳":"🔒"}</div><div class="grow"><h3>${esc(e.title)}</h3>
       <div class="small muted">${e.count} câu · ${e.durationMin} phút${e.dueAt?` · Hạn nộp ${fmt(e.dueAt)}`:""}</div>
       <div style="margin-top:6px">${st}</div></div>${act}</div></div>`;
   }).join("");
@@ -197,7 +210,7 @@ function renderResult(r,title,examId){
   $("vRes").innerHTML=`<div class="card" style="text-align:center">
     <h1>${esc(title||"Kết quả")}</h1>
     ${pending?`<p style="font-size:22px">Phần trắc nghiệm: <b>${r.autoScore}</b> điểm</p><p class="tag warn">Phần tự luận đang được chấm. Em quay lại xem sau nhé.</p>`
-      :`<div style="font-size:56px;font-weight:800;line-height:1">${r.score}/${r.max}</div><div style="font-size:36px">${pct>=90?"★★★":pct>=70?"★★☆":pct>=50?"★☆☆":"☆☆☆"}</div>`}
+      :`<div class="praise">${pct>=90?"太棒了！Xuất sắc!":pct>=70?"很好！Làm tốt lắm!":pct>=50?"加油！Cố lên nhé!":"别放弃！Đừng bỏ cuộc!"}</div><div style="font-size:56px;font-weight:800;line-height:1">${r.score}/${r.max}</div><div style="font-size:36px">${pct>=90?"★★★":pct>=70?"★★☆":pct>=50?"★☆☆":"☆☆☆"}</div>`}
     ${r.late?`<p class="tag bad">Nộp muộn</p>`:""}
     ${r.comment?`<div class="card" style="text-align:left;margin-top:12px"><b>Nhận xét:</b> ${esc(r.comment)}</div>`:""}
     <div class="row" style="justify-content:center;margin-top:10px">
@@ -207,6 +220,7 @@ function renderResult(r,title,examId){
   $("rBack").onclick=()=>loadList().catch(e=>toast(e.message));
   if($("rReload")) $("rReload").onclick=()=>openResult(examId);
   show("vRes");
+  if(pct!=null&&pct>=80) confetti();
 }
 function resRow(d,i){
   let body="", mark="";
@@ -231,8 +245,37 @@ function resRow(d,i){
   return `<div class="card"><div class="row"><span class="qnum">${i+1}</span><div class="grow prompt zh">${esc(d.prompt)}</div>${mark}</div><div style="margin-top:8px">${body}</div></div>`;
 }
 
+/* ---------- Khẩu hiệu ---------- */
+const SLOGANS=[
+  {zh:"每天进步一点点",py:"Měitiān jìnbù yìdiǎndiǎn",vi:"Mỗi ngày tiến bộ một chút"},
+  {zh:"学而时习之",py:"Xué ér shí xí zhī",vi:"Học rồi thường xuyên ôn luyện (Luận Ngữ)"},
+  {zh:"熟能生巧",py:"Shú néng shēng qiǎo",vi:"Luyện nhiều ắt thành thạo"},
+  {zh:"千里之行，始于足下",py:"Qiān lǐ zhī xíng, shǐ yú zú xià",vi:"Đường ngàn dặm bắt đầu từ một bước chân"},
+  {zh:"书山有路勤为径",py:"Shū shān yǒu lù qín wéi jìng",vi:"Núi sách có đường, chăm chỉ là lối đi"},
+  {zh:"一分耕耘，一分收获",py:"Yì fēn gēngyún, yì fēn shōuhuò",vi:"Gieo bao nhiêu công, gặt bấy nhiêu quả"},
+];
+let sIdx=Math.floor(Math.random()*SLOGANS.length);
+function drawSlogan(){
+  const x=SLOGANS[sIdx%SLOGANS.length];
+  ["slogan1","slogan2"].forEach(id=>{const el=$(id);if(!el)return;el.classList.remove("in");void el.offsetWidth;
+    el.innerHTML=`<div class="s-zh">${x.zh}</div><div class="s-py">${x.py}</div><div class="s-vi">${x.vi}</div>`;el.classList.add("in")});
+}
+drawSlogan(); setInterval(()=>{sIdx++;drawSlogan()},7000);
+
+/* ---------- Pháo giấy khi điểm cao ---------- */
+function confetti(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const colors=["#FF6B6B","#FFD43B","#20C997","#3B82F6","#8B5CF6","#FF922B"];
+  const box=document.createElement("div");box.className="confetti";box.setAttribute("aria-hidden","true");
+  for(let i=0;i<80;i++){const c=document.createElement("i");c.style.left=Math.random()*100+"vw";c.style.background=colors[i%colors.length];
+    c.style.animationDelay=(Math.random()*0.6)+"s";c.style.animationDuration=(2.2+Math.random()*1.6)+"s";c.style.transform=`rotate(${Math.random()*360}deg)`;box.appendChild(c)}
+  document.body.appendChild(box); setTimeout(()=>box.remove(),4500);
+}
+
 /* ---------- Khởi động ---------- */
-if(ME.code&&ME.name&&!q0) loadList().catch(()=>show("vJoin")); else show("vJoin");
+const t0=new URLSearchParams(location.search).get("ten");
+if(q0&&t0){ ME={code:q0.toUpperCase(),name:t0.trim()}; LS.set("kt_me",ME); history.replaceState(null,"","/"); loadList().catch(e=>{$("jErr").textContent=e.message;$("jErr").classList.remove("hide");show("vJoin")}); }
+else if(ME.code&&ME.name&&!q0) loadList().catch(()=>show("vJoin")); else show("vJoin");
 addEventListener("beforeunload",e=>{if(X&&!X.done){e.preventDefault();e.returnValue=""}});
 </script>
 </body>
