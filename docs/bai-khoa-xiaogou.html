@@ -53,6 +53,16 @@ textarea:focus{outline:none;border-color:var(--head)}
 .result{text-align:center;display:none}
 .result .score{font-size:3rem;font-weight:800;color:var(--head)}
 .result .sub{color:var(--muted)}
+.review{text-align:left;margin-top:16px}
+.review h3{font-size:1.05rem;color:var(--head);margin:14px 0 6px}
+.review table{width:100%;border-collapse:collapse;font-size:.95rem}
+.review th,.review td{border-bottom:1px solid #e6e3dc;padding:7px 6px;vertical-align:top}
+.review th{background:#f1efe9;text-align:left;font-weight:600}
+.review td.c{text-align:center;width:44px;font-size:1.1rem}
+.review .mine{color:var(--muted)}
+.review .zh{font-size:1.05rem}
+.locked textarea{background:#f6f6f4;color:#555}
+@media(max-width:600px){.review th:nth-child(2),.review td:nth-child(2){display:none}}
 footer{text-align:center;color:var(--muted);font-size:.9rem;margin:24px 0 10px}
 </style>
 </head>
@@ -103,6 +113,7 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;margin:24px 0 10px}
   <div class="sub" id="scoreSub"></div>
   <div style="font-size:1.1rem;margin-top:4px" id="scoreMsg"></div>
   <div class="sub" id="sendStatus" style="margin-top:6px"></div>
+  <div class="review" id="review"></div>
   <div class="toolbar" style="justify-content:center">
     <button id="copyBtn">📋 Sao chép kết quả</button>
     <button class="alt" id="retryBtn">🔄 Làm lại</button>
@@ -227,13 +238,14 @@ function checkZh(text,keys){
   keys.forEach(function(g){ if(g.some(function(k){ return text.indexOf(k)>-1; })) hit++; });
   return hit/keys.length;
 }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
 function hasHanzi(s){ return /[一-鿿]/.test(s); }
 
 var lastReport = "";
 document.getElementById("submitBtn").onclick = function(){
   var nm = document.getElementById("stName");
   if(!nm.value.trim()){ alert("Bạn hãy ghi họ tên trước khi nộp bài nhé."); nm.focus(); return; }
-  var tPts = 0, qPts = 0, rowsT = [], rowsQ = [];
+  var tPts = 0, qPts = 0, rowsT = [], rowsQ = [], revT = [], revQ = [];
 
   DATA.forEach(function(d,i){
     var ans = document.getElementById("t"+i).value.trim(), f = document.getElementById("f"+i), pt = 0, tag;
@@ -250,6 +262,7 @@ document.getElementById("submitBtn").onclick = function(){
       }
     }
     tPts += pt;
+    revT.push([d.hz, ans, d.vi, pt]);
     rowsT.push((i+1)+". "+d.hz+"\n   Bạn dịch: "+(ans||"(bỏ trống)")+"  → "+tag);
   });
 
@@ -270,6 +283,7 @@ document.getElementById("submitBtn").onclick = function(){
       }
     }
     qPts += pt;
+    revQ.push([d.q, ans, d.a, pt]);
     rowsQ.push((i+1)+". "+d.q+"\n   Bạn trả lời: "+(ans||"(bỏ trống)")+"  → "+tag);
   });
 
@@ -281,11 +295,25 @@ document.getElementById("submitBtn").onclick = function(){
   document.getElementById("scoreText").textContent = score + " / 10";
   document.getElementById("scoreSub").textContent = "Dịch: "+r1(s2)+"/"+TRANS_PTS+" · Trả lời câu hỏi: "+r1(s3)+"/"+QUES_PTS;
   document.getElementById("scoreMsg").textContent = msg;
+  function mark(p){ return p>=1 ? "✅" : p>0 ? "🟡" : "❌"; }
+  function tbl(rows, h){
+    return '<table><tr><th>#</th><th>Câu</th><th>Bài làm của bạn</th><th>Đáp án</th><th></th></tr>'+
+      rows.map(function(r,i){ return '<tr><td>'+(i+1)+'</td><td class="zh">'+esc(r[0])+'</td><td class="mine">'+(r[1]?esc(r[1]):'<i>(bỏ trống)</i>')+
+      '</td><td'+(h?' class="zh"':'')+'>'+esc(r[2])+'</td><td class="c">'+mark(r[3])+'</td></tr>'; }).join("")+'</table>';
+  }
+  document.getElementById("review").innerHTML =
+    '<h3>✍️ Phần 2 – Dịch ('+r1(s2)+'/'+TRANS_PTS+')</h3>'+tbl(revT,false)+
+    '<h3>❓ Phần 3 – Trả lời câu hỏi ('+r1(s3)+'/'+QUES_PTS+')</h3>'+tbl(revQ,true)+
+    '<p class="sub" style="margin-top:8px">✅ đúng · 🟡 gần đúng (½ điểm) · ❌ chưa đúng</p>';
+  document.querySelectorAll("textarea,#stName").forEach(function(t){ t.readOnly = true; });
+  document.body.classList.add("locked");
+  document.getElementById("submitBtn").disabled = true;
+  document.getElementById("submitBtn").textContent = "✅ Đã nộp bài";
   var res = document.getElementById("result"); res.style.display="block"; res.scrollIntoView({behavior:"smooth"});
 
   var name = document.getElementById("stName").value.trim() || "(chưa ghi tên)";
   lastReport = "BÀI KHÓA 小狗和胖姐\nHọc sinh: "+name+"\nĐiểm: "+score+"/10 (Dịch "+r1(s2)+"/"+TRANS_PTS+", Câu hỏi "+r1(s3)+"/"+QUES_PTS+")\n\n"+
-               "PHẦN 2 – DỊCH\n"+rowsT.join("\n")+"\n\nPHẦN 3 – TRẢ LỜI CÂU HỎI\n"+rowsQ.join("\n");
+               "A. DỊCH (13 câu)\n"+rowsT.join("\n")+"\n\nB. TRẢ LỜI CÂU HỎI (5 câu)\n"+rowsQ.join("\n");
 
   // Gửi kết quả (SEND_URL trống = chỉ dùng nút Sao chép)
   var st = document.getElementById("sendStatus");
@@ -293,14 +321,13 @@ document.getElementById("submitBtn").onclick = function(){
   st.textContent = "⏳ Đang gửi bài cho giáo viên…";
   submitCount++;
   var body = new URLSearchParams({
-    "form-name":"bai-khoa-xiaogou", "hoc_sinh":name, "diem":String(score),
+    "bai":"对话 · 小狗和胖姐", "hoc_sinh":name, "diem":String(score),
     "diem_dich":r1(s2)+"/"+TRANS_PTS, "diem_cau_hoi":r1(s3)+"/"+QUES_PTS,
     "lan_nop":String(submitCount), "chi_tiet":lastReport
-  }).toString();
-  fetch(SEND_URL, {method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body:body})
-    .then(function(r){ st.textContent = r.ok ? "✅ Đã gửi bài cho giáo viên." :
-      "⚠️ Chưa gửi được. Bạn bấm “Sao chép kết quả” và gửi cho giáo viên nhé."; })
-    .catch(function(){ st.textContent = "⚠️ Chưa gửi được. Bạn bấm “Sao chép kết quả” và gửi cho giáo viên nhé."; });
+  });
+  fetch(SEND_URL, {method:"POST", mode:"no-cors", body:new URLSearchParams(body)})
+    .then(function(){ st.textContent = "✅ Đã gửi bài cho giáo viên."; })
+    .catch(function(){ st.textContent = "⚠️ Chưa gửi được (lỗi mạng). Bạn bấm “Sao chép kết quả” và gửi cho giáo viên nhé."; });
 };
 var submitCount = 0;
 var SEND_URL = "";
@@ -312,6 +339,10 @@ document.getElementById("copyBtn").onclick = function(){
 };
 
 document.getElementById("retryBtn").onclick = function(){
+  document.querySelectorAll("textarea,#stName").forEach(function(t){ t.readOnly = false; });
+  document.body.classList.remove("locked");
+  var sb = document.getElementById("submitBtn"); sb.disabled = false; sb.textContent = "✅ Nộp bài & chấm điểm";
+  document.getElementById("review").innerHTML = "";
   DATA.forEach(function(d,i){ document.getElementById("t"+i).value=""; document.getElementById("f"+i).className="fb"; });
   QUES.forEach(function(d,i){ document.getElementById("q"+i).value=""; document.getElementById("g"+i).className="fb"; });
   document.getElementById("result").style.display="none";
