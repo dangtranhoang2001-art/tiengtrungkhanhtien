@@ -216,7 +216,7 @@ function hasHanzi(s){ return /[一-鿿]/.test(s); }
 function keyRatio(t,keys){ var h=0; keys.forEach(function(g){ if(g.some(function(k){return t.indexOf(k)>-1;})) h++; }); return h/keys.length; }
 
 var lastReport = "", submitCount = 0;
-var SEND_URL = "https://script.google.com/macros/s/AKfycbzyMZB7DQcy5SyzhCTirO-AK1sAJmpFWGKHrYB868SWAEnCEHUuNUaPBKZMI8xfaEzz/exec";
+var SEND_URL = "https://script.google.com/macros/s/AKfycbwHkJwYKxc4DJjKV8BSjtqiJ4NjznEUC7CxN75oB-7bXjQC5c6JtRek2XKI8H5QsdTN/exec";
 
 document.getElementById("submitBtn").onclick = function(){
   var nm = document.getElementById("stName");
