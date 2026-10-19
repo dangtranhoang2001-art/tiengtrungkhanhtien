@@ -293,6 +293,7 @@ document.getElementById("submitBtn").onclick = function(){
   var body = new URLSearchParams({
     "bai":"第五课 · 这是王老师 (Ôn tập)", "hoc_sinh":name, "diem":String(score),
     "diem_dich":"B1 "+r1(s1)+"/"+PTS[0]+" · B2 "+r1(s2)+"/"+PTS[1]+" · B3 "+r1(s3)+"/"+PTS[2], "diem_cau_hoi":"",
+    "b1":r1(s1)+"/"+PTS[0], "b2":r1(s2)+"/"+PTS[1], "b3":r1(s3)+"/"+PTS[2],
     "lan_nop":String(submitCount), "chi_tiet":lastReport
   });
   fetch(SEND_URL,{method:"POST",mode:"no-cors",body:body})
