@@ -96,25 +96,26 @@ select:disabled{opacity:1;background:#f6f6f4}
 
 <div class="box p1">
   <h2>📖 Bài 1. Đọc đoạn văn, trả lời câu hỏi <span style="font-size:.9rem;color:var(--muted)">(4 điểm)</span></h2>
-  <p class="note">Đọc kỹ đoạn văn, rồi chọn câu trả lời đúng cho mỗi câu hỏi.</p>
+  <p class="note">Đọc kỹ đoạn văn. Chú ý: có câu hỏi về <b>玛丽</b>, có câu hỏi về <b>麦克</b>, có câu hỏi so sánh cả hai.</p>
   <div class="passage">
-    <p>我叫大卫，是留学生。我住学校的宿舍。我的宿舍不太安静，所以晚上我常去图书馆学习。我在那儿复习课文，预习生词，有时候也上网查资料。我很少在图书馆看电影。</p>
-    <p>星期六和星期日，我有时候跟朋友一起去公园玩儿，有时候去超市买东西。星期日晚上我总在宿舍休息，或者上网跟妈妈聊天儿。</p>
-    <div class="gloss">所以 suǒyǐ: cho nên · 大卫 Dàwèi: David</div>
+    <p>玛丽和麦克都是留学生。玛丽常去图书馆，她常在那儿借书，也常在那儿看书。麦克也常去图书馆，他有时候借书，有时候上网查资料，但很少在那儿看书。他的宿舍很安静，所以他总在宿舍看书。</p>
+    <p>晚上，玛丽常复习课文，预习生词，或者做练习，很少看电视。麦克有时候上网跟朋友聊天儿，有时候看中文电影和电视剧的DVD。</p>
+    <p>星期六，他们常一起去超市买东西。星期日上午玛丽在宿舍休息，下午跟朋友去公园玩儿。麦克星期日总在宿舍看书。</p>
+    <div class="gloss">所以 suǒyǐ: cho nên · 但 dàn: nhưng</div>
   </div>
   <div id="mcq"></div>
 </div>
 
 <div class="box p2">
   <h2>✏️ Bài 2. Chọn từ điền vào chỗ trống <span style="font-size:.9rem;color:var(--muted)">(3 điểm)</span></h2>
-  <p class="note">Bấm vào ô trống để chọn từ. Có 1 từ không dùng đến.</p>
-  <div class="bank">常 · 很少 · 有时候 · 跟 · 一起 · 还是 · 或者 · 咱们 · 吧</div>
+  <p class="note">Mỗi ô trống chọn 1 từ. Có từ dùng nhiều lần, có từ không dùng đến. Mỗi ô trống tính riêng.</p>
+  <div class="bank">常 · 很少 · 总 · 有时候 · 跟 · 一起 · 还是 · 或者 · 咱们 · 我们 · 吧 · 吗</div>
   <div id="fill"></div>
 </div>
 
 <div class="box p3">
   <h2>🛠️ Bài 3. Sửa câu sai <span style="font-size:.9rem;color:var(--muted)">(3 điểm)</span></h2>
-  <p class="note">Mỗi câu có 1 lỗi. Gõ lại cả câu đúng bằng chữ Hán. Dấu câu không ảnh hưởng điểm.</p>
+  <p class="note"><b>Có câu đúng, có câu sai.</b> Câu đúng: gõ <b>对</b>. Câu sai (mỗi câu chỉ 1 lỗi): gõ lại cả câu đã sửa bằng chữ Hán. Dấu câu không ảnh hưởng điểm.</p>
   <div id="fix"></div>
 </div>
 
@@ -140,38 +141,41 @@ select:disabled{opacity:1;background:#f6f6f4}
 <script>
 // ===== BÀI 1: ĐỌC HIỂU =====
 var MCQ = [
- {q:"大卫住在哪儿？", o:["学校的宿舍","朋友家","图书馆","超市"], a:0, why:"我住学校的宿舍。"},
- {q:"大卫的宿舍怎么样？", o:["很安静","不太安静","很大","很小"], a:1, why:"我的宿舍不太安静。"},
- {q:"晚上大卫常去哪儿学习？", o:["宿舍","公园","图书馆","超市"], a:2, why:"所以晚上我常去图书馆学习。"},
- {q:"大卫有时候在图书馆做什么？", o:["看电影","上网查资料","休息","聊天儿"], a:1, why:"有时候也上网查资料。"},
- {q:"大卫很少在图书馆做什么？", o:["复习课文","预习生词","查资料","看电影"], a:3, why:"我很少在图书馆看电影。很少 = không thường."},
- {q:"星期六和星期日，大卫有时候跟谁一起去公园？", o:["妈妈","老师","朋友","玛丽"], a:2, why:"我有时候跟朋友一起去公园玩儿。"},
- {q:"星期日晚上大卫总在哪儿？", o:["宿舍","图书馆","公园","超市"], a:0, why:"星期日晚上我总在宿舍休息。"},
- {q:"星期日晚上大卫上网做什么？", o:["查资料","收发伊妹儿","跟妈妈聊天儿","看电视剧"], a:2, why:"……或者上网跟妈妈聊天儿。"}
+ {q:"谁常在图书馆看书？", o:["玛丽","麦克","玛丽和麦克","他们都不在那儿看书"], a:0, why:"玛丽……也常在那儿看书；麦克……但很少在那儿看书。"},
+ {q:"Vì sao 麦克 luôn đọc sách ở ký túc xá?", o:["图书馆不安静","他的宿舍很安静","他很少去图书馆","他常上网"], a:1, why:"他的宿舍很安静，所以他总在宿舍看书。(麦克 vẫn 常去图书馆, nên C sai.)"},
+ {q:"在图书馆，玛丽和麦克都做什么？", o:["借书","看书","上网查资料","看DVD"], a:0, why:"玛丽常借书；麦克有时候借书 → cả hai đều mượn sách. 看书: 麦克很少; 查资料: chỉ 麦克."},
+ {q:"晚上玛丽很少做什么？", o:["复习课文","预习生词","做练习","看电视"], a:3, why:"……或者做练习，很少看电视。"},
+ {q:"下面哪句话是对的？", o:["麦克常在图书馆看书。","玛丽晚上常看电视。","麦克晚上有时候看中文电影。","玛丽和麦克晚上都做练习。"], a:2, why:"麦克……有时候看中文电影和电视剧的DVD。"},
+ {q:"星期六玛丽和麦克常做什么？", o:["一起去超市买东西","一起去公园玩儿","在宿舍休息","去图书馆借书"], a:0, why:"星期六，他们常一起去超市买东西。"},
+ {q:"星期日下午玛丽在哪儿？", o:["宿舍","公园","超市","图书馆"], a:1, why:"星期日上午在宿舍休息，下午跟朋友去公园玩儿. Chú ý 上午 ≠ 下午."},
+ {q:"下面哪句话关于麦克是不对的？", o:["他常去图书馆。","他有时候在图书馆上网查资料。","他的宿舍不太安静。","星期日他总在宿舍看书。"], a:2, why:"Bài viết: 他的宿舍很安静 → C sai."}
 ];
 
 // ===== BÀI 2: ĐIỀN TỪ =====
-var BANK = ["常","很少","有时候","跟","一起","还是","或者","咱们","吧"];
+// t: chữ và ô trống (số = vị trí ô); a: đáp án chấp nhận cho từng ô
+var BANK = ["常","很少","总","有时候","跟","一起","还是","或者","咱们","我们","吧","吗"];
 var FILL = [
- {pre:"我很忙，", post:"看电视。", a:"很少", show:"我很忙，很少看电视。", why:"Bận nên ít xem → 很少."},
- {pre:"你喝茶", post:"喝咖啡？", a:"还是", show:"你喝茶还是喝咖啡？", why:"Câu hỏi lựa chọn dùng 还是."},
- {pre:"晚上我复习课文", post:"做练习。", a:"或者", show:"晚上我复习课文或者做练习。", why:"Câu trần thuật dùng 或者."},
- {pre:"我", post:"朋友一起去超市。", a:"跟", show:"我跟朋友一起去超市。", why:"跟 + người + 一起 + V."},
- {pre:"晚上我们", post:"去看电影，好吗？", a:"一起", show:"晚上我们一起去看电影，好吗？", why:"一起 đứng trước động từ: cùng nhau."},
- {pre:"A：咱们走", post:"。 B：好。", a:"吧", show:"A：咱们走吧。B：好。", why:"吧 cuối câu: rủ, đề nghị."},
- {pre:"我去，你也去，", post:"一起去吧。", a:"咱们", show:"我去，你也去，咱们一起去吧。", why:"咱们 gồm cả người nói và người nghe."},
- {pre:"我", post:"借书，有时候上网查资料。", a:"有时候", show:"我有时候借书，有时候上网查资料。", why:"有时候……，有时候……: có lúc…, có lúc…"}
+ {t:["A：你上午去",0,"下午去？ B：上午",1,"下午都行。"], a:[["还是"],["或者"]], show:"你上午去还是下午去？——上午或者下午都行。", why:"Câu hỏi lựa chọn → 还是; câu trần thuật → 或者."},
+ {t:["A：晚上咱们一起去看电影，好",0,"？ B：好",1,"。"], a:[["吗"],["吧"]], show:"……，好吗？——好吧。", why:"Hỏi ý kiến: ……，好吗？; đồng ý: 好吧."},
+ {t:["老师，",0,"是留学生，您是中国老师。"], a:[["我们"]], show:"老师，我们是留学生，您是中国老师。", why:"Không gồm người nghe (thầy) → 我们, không dùng 咱们."},
+ {t:["麦克常去图书馆，但",0,"在那儿看书，他总在宿舍看书。"], a:[["很少"]], show:"麦克常去图书馆，但很少在那儿看书。", why:"Vế sau 总在宿舍看书 → ở thư viện ít đọc: 很少."},
+ {t:["星期日我",0,"去公园，",1,"去超市。"], a:[["有时候"],["有时候"]], show:"星期日我有时候去公园，有时候去超市。", why:"有时候……，有时候……: có lúc…, có lúc…"},
+ {t:["我常",0,"同学",1,"复习课文。"], a:[["跟"],["一起"]], show:"我常跟同学一起复习课文。", why:"跟 + người + 一起 + V."},
+ {t:["星期一到星期日，他晚上都在宿舍看书。他晚上",0,"在宿舍看书。"], a:[["总"]], show:"他晚上总在宿舍看书。", why:"Ngày nào cũng vậy → 总 (luôn luôn)."},
+ {t:["A：你喝茶",0,"喝咖啡？ B：我",1,"喝咖啡，不喝茶。"], a:[["还是"],["常","总"]], show:"你喝茶还是喝咖啡？——我常/总喝咖啡，不喝茶。", why:"Câu hỏi lựa chọn → 还是. Ô 2: B chọn cà phê → 常 / 总 (很少 không hợp nghĩa)."}
 ];
 
 // ===== BÀI 3: SỬA CÂU SAI =====
-// a: các câu đúng chấp nhận (bỏ dấu câu); k: chỗ sửa chính → đúng chỗ sửa nhưng câu chưa khớp = ½ điểm
+// ok:true = câu đúng (gõ 对). a: câu sửa chấp nhận; k: chỗ sửa chính → ½ điểm
 var FIX = [
- {w:"我去图书馆晚上。", vi:"Buổi tối tôi đi thư viện.", a:["我晚上去图书馆","晚上我去图书馆"], k:["晚上去图书馆","晚上我去图书馆"], show:"我晚上去图书馆。/ 晚上我去图书馆。", why:"Từ chỉ thời gian đứng trước động từ hoặc trước chủ ngữ, không đứng cuối câu."},
- {w:"你喝茶或者喝咖啡？", vi:"Bạn uống trà hay uống cà phê?", a:["你喝茶还是喝咖啡"], k:["还是"], show:"你喝茶还是喝咖啡？", why:"Câu hỏi lựa chọn dùng 还是, không dùng 或者."},
- {w:"我很多看电视。", vi:"Tôi thường xem ti vi.", a:["我常看电视","我常常看电视"], k:["常看电视","常常看电视"], show:"我常看电视。", why:"很多 không làm trạng ngữ đứng trước động từ."},
- {w:"我一起跟朋友去公园。", vi:"Tôi cùng bạn đi công viên.", a:["我跟朋友一起去公园"], k:["跟朋友一起"], show:"我跟朋友一起去公园。", why:"Trật tự: 跟 + người + 一起 + động từ."},
- {w:"星期天我看书还是上网。", vi:"Chủ nhật tôi đọc sách hoặc lên mạng.", a:["星期天我看书或者上网"], k:["或者"], show:"星期天我看书或者上网。", why:"Câu trần thuật dùng 或者."},
- {w:"我常去不图书馆。", vi:"Tôi không thường đến thư viện.", a:["我不常去图书馆","我不常常去图书馆"], k:["不常去","不常常去"], show:"我不常去图书馆。", why:"Phủ định của 常 là 不常, đặt trước động từ."}
+ {w:"我常在宿舍看书晚上。", vi:"Buổi tối tôi thường đọc sách ở ký túc xá.", a:["我晚上常在宿舍看书","晚上我常在宿舍看书"], k:["晚上常在宿舍看书","晚上我常在宿舍看书"], show:"我晚上常在宿舍看书。", why:"Từ chỉ thời gian đứng trước động từ/trước chủ ngữ, không đứng cuối câu."},
+ {w:"星期六你去公园或者去超市？", vi:"Thứ bảy bạn đi công viên hay đi siêu thị?", a:["星期六你去公园还是去超市"], k:["还是"], show:"星期六你去公园还是去超市？", why:"Câu hỏi lựa chọn dùng 还是."},
+ {w:"麦克很少在图书馆看书。", vi:"Mike ít khi đọc sách ở thư viện.", ok:true, show:"对", why:"很少 làm trạng ngữ, đứng trước 在 + nơi chốn + V: câu đúng."},
+ {w:"你跟我一起去图书馆吗，好？", vi:"Bạn đi thư viện cùng mình, được không?", a:["你跟我一起去图书馆好吗"], k:["好吗"], show:"你跟我一起去图书馆，好吗？", why:"Cấu trúc đề nghị: câu trần thuật + ，好吗？"},
+ {w:"老师，咱们是留学生。", vi:"Thưa thầy, chúng em là lưu học sinh.", a:["老师我们是留学生"], k:["我们是"], show:"老师，我们是留学生。", why:"Thầy không phải lưu học sinh → không gồm người nghe → 我们."},
+ {w:"我一起常跟朋友去超市。", vi:"Tôi thường cùng bạn đi siêu thị.", a:["我常跟朋友一起去超市","我常常跟朋友一起去超市"], k:["跟朋友一起去超市"], show:"我常跟朋友一起去超市。", why:"常 + 跟 + người + 一起 + V."},
+ {w:"晚上我复习课文或者预习生词。", vi:"Buổi tối tôi ôn bài khóa hoặc chuẩn bị từ mới.", ok:true, show:"对", why:"Câu trần thuật dùng 或者; từ thời gian đứng trước chủ ngữ: câu đúng."},
+ {w:"我不常喝咖啡，我很多喝茶。", vi:"Tôi không hay uống cà phê, tôi thường uống trà.", a:["我不常喝咖啡我常喝茶","我不常喝咖啡我常常喝茶"], k:["常喝茶","常常喝茶"], show:"我不常喝咖啡，我常喝茶。", why:"很多 không làm trạng ngữ trước động từ → 常."}
 ];
 var PTS = [4,3,3];
 
@@ -191,17 +195,17 @@ MCQ.forEach(function(d,i){
 var fBox = document.getElementById("fill");
 FILL.forEach(function(d,i){
   var el = document.createElement("div"); el.className="item";
-  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+esc(d.pre)+
-    '<select id="s'+i+'"><option value="">　___　</option>'+BANK.map(function(w){return '<option>'+w+'</option>';}).join("")+'</select>'+
-    esc(d.post)+'</span><div class="fb" id="ff'+i+'"></div>';
+  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+d.t.map(function(x){
+      return typeof x==="number" ? '<select id="s'+i+'_'+x+'"><option value="">　___　</option>'+BANK.map(function(w){return '<option>'+w+'</option>';}).join("")+'</select>' : esc(x);
+    }).join("")+'</span><div class="fb" id="ff'+i+'"></div>';
   fBox.appendChild(el);
 });
 
 var xBox = document.getElementById("fix");
 FIX.forEach(function(d,i){
   var el = document.createElement("div"); el.className="item";
-  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">✗ '+esc(d.w)+'</span><div class="vi">('+esc(d.vi)+')</div>'+
-    '<textarea id="t'+i+'" placeholder="Gõ lại câu đúng bằng chữ Hán…"></textarea><div class="fb" id="tf'+i+'"></div>';
+  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+esc(d.w)+'</span><div class="vi">('+esc(d.vi)+')</div>'+
+    '<textarea id="t'+i+'" placeholder="Gõ 对 hoặc gõ lại câu đã sửa…"></textarea><div class="fb" id="tf'+i+'"></div>';
   xBox.appendChild(el);
 });
 
@@ -228,18 +232,24 @@ document.getElementById("submitBtn").onclick = function(){
     rep1.push((i+1)+". "+(v<0?"(bỏ trống)":"ABCD"[v]+". "+d.o[v])+" → "+tag);
   });
 
+  var nBlank=0;
   FILL.forEach(function(d,i){
-    var v = document.getElementById("s"+i).value, f=document.getElementById("ff"+i), pt=0, tag;
-    if(!v){ tag="Chưa làm"; f.className="fb empty"; f.innerHTML='⚪ <b>Bạn chưa chọn từ.</b><div class="ans">👉 Đáp án: '+esc(d.show)+'</div>'; }
-    else if(v===d.a){ pt=1; tag="Đúng"; f.className="fb ok"; f.innerHTML='🌟 <b>Đúng rồi!</b><div class="ans">'+esc(d.why)+'</div>'; }
-    else { tag="Sai"; f.className="fb no"; f.innerHTML='💪 <b>Chưa đúng.</b><div class="ans">✏️ Đáp án: '+esc(d.show)+' — '+esc(d.why)+'</div>'; }
-    p2+=pt; rev2.push([d.pre+"___"+d.post, v, d.a, pt]);
-    rep2.push((i+1)+". "+(v||"(bỏ trống)")+" → "+tag);
+    var f=document.getElementById("ff"+i), got=0, vs=[], empty=true;
+    d.a.forEach(function(acc,k){ var v=document.getElementById("s"+i+"_"+k).value; vs.push(v||"___"); if(v) empty=false; nBlank++; if(acc.indexOf(v)>-1) got++; });
+    var tag = got===d.a.length?"Đúng":empty?"Chưa làm":got>0?"Đúng "+got+"/"+d.a.length:"Sai";
+    if(empty){ f.className="fb empty"; f.innerHTML='⚪ <b>Bạn chưa chọn từ.</b><div class="ans">👉 Đáp án: '+esc(d.show)+' — '+esc(d.why)+'</div>'; }
+    else if(got===d.a.length){ f.className="fb ok"; f.innerHTML='🌟 <b>Đúng rồi!</b><div class="ans">'+esc(d.why)+'</div>'; }
+    else { f.className = got>0?"fb mid":"fb no"; f.innerHTML=(got>0?'🙂 <b>Đúng '+got+'/'+d.a.length+' ô.</b>':'💪 <b>Chưa đúng.</b>')+'<div class="ans">✏️ Đáp án: '+esc(d.show)+' — '+esc(d.why)+'</div>'; }
+    p2+=got; rev2.push([d.t.map(function(x){return typeof x==="number"?"___":x;}).join(""), empty?"":vs.join(" / "), d.a.map(function(x){return x.join("/");}).join(" / "), got/d.a.length]);
+    rep2.push((i+1)+". "+(empty?"(bỏ trống)":vs.join(" / "))+" → "+tag);
   });
 
   FIX.forEach(function(d,i){
     var raw = document.getElementById("t"+i).value.trim(), s = clean(raw), f=document.getElementById("tf"+i), pt=0, tag;
     if(!raw){ tag="Chưa làm"; f.className="fb empty"; f.innerHTML='⚪ <b>Bạn chưa sửa câu này.</b><div class="ans">👉 Đáp án: '+esc(d.show)+'</div>'; }
+    else if(d.ok){ if(s==="对"||s==="对的"||s===clean(d.w)){ pt=1; tag="Đúng"; f.className="fb ok"; f.innerHTML='🌟 <b>Đúng rồi! Câu này không có lỗi.</b><div class="ans">'+esc(d.why)+'</div>'; }
+      else { tag="Sai (câu này đúng)"; f.className="fb no"; f.innerHTML='💪 <b>Câu này vốn đúng, không cần sửa.</b><div class="ans">✏️ Đáp án: 对 — '+esc(d.why)+'</div>'; } }
+    else if(s==="对"||s===clean(d.w)){ tag="Cho là đúng"; f.className="fb no"; f.innerHTML='💪 <b>Câu này có lỗi.</b><div class="ans">✏️ Đáp án: '+esc(d.show)+' — '+esc(d.why)+'</div>'; }
     else if(!hasHanzi(raw)){ tag="Không dùng chữ Hán"; f.className="fb no"; f.innerHTML='✋ <b>Bạn cần gõ bằng chữ Hán nhé.</b><div class="ans">👉 Đáp án: '+esc(d.show)+'</div>'; }
     else if(d.a.indexOf(s)>-1){ pt=1; tag="Đúng"; f.className="fb ok"; f.innerHTML='🌟 <b>Đúng rồi!</b><div class="ans">'+esc(d.why)+'</div>'; }
     else if(d.k.some(function(k){return s.indexOf(k)>-1;})){ pt=0.5; tag="Gần đúng"; f.className="fb mid"; f.innerHTML='🙂 <b>Đã sửa đúng lỗi chính, nhưng câu còn chỗ chưa khớp.</b><div class="ans">✏️ Đáp án: '+esc(d.show)+' — '+esc(d.why)+'</div>'; }
@@ -249,7 +259,7 @@ document.getElementById("submitBtn").onclick = function(){
   });
 
   var r1 = function(x){ return Math.round(x*10)/10; };
-  var s1 = p1/MCQ.length*PTS[0], s2 = p2/FILL.length*PTS[1], s3 = p3/FIX.length*PTS[2];
+  var s1 = p1/MCQ.length*PTS[0], s2 = p2/nBlank*PTS[1], s3 = p3/FIX.length*PTS[2];
   var score = r1(s1+s2+s3);
   var msg = score>=9 ? "🎉 Xuất sắc!" : score>=7 ? "👍 Tốt lắm! Xem lại vài câu nhé." :
             score>=5 ? "🙂 Khá rồi! Đọc lại phần sửa và làm lại nhé." : "💪 Cố lên! Ôn lại bài 16 rồi thử lại nhé.";
