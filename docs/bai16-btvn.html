@@ -114,8 +114,8 @@ select:disabled{opacity:1;background:#f6f6f4}
 </div>
 
 <div class="box p3">
-  <h2>🛠️ Bài 3. Tìm và sửa lỗi sai <span style="font-size:.9rem;color:var(--muted)">(3 điểm)</span></h2>
-  <p class="note"><b>Có câu đúng, có câu sai.</b> Lỗi có thể là <b>ngữ pháp</b> hoặc <b>viết sai chữ Hán</b> (chính tả) — đọc kỹ từng chữ! Câu đúng: gõ <b>对</b>. Câu sai (mỗi câu chỉ 1 lỗi): gõ lại cả câu đã sửa bằng chữ Hán. Dấu câu không ảnh hưởng điểm.</p>
+  <h2>🛠️ Bài 3. Sửa câu sai <span style="font-size:.9rem;color:var(--muted)">(3 điểm)</span></h2>
+  <p class="note"><b>Có câu đúng, có câu sai.</b> Câu đúng: gõ <b>对</b>. Câu sai (mỗi câu chỉ 1 lỗi): gõ lại cả câu đã sửa bằng chữ Hán. Dấu câu không ảnh hưởng điểm.</p>
   <div id="fix"></div>
 </div>
 
@@ -169,17 +169,12 @@ var FILL = [
 // ok:true = câu đúng (gõ 对). a: câu sửa chấp nhận; k: chỗ sửa chính → ½ điểm
 var FIX = [
  {w:"我常在宿舍看书晚上。", vi:"Buổi tối tôi thường đọc sách ở ký túc xá.", a:["我晚上常在宿舍看书","晚上我常在宿舍看书"], k:["晚上常在宿舍看书","晚上我常在宿舍看书"], show:"我晚上常在宿舍看书。", why:"Từ chỉ thời gian đứng trước động từ/trước chủ ngữ, không đứng cuối câu."},
- {w:"我常去图书管借书。", vi:"Tôi thường đến thư viện mượn sách.", a:["我常去图书馆借书"], k:["图书馆"], show:"我常去图书馆借书。", why:"Chữ sai: 管 → 馆 (bộ 饣 – thư viện, nhà hàng… nơi phục vụ). 管 bộ ⺮ nghĩa là ống/quản lý."},
  {w:"星期六你去公园或者去超市？", vi:"Thứ bảy bạn đi công viên hay đi siêu thị?", a:["星期六你去公园还是去超市"], k:["还是"], show:"星期六你去公园还是去超市？", why:"Câu hỏi lựa chọn dùng 还是."},
  {w:"麦克很少在图书馆看书。", vi:"Mike ít khi đọc sách ở thư viện.", ok:true, show:"对", why:"很少 làm trạng ngữ, đứng trước 在 + nơi chốn + V: câu đúng."},
- {w:"星期日我在宿舍体息。", vi:"Chủ nhật tôi nghỉ ngơi ở ký túc xá.", a:["星期日我在宿舍休息"], k:["休息"], show:"星期日我在宿舍休息。", why:"Chữ sai: 体 → 休 (người 亻 tựa gốc cây 木 để nghỉ). 体 có thêm một nét ngang."},
  {w:"你跟我一起去图书馆吗，好？", vi:"Bạn đi thư viện cùng mình, được không?", a:["你跟我一起去图书馆好吗"], k:["好吗"], show:"你跟我一起去图书馆，好吗？", why:"Cấu trúc đề nghị: câu trần thuật + ，好吗？"},
  {w:"老师，咱们是留学生。", vi:"Thưa thầy, chúng em là lưu học sinh.", a:["老师我们是留学生"], k:["我们是"], show:"老师，我们是留学生。", why:"Thầy không phải lưu học sinh → không gồm người nghe → 我们."},
- {w:"我的宿舍很安净。", vi:"Ký túc xá của tôi rất yên tĩnh.", a:["我的宿舍很安静"], k:["安静"], show:"我的宿舍很安静。", why:"Chữ sai: 净 → 静 (安静 ānjìng). 净 jìng = sạch, đồng âm nên dễ nhầm."},
  {w:"我一起常跟朋友去超市。", vi:"Tôi thường cùng bạn đi siêu thị.", a:["我常跟朋友一起去超市","我常常跟朋友一起去超市"], k:["跟朋友一起去超市"], show:"我常跟朋友一起去超市。", why:"常 + 跟 + người + 一起 + V."},
- {w:"我有时候上网查资科。", vi:"Có lúc tôi lên mạng tra tài liệu.", a:["我有时候上网查资料"], k:["资料"], show:"我有时候上网查资料。", why:"Chữ sai: 科 → 料 (bộ 米 + 斗). 科 bộ 禾."},
  {w:"晚上我复习课文或者预习生词。", vi:"Buổi tối tôi ôn bài khóa hoặc chuẩn bị từ mới.", ok:true, show:"对", why:"Câu trần thuật dùng 或者; từ thời gian đứng trước chủ ngữ: câu đúng."},
- {w:"晚上我复习课文，予习生词。", vi:"Buổi tối tôi ôn bài khóa, chuẩn bị từ mới.", a:["晚上我复习课文预习生词"], k:["预习"], show:"晚上我复习课文，预习生词。", why:"Chữ sai: 予 → 预 (预 = 予 + 页). Thiếu bộ 页."},
  {w:"我不常喝咖啡，我很多喝茶。", vi:"Tôi không hay uống cà phê, tôi thường uống trà.", a:["我不常喝咖啡我常喝茶","我不常喝咖啡我常常喝茶"], k:["常喝茶","常常喝茶"], show:"我不常喝咖啡，我常喝茶。", why:"很多 không làm trạng ngữ trước động từ → 常."}
 ];
 var PTS = [4,3,3];
