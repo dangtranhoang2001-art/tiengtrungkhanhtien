@@ -114,9 +114,9 @@ select:disabled{opacity:1;background:#f6f6f4}
 <div class="box" id="gate">
   <div class="name">
     <label for="stClass"><b>Lớp:</b></label>
-    <input id="stClass" placeholder="VD: K69" style="max-width:140px;min-width:100px">
+    <input id="stClass" placeholder="VD: K67" inputmode="numeric" autocomplete="off" style="max-width:140px;min-width:100px;text-transform:uppercase;font-weight:700">
     <label for="stName"><b>Họ tên:</b></label>
-    <input id="stName" placeholder="Nhập họ tên của bạn">
+    <input id="stName" placeholder="NHẬP HỌ TÊN CỦA BẠN" autocomplete="off" style="text-transform:uppercase">
   </div>
   <p class="note" style="margin-top:8px">⏱ Bấm <b>Bắt đầu</b> là đồng hồ chạy. Xếp hạng <b>BẢNG VÀNG</b>: điểm cao hơn đứng trên; bằng điểm thì ai làm <b>nhanh hơn</b> đứng trên. Chỉ tính <b>lần nộp đầu tiên</b>.</p>
   <div class="toolbar">
@@ -184,7 +184,7 @@ select:disabled{opacity:1;background:#f6f6f4}
   <div id="bxhBody"></div>
 </div>
 
-<footer>第六课 · 我学习汉语 · 汉语加油站 · <span style="opacity:.6">bản 26/10 · 14:30</span></footer>
+<footer>第六课 · 我学习汉语 · 汉语加油站 · <span style="opacity:.6">bản 26/10 · 14:40</span></footer>
 </div>
 
 <script>
@@ -338,16 +338,20 @@ function setFb(f,cls,head,ans){ f.className="fb "+cls; f.innerHTML=head+'<div cl
 
 var lastReport = "", submitCount = 0, t0 = 0, tick = null, elapsed = 0;
 function fmt(sec){ sec=Math.round(sec); return ("0"+Math.floor(sec/60)).slice(-2)+":"+("0"+sec%60).slice(-2); }
-function normClass(s){ return s.toUpperCase().replace(/\s+/g,""); }
+function normClass(s){ var d=String(s).replace(/\D/g,""); return d ? "K"+d : ""; }
+function normName(s){ return String(s).toUpperCase().replace(/\s+/g," ").trim(); }
 function startTimer(){ t0=Date.now(); clearInterval(tick); document.getElementById("timer").textContent="00:00";
   tick=setInterval(function(){ document.getElementById("timer").textContent=fmt((Date.now()-t0)/1000); },1000); }
 var SEND_URL = "https://script.google.com/macros/s/AKfycbx508ViixA0vWGdPYhITUpyASRrVjgXgBekW94w3sALMtJElzQhIGcjOMLrzeBGAgPgsw/exec";
 var NAMES = ["Trắc nghiệm","Điền từ","Ghép câu hỏi – trả lời","Sắp xếp câu","Dịch"];
 var ICONS = ["🧩","✏️","🔗","🔤","🌏"];
 
+document.getElementById("stClass").addEventListener("input",function(){ var v=normClass(this.value); this.value = v || ""; });
+document.getElementById("stName").addEventListener("blur",function(){ this.value=normName(this.value); });
 document.getElementById("startBtn").onclick = function(){
   var c=document.getElementById("stClass"), n=document.getElementById("stName");
-  if(!c.value.trim()){ alert("Bạn hãy ghi tên lớp nhé."); c.focus(); return; }
+  c.value=normClass(c.value); n.value=normName(n.value);
+  if(!/^K\d{2,3}$/.test(c.value)){ alert("Bạn hãy ghi đúng tên lớp, VD: K67"); c.focus(); return; }
   if(!n.value.trim()){ alert("Bạn hãy ghi họ tên nhé."); n.focus(); return; }
   c.value=normClass(c.value); c.readOnly=true; n.readOnly=true;
   this.style.display="none";
