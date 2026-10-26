@@ -324,7 +324,7 @@ function fmt(sec){ sec=Math.round(sec); return ("0"+Math.floor(sec/60)).slice(-2
 function normClass(s){ return s.toUpperCase().replace(/\s+/g,""); }
 function startTimer(){ t0=Date.now(); clearInterval(tick); document.getElementById("timer").textContent="00:00";
   tick=setInterval(function(){ document.getElementById("timer").textContent=fmt((Date.now()-t0)/1000); },1000); }
-var SEND_URL = "https://script.google.com/macros/s/AKfycbwHkJwYKxc4DJjKV8BSjtqiJ4NjznEUC7CxN75oB-7bXjQC5c6JtRek2XKI8H5QsdTN/exec";
+var SEND_URL = "https://script.google.com/macros/s/AKfycbx508ViixA0vWGdPYhITUpyASRrVjgXgBekW94w3sALMtJElzQhIGcjOMLrzeBGAgPgsw/exec";
 var NAMES = ["Trắc nghiệm","Điền từ","Ghép câu hỏi – trả lời","Sắp xếp câu","Dịch"];
 var ICONS = ["🧩","✏️","🔗","🔤","🌏"];
 
