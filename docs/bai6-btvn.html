@@ -2,6 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BTVN Bài 6 我学习汉语</title>
 <style>
@@ -83,6 +85,8 @@ select:disabled{opacity:1;background:#f6f6f4}
 .pt{font-size:.9rem;color:var(--muted);font-weight:400}
 .ansbank{background:#fff;border:2px dashed var(--purple);border-radius:12px;padding:10px 14px;margin:6px 0;font-size:1.2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:4px 16px}
 .ansbank b{color:var(--purple)}
+.ansbank .used{color:#b9b6c9;text-decoration:line-through}
+.ansbank .used b{color:#b9b6c9}
 .timer{position:sticky;top:0;z-index:5;margin:10px auto 0;width:max-content;background:var(--head);color:#fff;font-weight:700;font-size:1.2rem;padding:6px 18px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .bxh{background:linear-gradient(180deg,#fff8e1,#fff);border:2px solid #d4a017}
 .bxh-head{text-align:center;font-size:1.7rem;font-weight:800;color:#b8860b;letter-spacing:2px}
@@ -180,7 +184,7 @@ select:disabled{opacity:1;background:#f6f6f4}
   <div id="bxhBody"></div>
 </div>
 
-<footer>第六课 · 我学习汉语 · 汉语加油站</footer>
+<footer>第六课 · 我学习汉语 · 汉语加油站 · <span style="opacity:.6">bản 26/10 · 14:30</span></footer>
 </div>
 
 <script>
@@ -271,13 +275,26 @@ FILL.forEach(function(d,i){
   fBox.appendChild(el);
 });
 
-document.getElementById("ansbank").innerHTML = ANS.map(function(a,k){ return '<div><b>'+L[k]+'.</b> '+esc(a)+'</div>'; }).join("");
+document.getElementById("ansbank").innerHTML = ANS.map(function(a,k){ return '<div id="ab'+k+'"><b>'+L[k]+'.</b> '+esc(a)+'</div>'; }).join("");
+function syncMatch(){
+  var used = {};
+  MATCH.forEach(function(d,i){ var v=document.getElementById("x"+i).value; if(v!=="") used[v]=i; });
+  MATCH.forEach(function(d,i){
+    document.getElementById("x"+i).querySelectorAll("option").forEach(function(o){
+      if(o.value==="") return;
+      var taken = (o.value in used) && used[o.value]!==i;
+      o.disabled = taken; o.textContent = L[+o.value] + (taken ? " (đã chọn)" : "");
+    });
+  });
+  ANS.forEach(function(a,k){ document.getElementById("ab"+k).classList.toggle("used", String(k) in used); });
+}
 var xBox = document.getElementById("fix");
 MATCH.forEach(function(d,i){
   var el = document.createElement("div"); el.className="item";
   el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+esc(d.q)+'</span> → <select id="x'+i+'"><option value="">　_　</option>'+
     ANS.map(function(a,k){ return '<option value="'+k+'">'+L[k]+'</option>'; }).join("")+'</select><div class="fb" id="xf'+i+'"></div>';
   xBox.appendChild(el);
+  el.querySelector("select").onchange = syncMatch;
 });
 
 var oBox = document.getElementById("order"), picked = [];
@@ -459,6 +476,7 @@ document.getElementById("retryBtn").onclick = function(){
   var sb=document.getElementById("submitBtn"); sb.disabled=false; sb.textContent="✅ Nộp bài & chấm điểm";
   document.getElementById("review").innerHTML="";
   document.querySelectorAll(".opt").forEach(function(o){ o.classList.remove("sel","right","wrong"); o.querySelector("input").checked=false; });
+  syncMatch();
   ORDER.forEach(function(d,i){ document.getElementById("cl"+i).click(); });
   document.querySelectorAll("textarea").forEach(function(t){ t.value=""; });
   document.querySelectorAll(".fb").forEach(function(f){ f.className="fb"; });
