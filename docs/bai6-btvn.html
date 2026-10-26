@@ -83,6 +83,20 @@ select:disabled{opacity:1;background:#f6f6f4}
 .pt{font-size:.9rem;color:var(--muted);font-weight:400}
 .ansbank{background:#fff;border:2px dashed var(--purple);border-radius:12px;padding:10px 14px;margin:6px 0;font-size:1.2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:4px 16px}
 .ansbank b{color:var(--purple)}
+.timer{position:sticky;top:0;z-index:5;margin:10px auto 0;width:max-content;background:var(--head);color:#fff;font-weight:700;font-size:1.2rem;padding:6px 18px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.bxh{background:linear-gradient(180deg,#fff8e1,#fff);border:2px solid #d4a017}
+.bxh-head{text-align:center;font-size:1.7rem;font-weight:800;color:#b8860b;letter-spacing:2px}
+.bxh-sub{text-align:center;color:var(--muted);margin:4px 0 10px}
+.bxh-sub select{border-color:#d4a017;font-size:1rem}
+.bxh table{width:100%;border-collapse:collapse;font-size:1.05rem}
+.bxh th{background:#f7e7b4;color:#7a5a00;text-align:left;padding:8px}
+.bxh td{padding:8px;border-bottom:1px solid #f0e2b6}
+.bxh td.r{text-align:center;font-size:1.3rem;width:52px}
+.bxh tr.top1 td{background:#fff3c4;font-weight:700}
+.bxh tr.top2 td{background:#f4f4f4}
+.bxh tr.top3 td{background:#fbeee4}
+.bxh tr.me td{outline:2px solid var(--green);outline-offset:-2px}
+.bxh .empty{text-align:center;color:var(--muted);padding:14px}
 </style>
 </head>
 <body>
@@ -93,12 +107,23 @@ select:disabled{opacity:1;background:#f6f6f4}
   <h1>Bài tập về nhà</h1>
 </header>
 
-<div class="box">
+<div class="box" id="gate">
   <div class="name">
+    <label for="stClass"><b>Lớp:</b></label>
+    <input id="stClass" placeholder="VD: K69" style="max-width:140px;min-width:100px">
     <label for="stName"><b>Họ tên:</b></label>
     <input id="stName" placeholder="Nhập họ tên của bạn">
   </div>
+  <p class="note" style="margin-top:8px">⏱ Bấm <b>Bắt đầu</b> là đồng hồ chạy. Xếp hạng <b>BẢNG VÀNG</b>: điểm cao hơn đứng trên; bằng điểm thì ai làm <b>nhanh hơn</b> đứng trên. Chỉ tính <b>lần nộp đầu tiên</b>.</p>
+  <div class="toolbar">
+    <button class="big" id="startBtn">▶️ Bắt đầu làm bài</button>
+    <button class="alt" id="viewBxh">🏆 Xem Bảng vàng</button>
+  </div>
 </div>
+
+<div id="timerBar" class="timer" hidden>⏱ <span id="timer">00:00</span></div>
+
+<div id="quiz" hidden>
 
 <div class="box p1">
   <h2>🧩 Bài 1. Chọn đáp án đúng <span class="pt">(2 điểm)</span></h2>
@@ -135,6 +160,8 @@ select:disabled{opacity:1;background:#f6f6f4}
   <button class="big" id="submitBtn">✅ Nộp bài &amp; chấm điểm</button>
 </div>
 
+</div>
+
 <div class="box result" id="result">
   <div class="score" id="scoreText"></div>
   <div class="sub" id="scoreSub"></div>
@@ -145,6 +172,12 @@ select:disabled{opacity:1;background:#f6f6f4}
     <button id="copyBtn">📋 Sao chép kết quả</button>
     <button class="alt" id="retryBtn">🔄 Làm lại</button>
   </div>
+</div>
+
+<div class="box bxh" id="bxh" hidden>
+  <div class="bxh-head">🏆 BẢNG VÀNG 🏆</div>
+  <div class="bxh-sub">第六课 · 我学习汉语 — Lớp <select id="bxhClass"></select> <button class="alt" id="bxhReload" style="padding:4px 10px;font-size:.9rem">🔄</button></div>
+  <div id="bxhBody"></div>
 </div>
 
 <footer>第六课 · 我学习汉语 · 汉语加油站</footer>
@@ -286,14 +319,30 @@ function keyRatio(t,keys){ var h=0; keys.forEach(function(g){ if(g.some(function
 function okBox(f,html){ f.className="fb ok"; f.innerHTML='🌟 <b>Đúng rồi!</b>'+(html?'<div class="ans">'+html+'</div>':''); }
 function setFb(f,cls,head,ans){ f.className="fb "+cls; f.innerHTML=head+'<div class="ans">'+ans+'</div>'; }
 
-var lastReport = "", submitCount = 0;
+var lastReport = "", submitCount = 0, t0 = 0, tick = null, elapsed = 0;
+function fmt(sec){ sec=Math.round(sec); return ("0"+Math.floor(sec/60)).slice(-2)+":"+("0"+sec%60).slice(-2); }
+function normClass(s){ return s.toUpperCase().replace(/\s+/g,""); }
+function startTimer(){ t0=Date.now(); clearInterval(tick); document.getElementById("timer").textContent="00:00";
+  tick=setInterval(function(){ document.getElementById("timer").textContent=fmt((Date.now()-t0)/1000); },1000); }
 var SEND_URL = "https://script.google.com/macros/s/AKfycbwHkJwYKxc4DJjKV8BSjtqiJ4NjznEUC7CxN75oB-7bXjQC5c6JtRek2XKI8H5QsdTN/exec";
 var NAMES = ["Trắc nghiệm","Điền từ","Ghép câu hỏi – trả lời","Sắp xếp câu","Dịch"];
 var ICONS = ["🧩","✏️","🔗","🔤","🌏"];
 
+document.getElementById("startBtn").onclick = function(){
+  var c=document.getElementById("stClass"), n=document.getElementById("stName");
+  if(!c.value.trim()){ alert("Bạn hãy ghi tên lớp nhé."); c.focus(); return; }
+  if(!n.value.trim()){ alert("Bạn hãy ghi họ tên nhé."); n.focus(); return; }
+  c.value=normClass(c.value); c.readOnly=true; n.readOnly=true;
+  this.style.display="none";
+  document.getElementById("quiz").hidden=false; document.getElementById("timerBar").hidden=false;
+  startTimer();
+  document.getElementById("quiz").scrollIntoView({behavior:"smooth"});
+};
+
 document.getElementById("submitBtn").onclick = function(){
-  var nm = document.getElementById("stName");
-  if(!nm.value.trim()){ alert("Bạn hãy ghi họ tên trước khi nộp bài nhé."); nm.focus(); return; }
+  var nm = document.getElementById("stName"), lop = document.getElementById("stClass").value;
+  elapsed = Math.round((Date.now()-t0)/1000); clearInterval(tick);
+  document.getElementById("timer").textContent = fmt(elapsed)+" ✔";
   var P=[0,0,0,0,0], REV=[[],[],[],[],[]], REP=[[],[],[],[],[]], TOT=[MCQ.length,0,MATCH.length,ORDER.length,TRANS.length];
 
   MCQ.forEach(function(d,i){
@@ -361,7 +410,7 @@ document.getElementById("submitBtn").onclick = function(){
   var parts = S.map(function(s,k){ return "Bài "+(k+1)+": "+r1(s)+"/"+PTS[k]; });
   document.getElementById("scoreText").textContent = score+" / 10";
   document.getElementById("scoreSub").textContent = parts.join(" · ");
-  document.getElementById("scoreMsg").textContent = msg;
+  document.getElementById("scoreMsg").textContent = msg+"  ⏱ Thời gian làm bài: "+fmt(elapsed);
   function mark(p){ return p>=1?"✅":p>0?"🟡":"❌"; }
   function tbl(rows){
     return '<table><tr><th>#</th><th>Câu</th><th>Bài làm của bạn</th><th>Đáp án</th><th></th></tr>'+
@@ -371,14 +420,14 @@ document.getElementById("submitBtn").onclick = function(){
   document.getElementById("review").innerHTML = S.map(function(s,k){
     return '<h3>'+ICONS[k]+' Bài '+(k+1)+' – '+NAMES[k]+' ('+r1(s)+'/'+PTS[k]+')</h3>'+tbl(REV[k]); }).join("")+
     '<p class="sub" style="margin-top:8px">✅ đúng · 🟡 gần đúng (½ điểm) · ❌ chưa đúng</p>';
-  document.querySelectorAll("textarea,#stName").forEach(function(t){ t.readOnly=true; });
-  document.querySelectorAll("select").forEach(function(t){ t.disabled=true; });
+  document.querySelectorAll("#quiz textarea").forEach(function(t){ t.readOnly=true; });
+  document.querySelectorAll("#quiz select").forEach(function(t){ t.disabled=true; });
   document.body.classList.add("locked");
   var sb=document.getElementById("submitBtn"); sb.disabled=true; sb.textContent="✅ Đã nộp bài";
   var res=document.getElementById("result"); res.style.display="block"; res.scrollIntoView({behavior:"smooth"});
 
   var name = nm.value.trim();
-  lastReport = "BTVN BÀI 6 我学习汉语\nHọc sinh: "+name+"\nĐiểm: "+score+"/10 ("+parts.join(", ")+")\n\n"+
+  lastReport = "BTVN BÀI 6 我学习汉语\nHọc sinh: "+name+"\nLớp: "+lop+"\nThời gian làm: "+fmt(elapsed)+"\nĐiểm: "+score+"/10 ("+parts.join(", ")+")\n\n"+
     REP.map(function(r,k){ return "BÀI "+(k+1)+". "+NAMES[k].toUpperCase()+"\n"+r.join("\n"); }).join("\n\n");
 
   var st = document.getElementById("sendStatus");
@@ -387,13 +436,13 @@ document.getElementById("submitBtn").onclick = function(){
   submitCount++;
   var short = S.map(function(s,k){ return "B"+(k+1)+" "+r1(s)+"/"+PTS[k]; }).join(" · ");
   var body = new URLSearchParams({
-    "bai":"第六课 · 我学习汉语 (BTVN)", "hoc_sinh":name, "diem":String(score),
+    "bai":"第六课 · 我学习汉语 (BTVN)", "lop":lop, "giay":String(elapsed), "hoc_sinh":name, "diem":String(score),
     "diem_dich":short, "diem_cau_hoi":"",
     "b1":r1(S[0])+"/"+PTS[0], "b2":r1(S[1])+"/"+PTS[1], "b3":r1(S[2])+"/"+PTS[2], "b4":r1(S[3])+"/"+PTS[3], "b5":r1(S[4])+"/"+PTS[4],
     "lan_nop":String(submitCount), "chi_tiet":lastReport
   });
   fetch(SEND_URL,{method:"POST",mode:"no-cors",body:body})
-    .then(function(){ st.textContent="✅ Đã gửi bài cho giáo viên."; })
+    .then(function(){ st.textContent="✅ Đã gửi bài cho giáo viên."; setTimeout(function(){ showBxh(lop,name); },1500); })
     .catch(function(){ st.textContent="⚠️ Chưa gửi được (lỗi mạng). Bạn bấm “Sao chép kết quả” và gửi cho giáo viên nhé."; });
 };
 
@@ -404,8 +453,8 @@ document.getElementById("copyBtn").onclick = function(){
 };
 
 document.getElementById("retryBtn").onclick = function(){
-  document.querySelectorAll("textarea,#stName").forEach(function(t){ t.readOnly=false; });
-  document.querySelectorAll("select").forEach(function(t){ t.disabled=false; t.value=""; });
+  document.querySelectorAll("#quiz textarea").forEach(function(t){ t.readOnly=false; });
+  document.querySelectorAll("#quiz select").forEach(function(t){ t.disabled=false; t.value=""; });
   document.body.classList.remove("locked");
   var sb=document.getElementById("submitBtn"); sb.disabled=false; sb.textContent="✅ Nộp bài & chấm điểm";
   document.getElementById("review").innerHTML="";
@@ -414,8 +463,42 @@ document.getElementById("retryBtn").onclick = function(){
   document.querySelectorAll("textarea").forEach(function(t){ t.value=""; });
   document.querySelectorAll(".fb").forEach(function(f){ f.className="fb"; });
   document.getElementById("result").style.display="none";
+  startTimer();
   window.scrollTo({top:0,behavior:"smooth"});
 };
+
+// ===== BẢNG VÀNG =====
+var BXH_URL = SEND_URL, meName = "";
+function jsonp(url, cb){
+  var name="bxhcb"+Date.now(), sc=document.createElement("script"), done=false;
+  window[name]=function(d){ done=true; cb(d); delete window[name]; sc.remove(); };
+  sc.onerror=function(){ if(!done) cb(null); };
+  sc.src=url+(url.indexOf("?")>-1?"&":"?")+"callback="+name+"&t="+Date.now();
+  document.body.appendChild(sc);
+  setTimeout(function(){ if(!done){ done=true; cb(null); } },15000);
+}
+function showBxh(lop, me){
+  meName = me ? me.toUpperCase().replace(/\s+/g,"") : meName;
+  var box=document.getElementById("bxh"), body=document.getElementById("bxhBody"), sel=document.getElementById("bxhClass");
+  box.hidden=false; body.innerHTML='<div class="empty">⏳ Đang tải Bảng vàng…</div>';
+  jsonp(BXH_URL+(lop?"?lop="+encodeURIComponent(lop):""), function(d){
+    if(!d){ body.innerHTML='<div class="empty">⚠️ Chưa tải được Bảng vàng. Bấm 🔄 để thử lại.</div>'; return; }
+    var lops=d.lops||[]; if(lop && lops.indexOf(normClass(lop))<0) lops.push(normClass(lop));
+    sel.innerHTML=lops.map(function(l){ return '<option'+(l===d.lop?' selected':'')+'>'+esc(l)+'</option>'; }).join("");
+    if(!d.lop){ if(lops.length){ showBxh(lops[0]); } else body.innerHTML='<div class="empty">Chưa có bạn nào nộp bài.</div>'; return; }
+    var rows=d.bxh||[];
+    if(!rows.length){ body.innerHTML='<div class="empty">Lớp này chưa có bạn nào nộp bài.</div>'; return; }
+    var medal=["🥇","🥈","🥉"];
+    body.innerHTML='<table><tr><th>Hạng</th><th>Học sinh</th><th>Điểm</th><th>Thời gian</th></tr>'+rows.map(function(r,i){
+      var me = meName && r.ten.toUpperCase().replace(/\s+/g,"")===meName;
+      return '<tr class="'+(i<3?'top'+(i+1):'')+(me?' me':'')+'"><td class="r">'+(medal[i]||(i+1))+'</td><td>'+esc(r.ten)+(me?' 👈':'')+'</td><td><b>'+r.diem+'</b></td><td>'+fmt(r.giay)+'</td></tr>';
+    }).join("")+'</table>';
+  });
+  box.scrollIntoView({behavior:"smooth"});
+}
+document.getElementById("bxhClass").onchange=function(){ showBxh(this.value); };
+document.getElementById("bxhReload").onclick=function(){ showBxh(document.getElementById("bxhClass").value); };
+document.getElementById("viewBxh").onclick=function(){ var c=document.getElementById("stClass").value.trim(); showBxh(c?normClass(c):""); };
 </script>
 </body>
 </html>
