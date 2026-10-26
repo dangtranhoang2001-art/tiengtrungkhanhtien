@@ -81,6 +81,8 @@ select:disabled{opacity:1;background:#f6f6f4}
 .p4 .item{border-left-color:var(--green);background:#eff6f1}
 .p5 .item{border-left-color:var(--pink);background:#f8f0f2}
 .pt{font-size:.9rem;color:var(--muted);font-weight:400}
+.ansbank{background:#fff;border:2px dashed var(--purple);border-radius:12px;padding:10px 14px;margin:6px 0;font-size:1.2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:4px 16px}
+.ansbank b{color:var(--purple)}
 </style>
 </head>
 <body>
@@ -111,8 +113,9 @@ select:disabled{opacity:1;background:#f6f6f4}
 </div>
 
 <div class="box p3">
-  <h2>🛠️ Bài 3. Sửa câu sai <span class="pt">(2 điểm)</span></h2>
-  <p class="note"><b>Có câu đúng, có câu sai.</b> Câu đúng: gõ <b>对</b>. Câu sai (mỗi câu chỉ 1 lỗi): gõ lại cả câu đã sửa bằng chữ Hán. Dấu câu không ảnh hưởng điểm.</p>
+  <h2>🔗 Bài 3. Ghép câu hỏi với câu trả lời phù hợp <span class="pt">(2 điểm)</span></h2>
+  <p class="note">Có 10 câu trả lời cho 8 câu hỏi → <b>thừa 2 câu</b>. Mỗi câu trả lời chỉ dùng 1 lần.</p>
+  <div class="ansbank" id="ansbank"></div>
   <div id="fix"></div>
 </div>
 
@@ -175,20 +178,19 @@ var FILL = [
  {t:["张东是中国",0,"，他学习英",1,"。"], a:[["人"],["文"]], show:"张东是中国人，他学习英文。", why:"中国人: người Trung Quốc; 英文: tiếng Anh."}
 ];
 
-// ===== BÀI 3: SỬA CÂU SAI =====
-// ok:true = câu đúng (gõ 对). a: câu sửa chấp nhận; k: chỗ sửa chính → ½ điểm
-var FIX = [
- {w:"你叫什么名字吗？", vi:"Bạn tên là gì?", a:["你叫什么名字"], k:["你叫什么名字"], show:"你叫什么名字？", why:"Câu đã có từ để hỏi 什么 thì không thêm 吗."},
- {w:"我贵姓陈。", vi:"Tôi họ Trần.", a:["我姓陈"], k:["我姓陈"], show:"我姓陈。", why:"贵 là lời tôn trọng người khác, không dùng khi nói về mình."},
- {w:"这是书的老师。", vi:"Đây là sách của thầy giáo.", a:["这是老师的书"], k:["老师的书"], show:"这是老师的书。", why:"Người sở hữu đứng trước 的, vật đứng sau (ngược tiếng Việt)."},
- {w:"那是我妈妈的书。", vi:"Kia là sách của mẹ tôi.", ok:true, alt:["那是我的妈妈的书"], show:"对", why:"我妈妈 (thân thuộc, bỏ 的) + 的书 (vật, phải có 的): câu đúng."},
- {w:"我姓张东。", vi:"Tôi tên là Trương Đông.", a:["我叫张东","我姓张叫张东","我姓张我叫张东"], k:["叫张东"], show:"我叫张东。", why:"姓 chỉ đi với họ; nói cả họ tên dùng 叫."},
- {w:"哪是什么杂志？", vi:"Kia là tạp chí gì?", a:["那是什么杂志"], k:["那是"], show:"那是什么杂志？", why:"Kia = 那 nà; 哪 nǎ = nào. Hai chữ chỉ khác bộ 口 và thanh điệu."},
- {w:"他是人美国。", vi:"Anh ấy là người Mỹ.", a:["他是美国人"], k:["美国人"], show:"他是美国人。", why:"Tên nước đứng trước 人: 美国人."},
- {w:"我朋友是中国人。", vi:"Bạn tôi là người Trung Quốc.", ok:true, alt:["我的朋友是中国人"], show:"对", why:"Bạn bè là quan hệ thân thiết → có thể bỏ 的: 我朋友 = 我的朋友. Câu đúng."},
- {w:"那是谁书？", vi:"Kia là sách của ai?", a:["那是谁的书"], k:["谁的书"], show:"那是谁的书？", why:"“Của ai” = 谁的 + danh từ, không bỏ 的."},
- {w:"这是什么的杂志？", vi:"Đây là tạp chí gì?", a:["这是什么杂志"], k:["什么杂志"], show:"这是什么杂志？", why:"什么 + danh từ trực tiếp (什么杂志), không có 的."}
+// ===== BÀI 3: GHÉP CÂU HỎI – CÂU TRẢ LỜI =====
+var ANS = ["那是我朋友的杂志。","我贵姓王。","我是美国人。","汉字很难，发音不太难。","我叫麦克。","这是老师的书。","是，我学习汉语。","那是英文杂志。","我姓王。","我学习汉语。"];
+var MATCH = [
+ {q:"请问，您贵姓？", a:8, why:"Tự giới thiệu chỉ dùng 姓, không dùng 贵 cho mình → 我贵姓王 là câu sai."},
+ {q:"你叫什么名字？", a:4, why:"叫什么名字 → 我叫 + tên."},
+ {q:"你是哪国人？", a:2, why:"哪国人 → tên nước + 人."},
+ {q:"你学习什么？", a:9, why:"Câu hỏi có 什么 không trả lời bằng 是/不是 → “是，我学习汉语” không hợp."},
+ {q:"汉语难吗？", a:3, why:"Hỏi khó không → trả lời mức độ: 很难 / 不太难."},
+ {q:"那是什么杂志？", a:7, why:"什么杂志 hỏi loại tạp chí → 英文杂志."},
+ {q:"那是谁的杂志？", a:0, why:"谁的杂志 hỏi chủ sở hữu → 我朋友的杂志."},
+ {q:"这是谁的书？", a:5, why:"谁的书 → 老师的书."}
 ];
+var L = "ABCDEFGHIJ";
 
 // ===== BÀI 4: SẮP XẾP =====
 var ORDER = [
@@ -236,11 +238,12 @@ FILL.forEach(function(d,i){
   fBox.appendChild(el);
 });
 
+document.getElementById("ansbank").innerHTML = ANS.map(function(a,k){ return '<div><b>'+L[k]+'.</b> '+esc(a)+'</div>'; }).join("");
 var xBox = document.getElementById("fix");
-FIX.forEach(function(d,i){
+MATCH.forEach(function(d,i){
   var el = document.createElement("div"); el.className="item";
-  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+esc(d.w)+'</span><div class="vi">('+esc(d.vi)+')</div>'+
-    '<textarea id="x'+i+'" placeholder="Gõ 对 hoặc gõ lại câu đã sửa…"></textarea><div class="fb" id="xf'+i+'"></div>';
+  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+esc(d.q)+'</span> → <select id="x'+i+'"><option value="">　_　</option>'+
+    ANS.map(function(a,k){ return '<option value="'+k+'">'+L[k]+'</option>'; }).join("")+'</select><div class="fb" id="xf'+i+'"></div>';
   xBox.appendChild(el);
 });
 
@@ -285,13 +288,13 @@ function setFb(f,cls,head,ans){ f.className="fb "+cls; f.innerHTML=head+'<div cl
 
 var lastReport = "", submitCount = 0;
 var SEND_URL = "https://script.google.com/macros/s/AKfycbwHkJwYKxc4DJjKV8BSjtqiJ4NjznEUC7CxN75oB-7bXjQC5c6JtRek2XKI8H5QsdTN/exec";
-var NAMES = ["Trắc nghiệm","Điền từ","Sửa câu sai","Sắp xếp câu","Dịch"];
-var ICONS = ["🧩","✏️","🛠️","🔤","🌏"];
+var NAMES = ["Trắc nghiệm","Điền từ","Ghép câu hỏi – trả lời","Sắp xếp câu","Dịch"];
+var ICONS = ["🧩","✏️","🔗","🔤","🌏"];
 
 document.getElementById("submitBtn").onclick = function(){
   var nm = document.getElementById("stName");
   if(!nm.value.trim()){ alert("Bạn hãy ghi họ tên trước khi nộp bài nhé."); nm.focus(); return; }
-  var P=[0,0,0,0,0], REV=[[],[],[],[],[]], REP=[[],[],[],[],[]], TOT=[MCQ.length,0,FIX.length,ORDER.length,TRANS.length];
+  var P=[0,0,0,0,0], REV=[[],[],[],[],[]], REP=[[],[],[],[],[]], TOT=[MCQ.length,0,MATCH.length,ORDER.length,TRANS.length];
 
   MCQ.forEach(function(d,i){
     var r = document.querySelector('input[name="m'+i+'"]:checked'), f=document.getElementById("mf"+i), v = r?+r.value:-1, pt=0, tag;
@@ -316,19 +319,14 @@ document.getElementById("submitBtn").onclick = function(){
     REP[1].push((i+1)+". "+(empty?"(bỏ trống)":vs.join(" / "))+" → "+tag);
   });
 
-  FIX.forEach(function(d,i){
-    var raw = document.getElementById("x"+i).value.trim(), s = clean(raw), f=document.getElementById("xf"+i), pt=0, tag;
-    var key = esc(d.show)+' — '+esc(d.why);
-    if(!raw){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa làm câu này.</b>','👉 Đáp án: '+key); }
-    else if(d.ok){ if(s==="对"||s==="对的"||s===clean(d.w)||(d.alt||[]).indexOf(s)>-1){ pt=1; tag="Đúng"; okBox(f,'Câu này không có lỗi. '+esc(d.why)); }
-      else { tag="Sai (câu này đúng)"; setFb(f,"no",'💪 <b>Câu này vốn đúng, không cần sửa.</b>','✏️ Đáp án: '+key); } }
-    else if(s==="对"||s===clean(d.w)){ tag="Cho là đúng"; setFb(f,"no",'💪 <b>Câu này có lỗi.</b>','✏️ Đáp án: '+key); }
-    else if(!hasHanzi(raw)){ tag="Không dùng chữ Hán"; setFb(f,"no",'✋ <b>Bạn cần gõ bằng chữ Hán nhé.</b>','👉 Đáp án: '+key); }
-    else if(d.a.indexOf(s)>-1){ pt=1; tag="Đúng"; okBox(f,esc(d.why)); }
-    else if(d.k.some(function(k){return s.indexOf(k)>-1;})){ pt=0.5; tag="Gần đúng"; setFb(f,"mid",'🙂 <b>Đã sửa đúng lỗi chính, nhưng câu còn chỗ chưa khớp.</b>','✏️ Đáp án: '+key); }
-    else { tag="Chưa đúng"; setFb(f,"no",'💪 <b>Chưa đúng.</b>','✏️ Đáp án: '+key); }
-    P[2]+=pt; REV[2].push([d.w, raw, d.show, pt]);
-    REP[2].push((i+1)+". "+d.w+"\n   Bạn sửa: "+(raw||"(bỏ trống)")+" → "+tag);
+  MATCH.forEach(function(d,i){
+    var v=document.getElementById("x"+i).value, f=document.getElementById("xf"+i), pt=0, tag;
+    var key = L[d.a]+'. '+esc(ANS[d.a])+' — '+esc(d.why);
+    if(v===""){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa chọn.</b>','👉 Đáp án: '+key); }
+    else if(+v===d.a){ pt=1; tag="Đúng"; okBox(f,esc(d.why)); }
+    else { tag="Sai"; setFb(f,"no",'💪 <b>Chưa đúng.</b>','✏️ Đáp án: '+key); }
+    P[2]+=pt; REV[2].push([d.q, v===""?"":L[+v]+". "+ANS[+v], L[d.a]+". "+ANS[d.a], pt]);
+    REP[2].push((i+1)+". "+(v===""?"(bỏ trống)":L[+v]+". "+ANS[+v])+" → "+tag);
   });
 
   ORDER.forEach(function(d,i){
