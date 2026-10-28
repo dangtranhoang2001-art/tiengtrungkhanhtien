@@ -6,7 +6,7 @@
  *   - Người có quyền truy cập: Bất kỳ ai
  */
 var HEADERS = ["Thời gian nộp","Lớp","Học sinh","Điểm (/10)","Thời gian làm (giây)","Thời gian làm",
-  "Dịch sang tiếng Việt (/6)","Trả lời câu hỏi (/4)",
+  "Dịch sang tiếng Việt (/4)","Trả lời câu hỏi (/2)","Điền từ (/2)","Viết lại câu (/2)",
   "Lần nộp","Chi tiết bài làm"];
 
 function sheet_() {
@@ -26,7 +26,7 @@ function doPost(e) {
   try {
     var p = e.parameter, sh = sheet_();
     sh.appendRow([new Date(), p.lop || "", p.hoc_sinh || "", +p.diem || 0, +p.giay || 0, mmss_(p.giay),
-      p.diem_dich || "", p.diem_cau_hoi || "", +p.lan_nop || 1, p.chi_tiet || ""]);
+      p.diem_dich || "", p.diem_cau_hoi || "", p.diem_dien_tu || "", p.diem_viet_lai || "", +p.lan_nop || 1, p.chi_tiet || ""]);
     return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
   } finally { lock.releaseLock(); }
 }

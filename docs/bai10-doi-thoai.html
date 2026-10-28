@@ -78,6 +78,13 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;margin:24px 0 10px}
 .bxh tr.top3 td{background:#fbeee4}
 .bxh tr.me td{outline:2px solid var(--green);outline-offset:-2px}
 .bxh .empty{text-align:center;color:var(--muted);padding:14px}
+.p4 h2{color:var(--green)} .p5 h2{color:var(--orange)}
+.item.g4{border-left-color:var(--green);background:#eff6f1}
+.item.g5{border-left-color:var(--orange);background:#faf5ee}
+.bank{background:#fff;border:2px dashed var(--green);border-radius:12px;padding:8px 12px;text-align:center;font-size:1.25rem;font-weight:600;color:var(--green);margin:6px 0}
+select{font-size:1.15rem;font-family:inherit;padding:3px 6px;margin:0 4px;border:2px solid var(--green);border-radius:8px;background:#fff;color:var(--ink)}
+select:disabled{opacity:1;background:#f6f6f4}
+.tag{display:inline-block;margin-left:6px;padding:1px 10px;border-radius:10px;background:#fff;border:1.5px solid var(--orange);color:var(--orange);font-weight:700}
 </style>
 </head>
 <body>
@@ -85,7 +92,7 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;margin:24px 0 10px}
 
 <header>
   <div class="zh">第十课 · 对话</div>
-  <h1>Bài tập về nhà: Đọc hội thoại – Dịch – Trả lời câu hỏi</h1>
+  <h1>Bài tập về nhà: Hội thoại – Dịch – Câu hỏi – Ngữ pháp</h1>
 </header>
 
 <div class="box" id="gate">
@@ -117,16 +124,31 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;margin:24px 0 10px}
 
 <!-- PHẦN 2 -->
 <div class="box p2">
-  <h2>✍️ Phần 2. Dịch từng câu sang tiếng Việt <span style="font-size:.9rem;color:var(--muted)">(6 điểm)</span></h2>
+  <h2>✍️ Phần 2. Dịch từng câu sang tiếng Việt <span style="font-size:.9rem;color:var(--muted)">(4 điểm)</span></h2>
   <p class="note">Chỉ cần dịch đúng ý, không cần giống từng chữ.</p>
   <div id="trans"></div>
 </div>
 
 <!-- PHẦN 3 -->
 <div class="box p3">
-  <h2>❓ Phần 3. Trả lời câu hỏi bằng chữ Hán <span style="font-size:.9rem;color:var(--muted)">(4 điểm)</span></h2>
+  <h2>❓ Phần 3. Trả lời câu hỏi bằng chữ Hán <span style="font-size:.9rem;color:var(--muted)">(2 điểm)</span></h2>
   <p class="note">Gõ câu trả lời bằng chữ Hán (không gõ pinyin).</p>
   <div id="ques"></div>
+</div>
+
+<!-- PHẦN 4 -->
+<div class="box p4">
+  <h2>🧩 Phần 4. Chọn từ điền vào chỗ trống <span style="font-size:.9rem;color:var(--muted)">(2 điểm)</span></h2>
+  <p class="note">Ôn 4 điểm ngữ pháp: V得 + Adj · 对…感兴趣 · 只要…就… · 有点儿 / 一点儿也不. Có từ dùng nhiều lần.</p>
+  <div class="bank">得 · 对 · 感兴趣 · 只要 · 就 · 有点儿 · 一点儿也不</div>
+  <div id="fill"></div>
+</div>
+
+<!-- PHẦN 5 -->
+<div class="box p5">
+  <h2>🔁 Phần 5. Dùng từ trong ngoặc viết lại câu <span style="font-size:.9rem;color:var(--muted)">(2 điểm)</span></h2>
+  <p class="note">Viết lại bằng chữ Hán, giữ nguyên nghĩa của câu. Dấu câu không ảnh hưởng điểm.</p>
+  <div id="rew"></div>
 </div>
 
 <div class="toolbar" style="justify-content:center;margin-top:18px">
@@ -212,7 +234,33 @@ var QUES = [
 ];
 
 var WHO = {dog:["麦克","Màikè"], sis:["玛丽","Mǎlì"]};
-var TRANS_PTS = 6, QUES_PTS = 4;
+
+// ===== PHẦN 4: ĐIỀN TỪ =====
+var BANK = ["得","对","感兴趣","只要","就","有点儿","一点儿也不"];
+var FILL = [
+ {t:["玛丽跳舞跳",0,"非常好。"], a:[["得"]], show:"玛丽跳舞跳得非常好。", why:"V + 得 + tính từ: đánh giá hành động."},
+ {t:["麦克",0,"跳舞也很感兴趣。"], a:[["对"]], show:"麦克对跳舞也很感兴趣。", why:"对 + đối tượng + 感兴趣."},
+ {t:["我对音乐也很",0,"。"], a:[["感兴趣"]], show:"我对音乐也很感兴趣。", why:"对……很感兴趣: rất hứng thú với…"},
+ {t:["",0,"你坚持学，很快",1,"能学会。"], a:[["只要"],["就"]], show:"只要你坚持学，很快就能学会。", why:"只要 + điều kiện，就 + kết quả."},
+ {t:["我今天",0,"累，不想跳舞。"], a:[["有点儿"]], show:"我今天有点儿累，不想跳舞。", why:"有点儿 + tính từ: hơi… (ý không hài lòng)."},
+ {t:["学跳舞",0,"难。"], a:[["一点儿也不"]], show:"学跳舞一点儿也不难。", why:"一点儿也不 + tính từ: không… chút nào."},
+ {t:["玛丽教",0,"很认真。"], a:[["得"]], show:"玛丽教得很认真。", why:"教得很认真: dạy rất nghiêm túc."},
+ {t:["麦克常常踩玛丽的脚，玛丽",0,"受不了。"], a:[["有点儿"]], show:"麦克常常踩玛丽的脚，玛丽有点儿受不了。", why:"有点儿受不了: hơi chịu không nổi."}
+];
+
+// ===== PHẦN 5: VIẾT LẠI CÂU =====
+// a: câu đúng (bỏ dấu câu); k: các ý bắt buộc (đủ hết = 1 điểm, từ ½ trở lên = ½ điểm)
+var REW = [
+ {q:"玛丽跳舞很好。", w:"得", a:["玛丽跳舞跳得很好"], show:"玛丽跳舞跳得很好。", k:[["跳舞跳得"],["很好"]], why:"Có tân ngữ (跳舞) phải lặp động từ: 跳舞跳得…"},
+ {q:"麦克学跳舞，他很努力。", w:"得", a:["麦克学跳舞学得很努力"], show:"麦克学跳舞学得很努力。", k:[["学跳舞学得"],["努力"]], why:"学跳舞学得很努力 — lặp lại động từ 学."},
+ {q:"麦克喜欢跳舞。", w:"对…感兴趣", a:["麦克对跳舞很感兴趣","麦克对跳舞感兴趣","麦克对跳舞非常感兴趣"], show:"麦克对跳舞很感兴趣。", k:[["对跳舞"],["感兴趣"]], why:"对 + 跳舞 đứng TRƯỚC 感兴趣 (không nói 感兴趣跳舞)."},
+ {q:"我不喜欢音乐。", w:"对…不感兴趣", a:["我对音乐不感兴趣"], show:"我对音乐不感兴趣。", k:[["对音乐"],["不感兴趣"]], why:"Phủ định: 对……不感兴趣."},
+ {q:"你认真学，很快能学会。", w:"只要…就…", a:["只要你认真学很快就能学会","只要你认真学就能很快学会","只要你认真学你很快就能学会","只要你认真学你就能很快学会"], show:"只要你认真学，很快就能学会。", k:[["只要你认真学","只要认真学"],["就能"]], why:"就 đứng sau chủ ngữ / trạng ngữ của vế sau: 很快就能…"},
+ {q:"玛丽听到音乐，想跳舞。", w:"只要…就…", a:["只要听到音乐玛丽就想跳舞","玛丽只要听到音乐就想跳舞","只要玛丽听到音乐她就想跳舞","只要玛丽听到音乐就想跳舞"], show:"只要听到音乐，玛丽就想跳舞。", k:[["只要"],["听到音乐"],["就想跳舞"]], why:"只要 + điều kiện，(chủ ngữ +) 就 + kết quả."},
+ {q:"学跳舞不难。", w:"一点儿也不", a:["学跳舞一点儿也不难","学跳舞一点也不难"], show:"学跳舞一点儿也不难。", k:[["一点儿也不难","一点也不难"]], why:"一点儿也不 + tính từ (không dùng 有点儿不难)."},
+ {q:"玛丽的脚很疼。", w:"有点儿", a:["玛丽的脚有点儿疼","玛丽的脚有点疼"], show:"玛丽的脚有点儿疼。", k:[["脚有点儿疼","脚有点疼"]], why:"有点儿 + tính từ: hơi… (không nói 一点儿疼)."}
+];
+var TRANS_PTS = 4, QUES_PTS = 2, FILL_PTS = 2, REW_PTS = 2;
 
 // ===== HIỂN THỊ =====
 var full = document.getElementById("fullText");
@@ -239,6 +287,22 @@ QUES.forEach(function(d,i){
   el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+d.q+'</span>'+
     '<textarea id="q'+i+'" placeholder="用汉字回答…"></textarea><div class="fb" id="g'+i+'"></div>';
   qBox.appendChild(el);
+});
+
+var fBox = document.getElementById("fill");
+FILL.forEach(function(d,i){
+  var el = document.createElement("div"); el.className="item g4";
+  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+d.t.map(function(x){
+      return typeof x==="number" ? '<select id="s'+i+'_'+x+'"><option value="">　___　</option>'+BANK.map(function(w){return '<option>'+w+'</option>';}).join("")+'</select>' : esc(x);
+    }).join("")+'</span><div class="fb" id="ff'+i+'"></div>';
+  fBox.appendChild(el);
+});
+var rBox = document.getElementById("rew");
+REW.forEach(function(d,i){
+  var el = document.createElement("div"); el.className="item g5";
+  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+esc(d.q)+'</span><span class="tag">'+esc(d.w)+'</span>'+
+    '<textarea id="r'+i+'" placeholder="用汉字改写…"></textarea><div class="fb" id="rf'+i+'"></div>';
+  rBox.appendChild(el);
 });
 
 document.getElementById("togglePy").onclick = function(){ full.classList.toggle("hide-py"); };
@@ -312,14 +376,43 @@ document.getElementById("submitBtn").onclick = function(){
     rowsQ.push((i+1)+". "+d.q+"\n   Bạn trả lời: "+(ans||"(bỏ trống)")+"  → "+tag);
   });
 
-  var s2 = tPts/DATA.length*TRANS_PTS, s3 = qPts/QUES.length*QUES_PTS;
-  var score = Math.round((s2+s3)*10)/10;
+  var fGot = 0, fTot = 0, revF = [], rowsF = [];
+  FILL.forEach(function(d,i){
+    var f=document.getElementById("ff"+i), got=0, vs=[], empty=true;
+    d.a.forEach(function(acc,k){ var v=document.getElementById("s"+i+"_"+k).value; vs.push(v||"___"); if(v) empty=false; fTot++; if(acc.indexOf(v)>-1) got++; });
+    var tag = got===d.a.length?"Đúng":empty?"Chưa làm":got>0?"Đúng "+got+"/"+d.a.length:"Sai";
+    if(empty){ f.className="fb empty"; f.innerHTML='⚪ <b>Bạn chưa chọn từ.</b><div class="ans">👉 Đáp án: '+esc(d.show)+' — '+esc(d.why)+'</div>'; }
+    else if(got===d.a.length){ f.className="fb ok"; f.innerHTML='🌟 <b>Đúng rồi!</b><div class="ans">'+esc(d.why)+'</div>'; }
+    else { f.className="fb "+(got>0?"mid":"no"); f.innerHTML=(got>0?'🙂 <b>Đúng '+got+'/'+d.a.length+' ô.</b>':'💪 <b>Chưa đúng.</b>')+'<div class="ans">✏️ Đáp án: '+esc(d.show)+' — '+esc(d.why)+'</div>'; }
+    fGot += got;
+    revF.push([d.t.map(function(x){return typeof x==="number"?"___":x;}).join(""), empty?"":vs.join(" / "), d.show, got/d.a.length]);
+    rowsF.push((i+1)+". "+(empty?"(bỏ trống)":vs.join(" / "))+"  → "+tag);
+  });
+  var rPts = 0, revR = [], rowsR = [];
+  function clean(x){ return x.replace(/[\s，。！？、：；,.!?:;“”"'（）()…—\-]/g,""); }
+  REW.forEach(function(d,i){
+    var raw = document.getElementById("r"+i).value.trim(), t = clean(raw), f=document.getElementById("rf"+i), pt=0, tag;
+    if(!raw){ tag="Chưa làm"; f.className="fb empty"; f.innerHTML='⚪ <b>Bạn chưa viết câu này.</b><div class="ans">👉 Đáp án: '+esc(d.show)+'</div>'; }
+    else if(!hasHanzi(raw)){ tag="Không dùng chữ Hán"; f.className="fb no"; f.innerHTML='✋ <b>Bạn cần gõ bằng chữ Hán nhé.</b><div class="ans">👉 Đáp án: '+esc(d.show)+'</div>'; }
+    else {
+      var r = checkZh(t,d.k);
+      if(d.a.indexOf(t)>-1 || r>=0.99){ pt=1; tag="Đúng"; f.className="fb ok"; f.innerHTML='🌟 <b>Đúng rồi!</b><div class="ans">📖 '+esc(d.show)+' — '+esc(d.why)+'</div>'; }
+      else if(r>=0.5){ pt=0.5; tag="Gần đúng"; f.className="fb mid"; f.innerHTML='🙂 <b>Gần đúng, còn thiếu hoặc sai một phần.</b><div class="ans">✏️ Đáp án: '+esc(d.show)+' — '+esc(d.why)+'</div>'; }
+      else { tag="Chưa đúng"; f.className="fb no"; f.innerHTML='💪 <b>Chưa đúng.</b><div class="ans">✏️ Đáp án: '+esc(d.show)+' — '+esc(d.why)+'</div>'; }
+    }
+    rPts += pt;
+    revR.push([d.q+"（"+d.w+"）", raw, d.show, pt]);
+    rowsR.push((i+1)+". "+d.q+"（"+d.w+"）\n   Bạn viết: "+(raw||"(bỏ trống)")+"  → "+tag);
+  });
+
+  var s2 = tPts/DATA.length*TRANS_PTS, s3 = qPts/QUES.length*QUES_PTS, s4 = fGot/fTot*FILL_PTS, s5 = rPts/REW.length*REW_PTS;
+  var score = Math.round((s2+s3+s4+s5)*10)/10;
   var r1 = function(x){ return Math.round(x*10)/10; };
   var msg = score>=9 ? "🎉 Xuất sắc!" : score>=7 ? "👍 Tốt lắm! Xem lại vài câu nhé." :
             score>=5 ? "🙂 Khá rồi! Đọc lại phần sửa và làm lại nhé." : "💪 Cố lên! Đọc lại hội thoại rồi thử lại nhé.";
   document.getElementById("scoreText").textContent = score + " / 10";
   msg += "  ⏱ Thời gian làm bài: "+fmt(elapsed);
-  document.getElementById("scoreSub").textContent = "Dịch: "+r1(s2)+"/"+TRANS_PTS+" · Trả lời câu hỏi: "+r1(s3)+"/"+QUES_PTS;
+  document.getElementById("scoreSub").textContent = "Dịch: "+r1(s2)+"/"+TRANS_PTS+" · Câu hỏi: "+r1(s3)+"/"+QUES_PTS+" · Điền từ: "+r1(s4)+"/"+FILL_PTS+" · Viết lại câu: "+r1(s5)+"/"+REW_PTS;
   document.getElementById("scoreMsg").textContent = msg;
   function mark(p){ return p>=1 ? "✅" : p>0 ? "🟡" : "❌"; }
   function tbl(rows, h){
@@ -330,16 +423,20 @@ document.getElementById("submitBtn").onclick = function(){
   document.getElementById("review").innerHTML =
     '<h3>✍️ Phần 2 – Dịch ('+r1(s2)+'/'+TRANS_PTS+')</h3>'+tbl(revT,false)+
     '<h3>❓ Phần 3 – Trả lời câu hỏi ('+r1(s3)+'/'+QUES_PTS+')</h3>'+tbl(revQ,true)+
+    '<h3>🧩 Phần 4 – Điền từ ('+r1(s4)+'/'+FILL_PTS+')</h3>'+tbl(revF,true)+
+    '<h3>🔁 Phần 5 – Viết lại câu ('+r1(s5)+'/'+REW_PTS+')</h3>'+tbl(revR,true)+
     '<p class="sub" style="margin-top:8px">✅ đúng · 🟡 gần đúng (½ điểm) · ❌ chưa đúng</p>';
   document.querySelectorAll("textarea,#stName,#stClass").forEach(function(t){ t.readOnly = true; });
+  document.querySelectorAll("#quiz select").forEach(function(t){ t.disabled = true; });
   document.body.classList.add("locked");
   document.getElementById("submitBtn").disabled = true;
   document.getElementById("submitBtn").textContent = "✅ Đã nộp bài";
   var res = document.getElementById("result"); res.style.display="block"; res.scrollIntoView({behavior:"smooth"});
 
   var name = document.getElementById("stName").value.trim() || "(chưa ghi tên)";
-  lastReport = "BTVN BÀI 10 · 对话 麦克学跳舞\nHọc sinh: "+name+"\nLớp: "+lop+"\nThời gian làm: "+fmt(elapsed)+"\nĐiểm: "+score+"/10 (Dịch "+r1(s2)+"/"+TRANS_PTS+", Câu hỏi "+r1(s3)+"/"+QUES_PTS+")\n\n"+
-               "A. DỊCH ("+DATA.length+" câu)\n"+rowsT.join("\n")+"\n\nB. TRẢ LỜI CÂU HỎI ("+QUES.length+" câu)\n"+rowsQ.join("\n");
+  lastReport = "BTVN BÀI 10 · 对话 麦克学跳舞\nHọc sinh: "+name+"\nLớp: "+lop+"\nThời gian làm: "+fmt(elapsed)+"\nĐiểm: "+score+"/10 (Dịch "+r1(s2)+"/"+TRANS_PTS+", Câu hỏi "+r1(s3)+"/"+QUES_PTS+", Điền từ "+r1(s4)+"/"+FILL_PTS+", Viết lại câu "+r1(s5)+"/"+REW_PTS+")\n\n"+
+               "A. DỊCH ("+DATA.length+" câu)\n"+rowsT.join("\n")+"\n\nB. TRẢ LỜI CÂU HỎI ("+QUES.length+" câu)\n"+rowsQ.join("\n")+
+               "\n\nC. ĐIỀN TỪ ("+FILL.length+" câu)\n"+rowsF.join("\n")+"\n\nD. VIẾT LẠI CÂU ("+REW.length+" câu)\n"+rowsR.join("\n");
 
   // Gửi kết quả (SEND_URL trống = chỉ dùng nút Sao chép)
   var st = document.getElementById("sendStatus");
@@ -348,7 +445,7 @@ document.getElementById("submitBtn").onclick = function(){
   submitCount++;
   var body = new URLSearchParams({
     "bai":"第十课 · 对话 麦克学跳舞 (BTVN)", "lop":lop, "giay":String(elapsed), "hoc_sinh":name, "diem":String(score),
-    "diem_dich":r1(s2)+"/"+TRANS_PTS, "diem_cau_hoi":r1(s3)+"/"+QUES_PTS,
+    "diem_dich":r1(s2)+"/"+TRANS_PTS, "diem_cau_hoi":r1(s3)+"/"+QUES_PTS, "diem_dien_tu":r1(s4)+"/"+FILL_PTS, "diem_viet_lai":r1(s5)+"/"+REW_PTS,
     "lan_nop":String(submitCount), "chi_tiet":lastReport
   });
   fetch(SEND_URL, {method:"POST", mode:"no-cors", body:new URLSearchParams(body)})
@@ -392,6 +489,9 @@ document.getElementById("retryBtn").onclick = function(){
   document.getElementById("review").innerHTML = "";
   DATA.forEach(function(d,i){ document.getElementById("t"+i).value=""; document.getElementById("f"+i).className="fb"; });
   QUES.forEach(function(d,i){ document.getElementById("q"+i).value=""; document.getElementById("g"+i).className="fb"; });
+  document.querySelectorAll("#quiz select").forEach(function(t){ t.disabled = false; t.value = ""; });
+  FILL.forEach(function(d,i){ document.getElementById("ff"+i).className="fb"; });
+  REW.forEach(function(d,i){ document.getElementById("r"+i).value=""; document.getElementById("rf"+i).className="fb"; });
   document.getElementById("result").style.display="none";
   startTimer();
   window.scrollTo({top:0,behavior:"smooth"});
