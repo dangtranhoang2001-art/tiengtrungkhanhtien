@@ -458,7 +458,7 @@ function normName(s){ return String(s).toUpperCase().replace(/\s+/g," ").trim();
 document.getElementById("stClass").addEventListener("input",function(){ var v=normClass(this.value); this.value = v || ""; });
 document.getElementById("stName").addEventListener("blur",function(){ this.value=normName(this.value); });
 // BXH_URL: link Ứng dụng web của Google Sheet "Bảng vàng Bài 10" (apps-script/bai10-bang-vang.gs)
-var BXH_URL = "";
+var BXH_URL = "https://script.google.com/macros/s/AKfycbyYvIeKEMdEDatxZD2Z63ig4Isoi-cCFij-UNb0C2wEtjyrObIFu5zU-x73G62RdjWLtA/exec";
 var SEND_URL = BXH_URL;
 var t0 = 0, tick = null, elapsed = 0;
 function fmt(sec){ sec=Math.round(sec); return ("0"+Math.floor(sec/60)).slice(-2)+":"+("0"+sec%60).slice(-2); }
