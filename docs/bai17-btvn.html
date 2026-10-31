@@ -95,11 +95,11 @@ select:disabled{opacity:1;background:#f6f6f4}
 .bxh-sub select{border-color:#d4a017;font-size:1rem}
 .bxh table{width:100%;border-collapse:collapse;font-size:1.05rem}
 .bxh th{background:#f7e7b4;color:#7a5a00;text-align:left;padding:8px}
-.bxh td{padding:8px;border-bottom:1px solid #f0e2b6;background:#fff}
-.bxh td.r{text-align:center;font-size:1.15rem;font-weight:800;width:60px}
-.bxh tr.top1 td{background:#ffd95a;font-weight:700}
-.bxh tr.top2 td{background:#dfe3e8;font-weight:700}
-.bxh tr.top3 td{background:#e8b48a;font-weight:700}
+.bxh td{padding:8px;border-bottom:1px solid #f0e2b6}
+.bxh td.r{text-align:center;font-size:1.3rem;width:52px}
+.bxh tr.top1 td{background:#fff3c4;font-weight:700}
+.bxh tr.top2 td{background:#f4f4f4}
+.bxh tr.top3 td{background:#fbeee4}
 .bxh tr.me td{outline:2px solid var(--green);outline-offset:-2px}
 .bxh .empty{text-align:center;color:var(--muted);padding:14px}
 /* trò chơi nối thẻ kiểu Pikachu */
@@ -670,10 +670,11 @@ function showBxh(lop, me){
     sel.innerHTML=lops.map(function(l){ return '<option'+(l===d.lop?' selected':'')+'>'+esc(l)+'</option>'; }).join("");
     if(!d.lop){ if(lops.length){ showBxh(lops[0]); } else body.innerHTML='<div class="empty">Chưa có bạn nào nộp bài.</div>'; return; }
     var rows=d.bxh||[];
+    var medal=["🥇","🥈","🥉"];
     if(!rows.length){ body.innerHTML='<div class="empty">Lớp này chưa có bạn nào nộp bài.</div>'; return; }
     body.innerHTML='<table><tr><th>Hạng</th><th>Học sinh</th><th>Điểm</th><th>Thời gian</th></tr>'+rows.map(function(r,i){
       var me = meName && r.ten.toUpperCase().replace(/\s+/g,"")===meName;
-      return '<tr class="'+(i<3?'top'+(i+1):'')+(me?' me':'')+'"><td class="r">'+(i+1)+'</td><td>'+esc(r.ten)+(me?' 👈':'')+'</td><td><b>'+r.diem+'</b></td><td>'+fmt(r.giay)+'</td></tr>';
+      return '<tr class="'+(i<3?'top'+(i+1):'')+(me?' me':'')+'"><td class="r">'+(medal[i]||(i+1))+'</td><td>'+esc(r.ten)+(me?' 👈':'')+'</td><td><b>'+r.diem+'</b></td><td>'+fmt(r.giay)+'</td></tr>';
     }).join("")+'</table>';
   });
   box.scrollIntoView({behavior:"smooth"});
