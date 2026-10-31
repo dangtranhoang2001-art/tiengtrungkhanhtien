@@ -5,8 +5,8 @@
  *   - Thực thi dưới dạng: Tôi
  *   - Người có quyền truy cập: Bất kỳ ai
  */
-var HEADERS = ["Thời gian nộp","Lớp","Học sinh","Điểm (/10)","Thời gian làm (giây)","Thời gian làm",
-  "Bài 1 Trò chơi từ vựng (/2)","Bài 2 Điền từ (/2)","Bài 3 Ghép câu (/2)","Bài 4 Sắp xếp (/2)","Bài 5 Dịch (/2)",
+var HEADERS = ["Thời gian nộp","Lớp","Học sinh","Điểm (/100)","Thời gian làm (giây)","Thời gian làm",
+  "Bài 1 Trò chơi từ vựng (/20)","Bài 2 Điền từ (/20)","Bài 3 Ghép câu (/20)","Bài 4 Sắp xếp (/20)","Bài 5 Dịch (/20)",
   "Lần nộp","Chi tiết bài làm"];
 
 function sheet_() {
