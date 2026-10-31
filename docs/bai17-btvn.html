@@ -469,7 +469,7 @@ function normClass(s){ var d=String(s).replace(/\D/g,""); return d ? "K"+d : "";
 function normName(s){ return String(s).toUpperCase().replace(/\s+/g," ").trim(); }
 function startTimer(){ t0=Date.now(); clearInterval(tick); document.getElementById("timer").textContent="00:00";
   tick=setInterval(function(){ document.getElementById("timer").textContent=fmt((Date.now()-t0)/1000); },1000); }
-var SEND_URL = ""; // TODO: dán URL ứng dụng web của Sheet bài 17
+var SEND_URL = "https://script.google.com/macros/s/AKfycbyZ_4qMOzy1bHaTaWL3BUS8GcVQbUwbpzYO5EngJug-27CVrC3h-YRYtfYpcO0EIzYStw/exec";
 var NAMES = ["Trò chơi nối thẻ","Điền từ","Ghép câu hỏi – trả lời","Sắp xếp câu","Dịch"];
 var ICONS = ["🎮","✏️","🔗","🔤","🌏"];
 
