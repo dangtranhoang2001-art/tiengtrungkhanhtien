@@ -154,11 +154,11 @@ select:disabled{opacity:1;background:#f6f6f4}
 <div id="quiz" hidden>
 
 <div class="box p1">
-  <h2>🎮 Bài 1. Trò chơi nối thẻ (kiểu Pikachu) <span class="pt">(2 điểm)</span></h2>
-  <p class="note">Bấm <b>thẻ chữ Hán</b> và <b>thẻ nghĩa tiếng Việt</b> tương ứng. Hai thẻ chỉ nối được khi đường nối <b>không vướng thẻ khác</b> và <b>gấp khúc tối đa 2 lần</b> (được đi vòng ra ngoài viền). Chọn sai cặp thì từ đó mất điểm. Qua <b>2 màn</b> nhé!</p>
+  <h2>🎮 Bài 1. Trò chơi ghép từ với nghĩa <span class="pt">(2 điểm)</span></h2>
+  <p class="note">Bấm 1 <b>thẻ chữ Hán</b> rồi bấm <b>thẻ nghĩa tiếng Việt</b> tương ứng. Ghép đúng thì 2 thẻ biến mất. Chọn sai cặp thì từ đó mất điểm. Qua <b>2 màn</b> nhé!</p>
   <div class="gtop"><span class="round" id="gRound"></span><span class="combo" id="gCombo"></span></div>
   <div class="gbar"><i id="gBar"></i></div>
-  <div class="gtools"><button class="alt" id="gShuffle">🔀 Đổi chỗ (<span id="gShN">3</span>)</button><button class="alt" id="gHint">💡 Gợi ý (<span id="gHiN">3</span>)</button></div>
+  <div class="gtools"><button class="alt" id="gHint">💡 Gợi ý (<span id="gHiN">3</span>)</button></div>
   <div class="gmsg" id="gMsg"></div>
   <div class="owrap" id="oWrap"><div class="oboard" id="oBoard"></div><svg class="oline" id="oLine"></svg></div>
   <div class="gdone" id="gDone"></div>
@@ -303,7 +303,7 @@ function gLevel(){
   while(tiles.length<ROWS*COLS) tiles.push(null);
   G.grid=[]; for(var r=0;r<ROWS+2;r++){ G.grid.push([]); for(var c=0;c<COLS+2;c++) G.grid[r].push(null); }
   placeBalanced(tiles);
-  G.sel=null; if(!anyMove()) reshuffle(true); draw(); gStatus(""); 
+  G.sel=null; draw(); gStatus(""); 
 }
 // xếp ngẫu nhiên nhưng cân đối: mỗi hàng nửa chữ Hán – nửa tiếng Việt, xen kẽ, không dồn một phía
 function typePattern(){
@@ -334,10 +334,10 @@ function draw(){
 function cellEl(r,c){ return document.querySelector('#oBoard .ot[data-r="'+r+'"][data-c="'+c+'"]'); }
 function gStatus(msg){
   var ids=G.levels[G.lv], n=ids.filter(function(i){return G.done[i];}).length, all=Object.keys(G.done).length;
-  document.getElementById("gRound").textContent="Màn "+(G.lv+1)+"/2 · đã nối "+n+"/"+ids.length+" cặp";
+  document.getElementById("gRound").textContent="Màn "+(G.lv+1)+"/2 · đã ghép "+n+"/"+ids.length+" cặp";
   document.getElementById("gBar").style.width=(all/WORDS.length*100)+"%";
   document.getElementById("gCombo").textContent = G.combo>=2 ? "🔥 Combo x"+G.combo : "";
-  document.getElementById("gShN").textContent=G.shN; document.getElementById("gHiN").textContent=G.hiN;
+  document.getElementById("gHiN").textContent=G.hiN;
   if(msg!==undefined) document.getElementById("gMsg").innerHTML=msg;
 }
 // tìm đường nối tối đa 2 lần rẽ (BFS theo số lần rẽ)
@@ -397,24 +397,21 @@ function pick(r,c){
     setTimeout(function(){ sel.classList.remove("bad","sel"); el.classList.remove("bad"); },380);
     G.sel=null; gStatus("❌ Không phải một cặp: <b>"+esc(WORDS[zw][0])+"</b> không có nghĩa này."); return;
   }
-  var p=findPath(s,[r,c]);
-  if(!p){ sel.classList.remove("sel"); G.sel=null; gStatus("⛔ Đúng cặp nhưng đường nối bị vướng (quá 2 lần gấp khúc). Hãy nối các cặp khác trước."); return; }
-  showLine(p); G.done[t.w]=true; G.combo++; G.best=Math.max(G.best,G.combo);
+  G.done[t.w]=true; G.combo++; G.best=Math.max(G.best,G.combo);
   G.grid[s[0]][s[1]]=null; G.grid[r][c]=null; G.sel=null;
   sel.classList.add("gone"); el.classList.add("gone"); sel.classList.remove("sel");
   gStatus("✅ <b>"+esc(WORDS[t.w][0])+"</b> "+esc(WORDS[t.w][1])+" — "+esc(WORDS[t.w][2]));
   if(G.levels[G.lv].every(function(i){return G.done[i];})){
     if(G.lv<1){ setTimeout(function(){ G.lv++; gLevel(); gStatus("🎉 Qua màn 1! Sang màn 2."); },800); }
     else { var ok=WORDS.filter(function(w,i){return !G.err[i] && !G.hinted[i];}).length, d=document.getElementById("gDone");
-      d.style.display="block"; d.textContent="🏆 Hoàn thành! Nối đúng ngay: "+ok+"/"+WORDS.length+" từ · Combo cao nhất x"+G.best; }
-  } else if(!anyMove()){ setTimeout(function(){ reshuffle(); gStatus("🔀 Hết đường nối — tự động đổi chỗ các thẻ."); },500); }
+      d.style.display="block"; d.textContent="🏆 Hoàn thành! Ghép đúng ngay: "+ok+"/"+WORDS.length+" từ · Combo cao nhất x"+G.best; }
+  }
 }
-document.getElementById("gShuffle").onclick=function(){ if(G.shN<=0) return; G.shN--; reshuffle(); gStatus("🔀 Đã đổi chỗ các thẻ."); };
 document.getElementById("gHint").onclick=function(){
-  if(G.hiN<=0) return; var p=pairs().filter(function(q){ return findPath(q[0],q[1]); })[0]; if(!p) return;
+  if(G.hiN<=0) return; var p=pairs()[0]; if(!p) return;
   G.hiN--; var w=G.grid[p[0][0]][p[0][1]].w; G.hinted[w]=true;
   [p[0],p[1]].forEach(function(q){ var e=cellEl(q[0],q[1]); e.classList.add("hint"); setTimeout(function(){ e.classList.remove("hint"); },1900); });
-  gStatus("💡 Gợi ý một cặp nối được (từ được gợi ý sẽ không tính điểm).");
+  gStatus("💡 Gợi ý một cặp (từ được gợi ý sẽ không tính điểm).");
 };
 gInit();
 
@@ -496,7 +493,7 @@ function normName(s){ return String(s).toUpperCase().replace(/\s+/g," ").trim();
 function startTimer(){ t0=Date.now(); clearInterval(tick); document.getElementById("timer").textContent="00:00";
   tick=setInterval(function(){ document.getElementById("timer").textContent=fmt((Date.now()-t0)/1000); },1000); }
 var SEND_URL = "https://script.google.com/macros/s/AKfycbyZ_4qMOzy1bHaTaWL3BUS8GcVQbUwbpzYO5EngJug-27CVrC3h-YRYtfYpcO0EIzYStw/exec";
-var NAMES = ["Trò chơi nối thẻ","Điền từ","Ghép câu hỏi – trả lời","Sắp xếp câu","Dịch"];
+var NAMES = ["Trò chơi ghép từ","Điền từ","Ghép câu hỏi – trả lời","Sắp xếp câu","Dịch"];
 var ICONS = ["🎮","✏️","🔗","🔤","🌏"];
 
 document.getElementById("stClass").addEventListener("input",function(){ var v=normClass(this.value); this.value = v || ""; });
@@ -521,7 +518,7 @@ document.getElementById("submitBtn").onclick = function(){
 
   WORDS.forEach(function(w,i){
     var e=G.err[i]||0, h=!!G.hinted[i], done=!!G.done[i], pt=(done&&!e&&!h)?1:0;
-    var tag = !done ? "Chưa nối" : e ? "Sai "+e+" lần" : h ? "Dùng gợi ý" : "Đúng ngay";
+    var tag = !done ? "Chưa ghép" : e ? "Sai "+e+" lần" : h ? "Dùng gợi ý" : "Đúng ngay";
     P[0]+=pt; REV[0].push([w[0]+" ("+w[1]+")", done?(e?"Chọn sai "+e+" lần":h?"Dùng gợi ý":"Đúng ngay lần đầu"):"", w[2], pt]);
     REP[0].push(w[0]+" → "+tag);
   });
