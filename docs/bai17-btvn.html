@@ -85,8 +85,9 @@ select:disabled{opacity:1;background:#f6f6f4}
 .pt{font-size:.9rem;color:var(--muted);font-weight:400}
 .ansbank{background:#fff;border:2px dashed var(--purple);border-radius:12px;padding:10px 14px;margin:6px 0;font-size:1.2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:4px 16px}
 .ansbank b{color:var(--purple)}
-.ansbank .used{color:#b9b6c9;text-decoration:line-through}
-.ansbank .used b{color:#b9b6c9}
+.ansbank .used{display:none}
+.bank .chip{display:inline-block;margin:4px 5px;padding:2px 12px;border:1.5px solid #e2b77d;border-radius:8px;background:#fffaf2}
+.bank .chip.used{display:none}
 .timer{position:sticky;top:0;z-index:5;margin:10px auto 0;width:max-content;background:var(--head);color:#fff;font-weight:700;font-size:1.2rem;padding:6px 18px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .bxh{background:linear-gradient(180deg,#fff8e1,#fff);border:2px solid #d4a017}
 .bxh-head{text-align:center;font-size:1.7rem;font-weight:800;color:#b8860b;letter-spacing:2px}
@@ -166,14 +167,14 @@ select:disabled{opacity:1;background:#f6f6f4}
 
 <div class="box p2">
   <h2>✏️ Bài 2. Chọn từ điền vào chỗ trống <span class="pt">(2 điểm)</span></h2>
-  <p class="note">Mỗi ô trống chọn 1 từ. Có từ dùng nhiều lần, có từ không dùng đến.</p>
-  <div class="bank">在 · 正在 · 呢 · 吗 · 没 · 不 · 怎么 · 什么 · 教 · 给 · 问 · 门 · 个 · 骑</div>
+  <p class="note">Mỗi từ trong khung chỉ dùng <b>1 lần</b> (từ nào có 2 thẻ thì dùng được 2 lần). Từ đã chọn sẽ <b>ẩn đi</b>; bỏ chọn thì từ hiện lại. Có <b>2 từ thừa</b>.</p>
+  <div class="bank" id="bank"></div>
   <div id="fill"></div>
 </div>
 
 <div class="box p3">
   <h2>🔗 Bài 3. Ghép câu hỏi với câu trả lời phù hợp <span class="pt">(2 điểm)</span></h2>
-  <p class="note">Có 10 câu trả lời cho 8 câu hỏi → <b>thừa 2 câu</b>. Mỗi câu trả lời chỉ dùng 1 lần.</p>
+  <p class="note">Có 10 câu trả lời cho 8 câu hỏi → <b>thừa 2 câu</b>. Câu trả lời đã chọn sẽ <b>ẩn đi</b>; bỏ chọn thì hiện lại.</p>
   <div class="ansbank" id="ansbank"></div>
   <div id="fix"></div>
 </div>
@@ -229,7 +230,7 @@ var WORDS = [
 ];
 
 // ===== BÀI 2: ĐIỀN TỪ =====
-var BANK = ["在","正在","呢","吗","没","不","怎么","什么","教","给","问","门","个","骑"];
+var BANK = ["在","正在","吗","什么","没","不","门","怎么","骑","教","给","问","问","个","个","呢","没有"];
 var FILL = [
  {t:["昨天晚上你来的时候，我",0,"给妈妈打电话呢。"], a:[["正在","在"]], show:"昨天晚上你来的时候，我正在给妈妈打电话呢。", why:"Có “…的时候” chỉ một thời điểm trong quá khứ → 正在 (在 cũng được). Sự tiến hành của động tác không chỉ dùng cho hiện tại."},
  {t:["A：你现在忙",0,"？ B：不忙，我",1,"看电视呢。"], a:[["吗"],["在","正在"]], show:"你现在忙吗？——不忙，我在看电视呢。", why:"Câu hỏi có/không dùng 吗; trả lời việc đang làm dùng 在 / 正在 + V + 呢."},
@@ -419,21 +420,34 @@ var fBox = document.getElementById("fill");
 FILL.forEach(function(d,i){
   var el = document.createElement("div"); el.className="item";
   el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+d.t.map(function(x){
-      return typeof x==="number" ? '<select id="s'+i+'_'+x+'"><option value="">　___　</option>'+BANK.map(function(w){return '<option>'+w+'</option>';}).join("")+'</select>' : esc(x);
+      return typeof x==="number" ? '<select class="fsel" id="s'+i+'_'+x+'"><option value="">　___　</option></select>' : esc(x);
     }).join("")+'</span><div class="fb" id="ff'+i+'"></div>';
   fBox.appendChild(el);
 });
+document.getElementById("bank").innerHTML = shuffle(BANK.map(function(w,k){return k;})).map(function(k){ return '<span class="chip" data-w="'+esc(BANK[k])+'">'+esc(BANK[k])+'</span>'; }).join("");
+function syncFill(){
+  var sels=[].slice.call(document.querySelectorAll(".fsel")), total={}, used={};
+  BANK.forEach(function(w){ total[w]=(total[w]||0)+1; });
+  sels.forEach(function(x){ if(x.value) used[x.value]=(used[x.value]||0)+1; });
+  var uniq=BANK.filter(function(w,i){ return BANK.indexOf(w)===i; });
+  sels.forEach(function(x){
+    var cur=x.value, h='<option value="">　___　</option>';
+    uniq.forEach(function(w){ var left=total[w]-(used[w]||0)+(cur===w?1:0); if(left>0) h+='<option'+(cur===w?' selected':'')+'>'+w+'</option>'; });
+    x.innerHTML=h; x.value=cur;
+  });
+  var u={}; document.querySelectorAll("#bank .chip").forEach(function(c){ var w=c.dataset.w; u[w]=(u[w]||0)+1; c.classList.toggle("used", u[w]<=(used[w]||0)); });
+}
+document.querySelectorAll(".fsel").forEach(function(x){ x.onchange=syncFill; });
+syncFill();
 
 document.getElementById("ansbank").innerHTML = ANS.map(function(a,k){ return '<div id="ab'+k+'"><b>'+L[k]+'.</b> '+esc(a)+'</div>'; }).join("");
 function syncMatch(){
   var used = {};
   MATCH.forEach(function(d,i){ var v=document.getElementById("x"+i).value; if(v!=="") used[v]=i; });
   MATCH.forEach(function(d,i){
-    document.getElementById("x"+i).querySelectorAll("option").forEach(function(o){
-      if(o.value==="") return;
-      var taken = (o.value in used) && used[o.value]!==i;
-      o.disabled = taken; o.textContent = L[+o.value] + (taken ? " (đã chọn)" : "");
-    });
+    var x=document.getElementById("x"+i), cur=x.value, h='<option value="">　_　</option>';
+    ANS.forEach(function(a,k){ if(!(String(k) in used) || used[k]===i) h+='<option value="'+k+'"'+(cur===String(k)?' selected':'')+'>'+L[k]+'</option>'; });
+    x.innerHTML=h; x.value=cur;
   });
   ANS.forEach(function(a,k){ document.getElementById("ab"+k).classList.toggle("used", String(k) in used); });
 }
@@ -626,7 +640,7 @@ document.getElementById("retryBtn").onclick = function(){
   var sb=document.getElementById("submitBtn"); sb.disabled=false; sb.textContent="✅ Nộp bài & chấm điểm";
   document.getElementById("review").innerHTML="";
   gInit();
-  syncMatch();
+  syncMatch(); syncFill();
   ORDER.forEach(function(d,i){ document.getElementById("cl"+i).click(); });
   document.querySelectorAll("textarea").forEach(function(t){ t.value=""; });
   document.querySelectorAll(".fb").forEach(function(f){ f.className="fb"; });
