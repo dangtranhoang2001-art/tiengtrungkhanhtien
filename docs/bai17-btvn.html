@@ -110,11 +110,11 @@ select:disabled{opacity:1;background:#f6f6f4}
 .gtools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 .gtools button{padding:6px 12px;font-size:.9rem}
 .gmsg{min-height:1.4em;font-size:.95rem;color:var(--muted);margin-bottom:6px}
-.owrap{position:relative;padding:22px;background:linear-gradient(135deg,#fff7e6,#eef6f3);border:2px solid #e8dcc4;border-radius:16px}
+.owrap{position:relative;padding:16px;background:linear-gradient(135deg,#fff7e6,#eef6f3);border:2px solid #e8dcc4;border-radius:16px}
 .oboard{display:grid;gap:6px;position:relative;z-index:1}
-.ot{aspect-ratio:1.15;border-radius:10px;border:2px solid #d9cfbd;background:#fff;box-shadow:0 3px 0 #d9cfbd;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;user-select:none;padding:3px;line-height:1.15;transition:transform .12s,background .15s}
+.ot{height:100%;min-height:0;border-radius:10px;border:2px solid #d9cfbd;background:#fff;box-shadow:0 3px 0 #d9cfbd;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;user-select:none;padding:3px;line-height:1.15;transition:transform .12s,background .15s}
 .ot:hover{transform:translateY(-2px)}
-.ot.zh{font-size:clamp(1.05rem,4.2vw,1.7rem);font-weight:700;color:#3b2a14;background:#fffaf0}
+.ot.zh{font-size:clamp(1.05rem,3.6vw,1.6rem);font-weight:700;color:#3b2a14;background:#fffaf0}
 .ot.vi{font-size:clamp(.62rem,2.3vw,.92rem);font-weight:600;color:var(--purple);background:#f5f4fb;border-color:#d3cfe6;box-shadow:0 3px 0 #d3cfe6}
 .ot.sel{background:#fde8b8;border-color:#e0a21b;box-shadow:0 3px 0 #e0a21b;transform:scale(1.05)}
 .ot.bad{background:#f9e1dd;border-color:var(--red);animation:shake .35s}
@@ -167,7 +167,7 @@ select:disabled{opacity:1;background:#f6f6f4}
 <div class="box p2">
   <h2>✏️ Bài 2. Chọn từ điền vào chỗ trống <span class="pt">(2 điểm)</span></h2>
   <p class="note">Mỗi ô trống chọn 1 từ. Có từ dùng nhiều lần, có từ không dùng đến.</p>
-  <div class="bank">在 · 正 · 正在 · 呢 · 没有 · 没 · 怎么 · 教 · 给 · 问 · 坐 · 骑</div>
+  <div class="bank">在 · 正在 · 呢 · 吗 · 没 · 不 · 怎么 · 什么 · 教 · 给 · 问 · 门 · 个 · 骑</div>
   <div id="fill"></div>
 </div>
 
@@ -185,8 +185,8 @@ select:disabled{opacity:1;background:#f6f6f4}
 </div>
 
 <div class="box p5">
-  <h2>🌏 Bài 5. Dịch sang tiếng Trung <span class="pt">(2 điểm)</span></h2>
-  <p class="note">Viết bằng chữ Hán. Dấu câu không ảnh hưởng điểm.</p>
+  <h2>🌏 Bài 5. Dịch Trung ⇄ Việt <span class="pt">(2 điểm)</span></h2>
+  <p class="note">Câu 1–4: dịch sang <b>tiếng Việt</b> (gõ có dấu hoặc không dấu đều được). Câu 5–8: dịch sang <b>tiếng Trung</b>, viết bằng chữ Hán. Dấu câu không ảnh hưởng điểm.</p>
   <div id="trans"></div>
 </div>
 
@@ -229,52 +229,57 @@ var WORDS = [
 ];
 
 // ===== BÀI 2: ĐIỀN TỪ =====
-var BANK = ["在","正","正在","呢","没有","没","怎么","教","给","问","坐","骑"];
+var BANK = ["在","正在","呢","吗","没","不","怎么","什么","教","给","问","门","个","骑"];
 var FILL = [
- {t:["A：麦克在做什么",0,"？ B：他",1,"听音乐呢。"], a:[["呢"],["在","正在","正"]], show:"麦克在做什么呢？——他在（正在 / 正）听音乐呢。", why:"呢 cuối câu hỏi làm ngữ khí nhẹ nhàng; 在 / 正在 / 正 + động từ = đang."},
- {t:["A：你在看电视吗？ B：",0,"，我在看书呢。"], a:[["没有"]], show:"你在看电视吗？——没有，我在看书呢。", why:"Trả lời phủ định hành động đang diễn ra dùng 没有, không dùng 不."},
- {t:["他们",0,"在上课，他们在休息。"], a:[["没","没有"]], show:"他们没（有）在上课，他们在休息。", why:"Phủ định: 没（有）+ 在 + động từ."},
- {t:["我出来的时候，他",0,"听课文录音呢。"], a:[["正在","正","在"]], show:"我出来的时候，他正在听课文录音呢。", why:"“…的时候” chỉ một thời điểm → dùng 正在 / 正 (dùng 在 cũng được)."},
- {t:["A：咱们",0,"去书店？ B：",1,"车去吧。"], a:[["怎么"],["坐","骑"]], show:"咱们怎么去书店？——坐（骑）车去吧。", why:"怎么 + động từ hỏi cách thức, 怎么 đứng trước động từ. 坐车 / 骑车 đều hợp."},
- {t:["今天星期六，坐车太挤，我们",0,"车去吧。"], a:[["骑"]], show:"今天星期六，坐车太挤，我们骑车去吧。", why:"坐车 đã “quá đông” → chọn cách khác: 骑车 (đạp xe)."},
- {t:["林老师",0,"我们听力和阅读。"], a:[["教"]], show:"林老师教我们听力和阅读。", why:"Câu hai tân ngữ: 教 + người (我们) + nội dung (听力和阅读)."},
- {t:["玛丽",0,"我一本英文杂志。我常常",1,"老师问题。"], a:[["给"],["问"]], show:"玛丽给我一本英文杂志。我常常问老师问题。", why:"给 + người + vật; 问 + người + 问题 — cả hai đều là câu hai tân ngữ."}
+ {t:["昨天晚上你来的时候，我",0,"给妈妈打电话呢。"], a:[["正在","在"]], show:"昨天晚上你来的时候，我正在给妈妈打电话呢。", why:"Có “…的时候” chỉ một thời điểm trong quá khứ → 正在 (在 cũng được). Sự tiến hành của động tác không chỉ dùng cho hiện tại."},
+ {t:["A：你现在忙",0,"？ B：不忙，我",1,"看电视呢。"], a:[["吗"],["在","正在"]], show:"你现在忙吗？——不忙，我在看电视呢。", why:"Câu hỏi có/không dùng 吗; trả lời việc đang làm dùng 在 / 正在 + V + 呢."},
+ {t:["A：你在做",0,"呢？ B：我在复习语法。"], a:[["什么"]], show:"你在做什么呢？——我在复习语法。", why:"Câu đã có 呢 và đang hỏi “làm gì” → cần từ để hỏi 什么 (không dùng 吗 cùng 呢 trong câu này)."},
+ {t:["他",0,"在复习课文，他在跟朋友聊天儿。"], a:[["没"]], show:"他没在复习课文，他在跟朋友聊天儿。", why:"Phủ định hành động đang diễn ra dùng 没（有）, không dùng 不."},
+ {t:["他",0,"是留学生，他是中国学生。"], a:[["不"]], show:"他不是留学生，他是中国学生。", why:"是 không dùng với 在/正在 và phủ định bằng 不 → 不是. Đừng nhầm với câu 4!"},
+ {t:["我们现在有五",0,"课：综合、口语、听力、阅读和文化。"], a:[["门"]], show:"我们现在有五门课：综合、口语、听力、阅读和文化。", why:"Lượng từ cho môn học là 门 (không dùng 个)."},
+ {t:["明天你",0,"去银行？坐车还是",1,"车？"], a:[["怎么"],["骑"]], show:"明天你怎么去银行？坐车还是骑车？", why:"怎么 đứng trước động từ để hỏi cách thức; xe đạp dùng 骑."},
+ {t:["张老师",0,"我们汉字，我常常",1,"他问题。"], a:[["教"],["问"]], show:"张老师教我们汉字，我常常问他问题。", why:"Câu hai tân ngữ: 教 + người + nội dung; 问 + người + 问题."},
+ {t:["哥哥",0,"我一本中文杂志，我想",1,"朋友一个问题。"], a:[["给"],["问"]], show:"哥哥给我一本中文杂志，我想问朋友一个问题。", why:"给 + người + vật; 问 + người + 一个问题 (lượng từ 个 đi với 问题)."},
+ {t:["我想问你一",0,"问题：你们班有几",1,"老师？"], a:[["个"],["个"]], show:"我想问你一个问题：你们班有几个老师？", why:"问题 và 老师 đều dùng lượng từ 个; 门 chỉ dùng cho môn học."}
 ];
 
 // ===== BÀI 3: GHÉP CÂU HỎI – CÂU TRẢ LỜI =====
-var ANS = ["他在听音乐呢。","骑车去吧。","没有，我正听课文录音呢。","王老师。","现在只有四门课。","我想买一本《汉英词典》。","没有事儿。","行。","她教我们听力和阅读。","我在宿舍。"];
+var ANS = ["他在给朋友打电话呢。","没有，我在预习生词呢。","我骑车去。","张老师教我们阅读。","有五门：综合、口语、听力、阅读和文化。","行，咱们几点去？","我问老师一个语法问题。","他给我一本《汉英词典》。","不，我不在复习课文。","我去银行怎么。"];
 var MATCH = [
- {q:"麦克在做什么呢？", a:0, why:"Hỏi “đang làm gì” → trả lời bằng 在 + động từ + 呢. “我在宿舍” chỉ nơi chốn."},
- {q:"你是不是在听音乐呢？", a:2, why:"Phủ định: 没有，我正听课文录音呢。"},
- {q:"下午你有事儿吗？", a:6, why:"有事儿吗 → 没有事儿。"},
- {q:"你要买什么书？", a:5, why:"什么书 → nói tên sách: 《汉英词典》."},
- {q:"咱们怎么去呢？", a:1, why:"怎么去 hỏi cách đi → 骑车去吧。"},
- {q:"今天坐车太挤，骑车去怎么样？", a:7, why:"Đồng ý với đề nghị → 行。"},
- {q:"你们有几门课？", a:4, why:"几门课 → số + 门 + 课."},
- {q:"谁教你们口语课？", a:3, why:"谁 hỏi người → 王老师。 Câu “她教我们听力和阅读” trả lời cho “林老师教你们什么？”."}
+ {q:"你哥哥在做什么呢？", a:0, why:"Hỏi “đang làm gì” → 在 + V + 呢."},
+ {q:"你在复习课文吗？", a:1, why:"Phủ định hành động đang diễn ra dùng 没有. “不，我不在复习课文” là câu sai."},
+ {q:"你怎么去银行？", a:2, why:"怎么去 hỏi phương tiện → 骑车去. “我去银行怎么” sai trật tự (怎么 không đứng cuối câu trả lời)."},
+ {q:"谁教你们阅读？", a:3, why:"谁 hỏi người → 张老师教我们阅读."},
+ {q:"你们这个星期有几门课？", a:4, why:"几门课 → số + 门."},
+ {q:"下午我们一起去书店，好吗？", a:5, why:"Đồng ý lời rủ → 行."},
+ {q:"你问老师什么问题？", a:6, why:"问 + người + 问题: 我问老师一个语法问题."},
+ {q:"你爸爸给你什么？", a:7, why:"给 + người + vật: 他给我一本《汉英词典》."}
 ];
 var L = "ABCDEFGHIJ";
 
 // ===== BÀI 4: SẮP XẾP =====
 var ORDER = [
- {t:["在","呢","他","做","什么"], a:["他在做什么呢"], show:"他在做什么呢？"},
- {t:["正在","我","录音","听","课文","呢"], a:["我正在听课文录音呢"], show:"我正在听课文录音呢。"},
- {t:["教","我们","林老师","听力"], a:["林老师教我们听力"], show:"林老师教我们听力。"},
- {t:["一本","给","我","词典","爸爸"], a:["爸爸给我一本词典"], show:"爸爸给我一本词典。"},
- {t:["怎么","去","你","书店"], a:["你怎么去书店"], show:"你怎么去书店？"},
- {t:["没","他们","上课","在"], a:["他们没在上课"], show:"他们没在上课。"},
- {t:["太","坐车","挤","今天"], a:["今天坐车太挤"], show:"今天坐车太挤。"},
- {t:["问","一个","老师","我","问题"], a:["我问老师一个问题"], show:"我问老师一个问题。"}
+ {t:["的时候","我","他","正在","给","去","朋友","打电话","呢"], a:["我去的时候他正在给朋友打电话呢","他去的时候我正在给朋友打电话呢"], show:"我去的时候，他正在给朋友打电话呢。"},
+ {t:["王老师","教","我们","口语","和","听力","不教","阅读"], a:["王老师教我们口语和听力不教阅读","王老师教我们听力和口语不教阅读"], show:"王老师教我们口语和听力，不教阅读。"},
+ {t:["他们","没","在","看电视","他们","在","复习","课文"], a:["他们没在看电视他们在复习课文","他们在复习课文他们没在看电视"], show:"他们没在看电视，他们在复习课文。"},
+ {t:["怎么","去","你们","明天","书店"], a:["明天你们怎么去书店","你们明天怎么去书店"], show:"明天你们怎么去书店？"},
+ {t:["一个","老师","问","我","想","问题"], a:["我想问老师一个问题"], show:"我想问老师一个问题。"},
+ {t:["给","一本","杂志","中文","我","朋友"], a:["朋友给我一本中文杂志","我给朋友一本中文杂志"], show:"朋友给我一本中文杂志。（hoặc：我给朋友一本中文杂志。）"},
+ {t:["坐车","挤","太","骑车","吧","去","今天","咱们"], a:["今天坐车太挤咱们骑车去吧","今天咱们骑车去吧坐车太挤"], show:"今天坐车太挤，咱们骑车去吧。"},
+ {t:["几","门","现在","你们","课","有"], a:["你们现在有几门课","现在你们有几门课"], show:"你们现在有几门课？"}
 ];
 
-// ===== BÀI 5: DỊCH VIỆT → TRUNG =====
+// ===== BÀI 5: DỊCH TRUNG ⇄ VIỆT =====
+// d:"vi" = dịch sang tiếng Việt (k: ý cần có, so khớp không dấu); d:"zh" = dịch sang tiếng Trung
 var TRANS = [
- {vi:"Bạn ấy đang làm gì thế? — Bạn ấy đang nghe nhạc.", a:["他在做什么呢他在听音乐呢","他正在做什么呢他正在听音乐呢","她在做什么呢她在听音乐呢"], show:"他在做什么呢？——他在听音乐呢。", k:[["在做什么","正在做什么","正做什么"],["在听音乐","正在听音乐","正听音乐"]]},
- {vi:"Lúc tôi ra ngoài, anh ấy đang xem ti vi.", a:["我出来的时候他正在看电视呢","我出来的时候他正在看电视","我出来的时候他在看电视呢"], show:"我出来的时候，他正在看电视呢。", k:[["出来的时候"],["正在看电视","在看电视","正看电视"]]},
- {vi:"Chúng ta đi bằng gì? — Đạp xe đi.", a:["咱们怎么去骑车去吧","我们怎么去骑车去吧","咱们怎么去呢骑车去吧"], show:"咱们怎么去（呢）？——骑车去吧。", k:[["怎么去"],["骑车去"]]},
- {vi:"Cô Lâm dạy chúng tôi nghe hiểu và đọc.", a:["林老师教我们听力和阅读"], show:"林老师教我们听力和阅读。", k:[["老师教我们"],["听力"],["阅读"]]},
- {vi:"Tôi không xem ti vi, tôi đang đọc sách.", a:["我没看电视我在看书","我没有看电视我在看书","我没在看电视我在看书","我没有在看电视我在看书","我没有看电视我正在看书"], show:"我没（有）看电视，我在看书。", k:[["没看电视","没有看电视","没在看电视","没有在看电视"],["在看书","正在看书","正看书"]]},
- {vi:"Các bạn có mấy môn học? Ai dạy các bạn khẩu ngữ?", a:["你们有几门课谁教你们口语","你们有几门课谁教你们口语课"], show:"你们有几门课？谁教你们口语（课）？", k:[["有几门课"],["谁教你们口语"]]}
+ {d:"vi", q:"你来的时候，我正在跟朋友聊天儿呢。", show:"Lúc bạn đến, mình đang nói chuyện với bạn bè.", k:[["luc ban den","khi ban den","luc cau den","khi cau den","ban den","ban toi","cau den","cau toi"],["dang"],["noi chuyen","tro chuyen","tan gau","tan chuyen","chuyen tro"]]},
+ {d:"vi", q:"我没在看电视，我在给妈妈写信。", show:"Tôi không xem ti vi, tôi đang viết thư cho mẹ.", k:[["khong"],["ti vi","tivi","truyen hinh"],["viet thu"],["me"]]},
+ {d:"vi", q:"谁教你们文化课？——林老师教我们。", show:"Ai dạy các bạn môn văn hoá? — Cô Lâm dạy chúng tôi.", k:[["ai day"],["van hoa"],["lam"]]},
+ {d:"vi", q:"今天星期六，坐车太挤，我们走路去吧。", show:"Hôm nay thứ bảy, đi xe buýt đông quá, chúng ta đi bộ đi.", k:[["thu bay"],["dong","chen chuc","chat"],["di bo"]]},
+ {d:"zh", q:"Lúc tôi đến hiệu sách, cô ấy đang mua từ điển Hán – Anh.", show:"我去书店的时候，她正在买《汉英词典》呢。", k:[["书店的时候"],["正在买","在买","正买"],["汉英词典"]]},
+ {d:"zh", q:"Anh ấy không ôn bài, anh ấy đang nghe nhạc.", show:"他没（在）复习，他在听音乐（呢）。", k:[["没"],["复习","学习","看书","做练习"],["在听音乐","正在听音乐","正听音乐"]]},
+ {d:"zh", q:"Chị gái tôi cho tôi một cuốn tạp chí tiếng Anh.", show:"我姐姐给我一本英文杂志。", k:[["姐姐给我"],["一本"],["英文杂志","英语杂志"]]},
+ {d:"zh", q:"Ngày mai các bạn đi công viên bằng gì? — Chúng tôi đạp xe đi.", show:"明天你们怎么去公园？——我们骑车去。", k:[["怎么去公园"],["骑车去","骑自行车去"]]}
 ];
 var PTS = [2,2,2,2,2];
 
@@ -283,6 +288,9 @@ function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&am
 // ---- trò chơi nối thẻ kiểu Pikachu ----
 function shuffle(x){ x=x.slice(); for(var i=x.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=x[i]; x[i]=x[j]; x[j]=t; } return x; }
 var COLS=4, ROWS=6;
+function gLayout(){ var wide=window.innerWidth>=620; COLS=wide?6:4; ROWS=wide?4:6; }
+function gSize(){ var b=document.getElementById("oBoard"); var h=Math.max(260,Math.min(window.innerHeight-(COLS===6?330:250), ROWS*(COLS===6?92:86))); b.style.height=h+"px"; b.style.gridTemplateRows="repeat("+ROWS+",1fr)"; }
+window.addEventListener("resize",function(){ if(G.grid) gSize(); });
 var G = {levels:[], lv:0, err:{}, done:{}, hinted:{}, sel:null, combo:0, best:0, grid:null, shN:3, hiN:3};
 function gInit(){
   var order = shuffle(WORDS.map(function(w,i){return i;}));
@@ -290,7 +298,7 @@ function gInit(){
   document.getElementById("gDone").style.display="none"; gLevel();
 }
 function gLevel(){
-  var ids=G.levels[G.lv], tiles=[];
+  gLayout(); var ids=G.levels[G.lv], tiles=[];
   ids.forEach(function(i){ tiles.push({w:i,s:"zh"}); tiles.push({w:i,s:"vi"}); });
   while(tiles.length<ROWS*COLS) tiles.push(null);
   G.grid=[]; for(var r=0;r<ROWS+2;r++){ G.grid.push([]); for(var c=0;c<COLS+2;c++) G.grid[r].push(null); }
@@ -299,7 +307,7 @@ function gLevel(){
   G.sel=null; if(!anyMove()) reshuffle(true); draw(); gStatus(""); 
 }
 function draw(){
-  var b=document.getElementById("oBoard"); b.style.gridTemplateColumns="repeat("+COLS+",1fr)"; b.innerHTML="";
+  var b=document.getElementById("oBoard"); b.style.gridTemplateColumns="repeat("+COLS+",1fr)"; gSize(); b.innerHTML="";
   for(var r=1;r<=ROWS;r++) for(var c=1;c<=COLS;c++){
     var t=G.grid[r][c], d=document.createElement("div");
     d.className="ot "+(t?t.s:"gone"); d.dataset.r=r; d.dataset.c=c;
@@ -451,14 +459,15 @@ function drawLine(i){
 var tBox = document.getElementById("trans");
 TRANS.forEach(function(d,i){
   var el = document.createElement("div"); el.className="item";
-  el.innerHTML = '<span class="num">'+(i+1)+'</span><b>'+esc(d.vi)+'</b>'+
-    '<textarea id="t'+i+'" placeholder="用汉字写…"></textarea><div class="fb" id="tf'+i+'"></div>';
+  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="pt">'+(d.d==="vi"?"Dịch sang tiếng Việt:":"Dịch sang tiếng Trung:")+'</span><br><b'+(d.d==="vi"?' class="hz"':'')+'>'+esc(d.q)+'</b>'+
+    '<textarea id="t'+i+'" placeholder="'+(d.d==="vi"?"Viết câu tiếng Việt…":"用汉字写…")+'"></textarea><div class="fb" id="tf'+i+'"></div>';
   tBox.appendChild(el);
 });
 
 // ===== CHẤM =====
 function clean(s){ return s.replace(/[\s，。！？、：；,.!?:;“”"'（）()…—\-]/g,""); }
 function hasHanzi(s){ return /[一-鿿]/.test(s); }
+function viNorm(s){ return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim(); }
 function keyRatio(t,keys){ var h=0; keys.forEach(function(g){ if(g.some(function(k){return t.indexOf(k)>-1;})) h++; }); return h/keys.length; }
 function okBox(f,html){ f.className="fb ok"; f.innerHTML='🌟 <b>Đúng rồi!</b>'+(html?'<div class="ans">'+html+'</div>':''); }
 function setFb(f,cls,head,ans){ f.className="fb "+cls; f.innerHTML=head+'<div class="ans">'+ans+'</div>'; }
@@ -484,7 +493,7 @@ document.getElementById("startBtn").onclick = function(){
   this.style.display="none";
   document.getElementById("quiz").hidden=false; document.getElementById("timerBar").hidden=false;
   startTimer();
-  document.getElementById("quiz").scrollIntoView({behavior:"smooth"});
+  setTimeout(function(){ var g=document.querySelector(window.innerWidth>=620?".p1":".gtop"); window.scrollTo({top:g.getBoundingClientRect().top+window.scrollY-(window.innerWidth>=620?8:56),behavior:"smooth"}); },50);
 };
 
 document.getElementById("submitBtn").onclick = function(){
@@ -532,17 +541,18 @@ document.getElementById("submitBtn").onclick = function(){
   });
 
   TRANS.forEach(function(d,i){
-    var raw = document.getElementById("t"+i).value.trim(), s = clean(raw), f=document.getElementById("tf"+i), pt=0, tag;
+    var raw = document.getElementById("t"+i).value.trim(), f=document.getElementById("tf"+i), pt=0, tag, r=0;
     if(!raw){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa dịch câu này.</b>','👉 Đáp án: '+esc(d.show)); }
-    else if(!hasHanzi(raw)){ tag="Không dùng chữ Hán"; setFb(f,"no",'✋ <b>Bạn cần gõ bằng chữ Hán nhé.</b>','👉 Đáp án: '+esc(d.show)); }
+    else if(d.d==="zh" && !hasHanzi(raw)){ tag="Không dùng chữ Hán"; setFb(f,"no",'✋ <b>Bạn cần gõ bằng chữ Hán nhé.</b>','👉 Đáp án: '+esc(d.show)); }
+    else if(d.d==="vi" && hasHanzi(raw)){ tag="Chưa dịch sang tiếng Việt"; setFb(f,"no",'✋ <b>Câu này cần dịch sang tiếng Việt.</b>','👉 Đáp án: '+esc(d.show)); }
     else {
-      var r = keyRatio(s,d.k);
-      if(d.a.indexOf(s)>-1 || r>=0.99){ pt=1; tag="Đúng"; okBox(f,'📖 Đáp án mẫu: '+esc(d.show)); }
+      r = d.d==="zh" ? keyRatio(clean(raw),d.k) : keyRatio(" "+viNorm(raw)+" ",d.k);
+      if(r>=0.99){ pt=1; tag="Đúng"; okBox(f,'📖 Đáp án mẫu: '+esc(d.show)); }
       else if(r>=0.5){ pt=0.5; tag="Gần đúng"; setFb(f,"mid",'🙂 <b>Gần đúng, còn thiếu hoặc sai một phần.</b>','✏️ Đáp án: '+esc(d.show)); }
       else { tag="Chưa đúng"; setFb(f,"no",'💪 <b>Chưa đúng.</b>','✏️ Đáp án: '+esc(d.show)); }
     }
-    P[4]+=pt; REV[4].push([d.vi, raw, d.show, pt]);
-    REP[4].push((i+1)+". "+d.vi+"\n   Bạn viết: "+(raw||"(bỏ trống)")+" → "+tag);
+    P[4]+=pt; REV[4].push([d.q, raw, d.show, pt]);
+    REP[4].push((i+1)+". "+d.q+"\n   Bạn viết: "+(raw||"(bỏ trống)")+" → "+tag);
   });
 
   var r1 = function(x){ return Math.round(x*10)/10; };
