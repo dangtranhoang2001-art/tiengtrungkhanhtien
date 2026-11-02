@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BTVN Bài 7 你吃什么</title>
+<style>
+:root{
+  --bg:#f5f4f0; --card:#fff; --ink:#2b2d33; --muted:#6c7079;
+  --pink:#a8576b; --orange:#b07a3e; --blue:#3f6e99; --green:#3f8a5f; --yellow:#c9b27a; --red:#b5554b; --purple:#5e5a93; --head:#2f5d62;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Roboto,"Noto Sans","Noto Sans SC","Microsoft YaHei",Arial,sans-serif;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+header{background:var(--head);color:#fff;border-radius:14px;padding:18px 22px}
+header .zh{font-size:2rem;font-weight:700;letter-spacing:2px}
+header h1{margin:2px 0;font-size:1.4rem}
+.box{background:var(--card);border:1px solid #e6e3dc;border-radius:14px;padding:16px 18px;margin-top:16px;}
+.box h2{margin:0 0 6px;font-size:1.2rem}
+.p1 h2{color:var(--blue)} .p2 h2{color:var(--orange)} .p3 h2{color:var(--purple)}
+.note{color:var(--muted);font-size:.95rem;margin:0 0 6px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{cursor:pointer;border:none;border-radius:12px;padding:10px 16px;font-size:1rem;font-weight:600;color:#fff;background:var(--blue)}
+button.alt{background:#fff;color:var(--blue);border:2px solid var(--blue)}
+button.big{background:var(--head);font-size:1.15rem;padding:14px 22px}
+button:disabled{opacity:.6;cursor:default}
+.name{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.name input{flex:1;min-width:200px;padding:10px 12px;border:1px solid #ccc;border-radius:12px;font-size:1rem}
+.item{border-radius:10px;padding:12px 14px;margin-top:12px;border-left:4px solid var(--blue);background:#f1f5f9}
+.p2 .item{border-left-color:var(--orange);background:#faf5ee}
+.p3 .item{border-left-color:var(--purple);background:#f3f2f8}
+.num{display:inline-block;min-width:26px;height:26px;border-radius:13px;background:var(--head);color:#fff;text-align:center;line-height:26px;font-size:.85rem;margin-right:6px;padding:0 6px}
+.hz{font-size:1.3rem}
+/* trắc nghiệm */
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:8px}
+.opt{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid #dcd9d2;border-radius:12px;padding:8px 12px;cursor:pointer;font-size:1.1rem}
+.opt input{display:none}
+.opt .l{font-weight:700;color:var(--blue);min-width:22px}
+.opt.sel{border-color:var(--blue);background:#eaf1f8}
+.opt.right{border-color:var(--green);background:#eef6f0}
+.opt.wrong{border-color:var(--red);background:#f9efed}
+/* sắp xếp */
+.line{min-height:52px;margin-top:8px;padding:8px;border:2px dashed #cfc6b6;border-radius:12px;background:#fff;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.line:empty::before{content:"Bấm vào các từ bên dưới theo đúng thứ tự…";color:#aaa;font-size:.95rem}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.tile{background:#fff;border:2px solid var(--orange);color:var(--ink);border-radius:10px;padding:6px 14px;font-size:1.3rem;font-weight:600;cursor:pointer;user-select:none}
+.tile.used{visibility:hidden}
+.line .tile{border-color:var(--head);background:#eef4f4}
+.clear{background:#fff;color:var(--muted);border:1px solid #ccc;font-size:.85rem;padding:4px 10px;margin-top:6px}
+/* dịch */
+textarea{width:100%;margin-top:8px;padding:10px;border:1px solid #cfccc4;border-radius:12px;font-size:1.15rem;font-family:inherit;resize:vertical;min-height:50px;background:#fff}
+textarea:focus{outline:none;border-color:var(--head)}
+.fb{margin-top:8px;border-radius:12px;padding:8px 12px;display:none;font-size:.97rem}
+.fb.ok{display:block;background:#eef6f0;border:1px solid var(--green)}
+.fb.mid{display:block;background:#faf6ea;border:1px solid var(--yellow)}
+.fb.no{display:block;background:#f9efed;border:1px solid var(--red)}
+.fb.empty{display:block;background:#f3f3f3;border:1px dashed #bbb}
+.fb .ans{margin-top:3px}
+.result{text-align:center;display:none}
+.result .score{font-size:3rem;font-weight:800;color:var(--head)}
+.result .sub{color:var(--muted)}
+.review{text-align:left;margin-top:16px}
+.review h3{font-size:1.05rem;color:var(--head);margin:14px 0 6px}
+.review table{width:100%;border-collapse:collapse;font-size:.95rem}
+.review th,.review td{border-bottom:1px solid #e6e3dc;padding:7px 6px;vertical-align:top}
+.review th{background:#f1efe9;text-align:left;font-weight:600}
+.review td.c{text-align:center;width:44px;font-size:1.1rem}
+.review .mine{color:var(--muted)}
+.locked textarea{background:#f6f6f4;color:#555}
+.locked .opt,.locked .tile,.locked .clear{pointer-events:none}
+@media(max-width:600px){.review th:nth-child(2),.review td:nth-child(2){display:none}}
+footer{text-align:center;color:var(--muted);font-size:.9rem;margin:24px 0 10px}
+.passage{background:#fffaf2;border:1px solid #ecd9bf;border-radius:12px;padding:12px 16px;margin:8px 0 4px;font-size:1.3rem;line-height:1.9}
+.passage p{margin:4px 0;text-indent:2em}
+.gloss{font-size:.9rem;color:var(--muted);margin-top:6px}
+.bank{background:#fff;border:2px dashed var(--orange);border-radius:12px;padding:8px 12px;text-align:center;font-size:1.3rem;font-weight:600;color:var(--orange);margin:6px 0}
+select{font-size:1.2rem;font-family:inherit;padding:3px 6px;margin:0 4px;border:2px solid var(--orange);border-radius:8px;background:#fff;color:var(--ink)}
+select:disabled{opacity:1;background:#f6f6f4}
+.vi{color:var(--muted);font-size:.95rem;margin-top:2px}
+.p4 h2{color:var(--green)} .p5 h2{color:var(--pink)}
+.p4 .item{border-left-color:var(--green);background:#eff6f1}
+.p5 .item{border-left-color:var(--pink);background:#f8f0f2}
+.pt{font-size:.9rem;color:var(--muted);font-weight:400}
+.ansbank{background:#fff;border:2px dashed var(--purple);border-radius:12px;padding:10px 14px;margin:6px 0;font-size:1.2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:4px 16px}
+.ansbank b{color:var(--purple)}
+.ansbank .used{display:none}
+.bank .chip{display:inline-block;margin:4px 5px;padding:2px 12px;border:1.5px solid #e2b77d;border-radius:8px;background:#fffaf2}
+.bank .chip.used{display:none}
+.timer{position:sticky;top:0;z-index:5;margin:10px auto 0;width:max-content;background:var(--head);color:#fff;font-weight:700;font-size:1.2rem;padding:6px 18px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.bxh{background:linear-gradient(180deg,#fff8e1,#fff);border:2px solid #d4a017}
+.bxh-head{text-align:center;font-size:1.7rem;font-weight:800;color:#b8860b;letter-spacing:2px}
+.bxh-sub{text-align:center;color:var(--muted);margin:4px 0 10px}
+.bxh-sub select{border-color:#d4a017;font-size:1rem}
+.bxh table{width:100%;border-collapse:collapse;font-size:1.05rem}
+.bxh th{background:#f7e7b4;color:#7a5a00;text-align:left;padding:8px}
+.bxh td{padding:8px;border-bottom:1px solid #f0e2b6}
+.bxh td.r{text-align:center;font-size:1.3rem;width:52px}
+.bxh tr.top1 td{background:#fff3c4;font-weight:700}
+.bxh tr.top2 td{background:#f4f4f4}
+.bxh tr.top3 td{background:#fbeee4}
+.bxh tr.me td{outline:2px solid var(--green);outline-offset:-2px}
+.bxh .empty{text-align:center;color:var(--muted);padding:14px}
+.p4 .item.read{border-left-color:var(--green);background:#eff6f1}
+.rq{margin-top:10px}
+.essay-hint{background:#fbf6ff;border:1px dashed var(--purple);border-radius:12px;padding:10px 14px;margin:8px 0;font-size:1rem}
+.essay-hint summary{cursor:pointer;font-weight:700;color:var(--purple)}
+.essay-hint ul{margin:6px 0 0;padding-left:20px}
+.essay-hint .hz{font-size:1.15rem}
+.frame{background:#fff;border-radius:10px;padding:8px 12px;margin-top:6px;font-size:1.2rem;line-height:1.9}
+#essay{min-height:170px;font-size:1.25rem;line-height:1.8}
+.cnt{display:flex;gap:14px;flex-wrap:wrap;font-size:.92rem;color:var(--muted);margin-top:4px}
+.cnt b{color:var(--ink)}
+.ai{margin-top:10px;border-radius:12px;border:1px solid #d9d2ea;background:#fbfaff;padding:12px 14px;display:none}
+.ai h4{margin:4px 0 6px;color:var(--purple);font-size:1.05rem}
+.ai .fixed{background:#fff;border:1px solid #e3dcf1;border-radius:10px;padding:10px 12px;font-size:1.25rem;line-height:1.9}
+.ai table{width:100%;border-collapse:collapse;font-size:.98rem;margin-top:4px}
+.ai th,.ai td{border-bottom:1px solid #ebe6f4;padding:6px;vertical-align:top;text-align:left}
+.ai th{background:#f1eef8}
+.ai td.bad{color:var(--red)} .ai td.good{color:var(--green);font-weight:600}
+.crit{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px;margin:6px 0}
+.crit div{background:#fff;border:1px solid #e3dcf1;border-radius:10px;padding:6px 10px}
+.crit b{color:var(--purple);font-size:1.1rem}
+.spin{display:inline-block;width:16px;height:16px;border:3px solid #d9d2ea;border-top-color:var(--purple);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.locked .opt{pointer-events:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="zh">第七课 · 你吃什么</div>
+  <h1>Bài tập về nhà · Nâng cao (khá – giỏi)</h1>
+</header>
+
+<div class="box" id="gate">
+  <div class="name">
+    <label for="stClass"><b>Lớp:</b></label>
+    <input id="stClass" placeholder="VD: K67" inputmode="numeric" autocomplete="off" style="max-width:140px;min-width:100px;text-transform:uppercase;font-weight:700">
+    <label for="stName"><b>Họ tên:</b></label>
+    <input id="stName" placeholder="NHẬP HỌ TÊN CỦA BẠN" autocomplete="off" style="text-transform:uppercase">
+  </div>
+  <p class="note" style="margin-top:8px">⏱ Bấm <b>Bắt đầu</b> là đồng hồ chạy. Bài 1–4 chấm ngay khi nộp; <b>Bài 5 (viết đoạn văn)</b> được chấm theo thang tiêu chí và <b>tự động sửa lỗi</b> sau khi nộp (đợi khoảng 10–30 giây). Xếp hạng <b>BẢNG VÀNG</b>: điểm cao hơn đứng trên; bằng điểm thì ai làm <b>nhanh hơn</b> đứng trên. Chỉ tính <b>lần nộp đầu tiên</b>.</p>
+  <div class="toolbar">
+    <button class="big" id="startBtn">▶️ Bắt đầu làm bài</button>
+    <button class="alt" id="viewBxh">🏆 Xem Bảng vàng</button>
+  </div>
+</div>
+
+<div id="timerBar" class="timer" hidden>⏱ <span id="timer">00:00</span></div>
+
+<div id="quiz" hidden>
+
+<div class="box p1">
+  <h2>✏️ Bài 1. Chọn từ điền vào chỗ trống <span class="pt">(20 điểm)</span></h2>
+  <p class="note">Mỗi thẻ trong khung chỉ dùng <b>1 lần</b> (từ có 2 thẻ thì dùng được 2 lần). Từ đã chọn sẽ <b>ẩn đi</b>; bỏ chọn thì từ hiện lại. Có <b>2 từ thừa</b>.</p>
+  <div class="bank" id="bank"></div>
+  <div id="fill"></div>
+</div>
+
+<div class="box p2">
+  <h2>🔍 Bài 2. Chọn câu ĐÚNG <span class="pt">(20 điểm)</span></h2>
+  <p class="note">Mỗi câu hỏi có 4 lựa chọn, chỉ <b>1 lựa chọn đúng</b> ngữ pháp và tự nhiên. Chú ý lượng từ, vị trí của 什么, 吃 / 喝 và biến điệu của 一.</p>
+  <div id="mc"></div>
+</div>
+
+<div class="box p3">
+  <h2>🔤 Bài 3. Sắp xếp thành câu đúng <span class="pt">(20 điểm)</span></h2>
+  <p class="note">Bấm lần lượt các từ theo đúng thứ tự. Bấm vào từ đã chọn để bỏ ra. Phải dùng hết các từ (không cần dấu câu).</p>
+  <div id="order"></div>
+</div>
+
+<div class="box p4">
+  <h2>📖 Bài 4. Đọc hiểu <span class="pt">(20 điểm)</span></h2>
+  <p class="note">Đọc đoạn văn rồi chọn đáp án đúng.</p>
+  <div class="passage" id="passage"></div>
+  <div id="read"></div>
+</div>
+
+<div class="box p5">
+  <h2>📝 Bài 5. Viết đoạn văn: 昨天你吃什么？<span class="pt">(20 điểm)</span></h2>
+  <p class="note">Viết <b>một đoạn văn bằng chữ Hán</b> (5–8 câu, khoảng <b>60–120 chữ</b>) kể <b>hôm qua bạn đã ăn gì</b>. Dùng ít nhất <b>5 từ của bài 7</b>.</p>
+  <details class="essay-hint" open>
+    <summary>💡 Gợi ý (bấm để ẩn / hiện)</summary>
+    <ul>
+      <li><b>Trả lời lần lượt các câu hỏi:</b> <span class="hz">昨天星期几？ 中午你去哪儿吃饭？ 你吃什么？ 你要几个 / 几碗？ 你喝什么？ 你的朋友（爸爸、妈妈）吃什么、喝什么？</span></li>
+      <li><b>Từ nên dùng:</b> <span class="hz">中午 · 食堂 · 吃饭 · 馒头 · 包子 · 饺子 · 面条 · 米饭 · 鸡蛋汤 · 啤酒 · 茶 · 要 · 个 · 碗 · 这些 · 那些</span></li>
+      <li><b>Khung câu tham khảo</b> (không bắt buộc, hãy viết theo cách của bạn):
+        <div class="frame">昨天星期＿＿。中午我去＿＿吃饭。我要＿＿个＿＿，一碗＿＿。我不喝＿＿，我喝＿＿。我的朋友不吃＿＿，他 / 她吃＿＿……</div></li>
+      <li><b>Thang chấm (20 điểm):</b> Nội dung &amp; yêu cầu 5 · Từ vựng bài 7: 5 · Ngữ pháp 6 · Chữ Hán &amp; dấu câu 4.</li>
+      <li>Có thể dùng 了 nếu bạn đã biết, nhưng <b>không bắt buộc</b> — không dùng 了 không bị trừ điểm.</li>
+    </ul>
+  </details>
+  <textarea id="essay" placeholder="昨天……（用汉字写）"></textarea>
+  <div class="cnt"><span>Số chữ Hán: <b id="nHz">0</b></span><span>Số câu: <b id="nSent">0</b></span><span>Từ bài 7 đã dùng: <b id="nW">0</b></span></div>
+  <div class="fb" id="ef"></div>
+  <div class="ai" id="aiBox"></div>
+</div>
+
+<div class="toolbar" style="justify-content:center;margin-top:18px">
+  <button class="big" id="submitBtn">✅ Nộp bài &amp; chấm điểm</button>
+</div>
+
+</div>
+
+<div class="box result" id="result">
+  <div class="score" id="scoreText"></div>
+  <div class="sub" id="scoreSub"></div>
+  <div style="font-size:1.1rem;margin-top:4px" id="scoreMsg"></div>
+  <div class="sub" id="sendStatus" style="margin-top:6px"></div>
+  <div class="review" id="review"></div>
+  <div class="toolbar" style="justify-content:center">
+    <button id="copyBtn">📋 Sao chép kết quả</button>
+    <button class="alt" id="retryBtn">🔄 Làm lại</button>
+  </div>
+</div>
+
+<div class="box bxh" id="bxh" hidden>
+  <div class="bxh-head">🏆 BẢNG VÀNG 🏆</div>
+  <div class="bxh-sub">第七课 · 你吃什么 — Lớp <select id="bxhClass"></select> <button class="alt" id="bxhReload" style="padding:4px 10px;font-size:.9rem">🔄</button></div>
+  <div id="bxhBody"></div>
+</div>
+
+<footer>第七课 · 你吃什么 · 汉语加油站 · <span style="opacity:.6">bản 02/11</span></footer>
+</div>
+
+<script>
+// ===== DỮ LIỆU =====
+// BÀI 1: ĐIỀN TỪ (a: các đáp án chấp nhận cho từng ô)
+var BANK = ["什么","几","碗","个","这些","喝","喝","要","吃","吗","汤"];
+var FILL = [
+ {t:["A：中午你吃",0,"？ B：我吃饺子。"], a:[["什么"]], show:"中午你吃什么？——我吃饺子。", why:"Hỏi “ăn gì” → 什么 đứng sau động từ, cuối câu không thêm 吗."},
+ {t:["A：你要",0,"个馒头？ B：一个。"], a:[["几"]], show:"你要几个馒头？——一个。", why:"Hỏi số lượng nhỏ: 几 + lượng từ + danh từ."},
+ {t:["我要一",0,"鸡蛋汤。"], a:[["碗"]], show:"我要一碗鸡蛋汤。", why:"Canh đựng trong bát → lượng từ 碗."},
+ {t:["妈妈吃三",0,"包子。"], a:[["个"]], show:"妈妈吃三个包子。", why:"Số + 个 + danh từ; không nói ✗三包子."},
+ {t:["A：",0,"是什么？ B：这是饺子，这是包子。"], a:[["这些"]], show:"这些是什么？——这是饺子，这是包子。", why:"Hỏi về nhiều thứ ở gần → 这些; trả lời từng món bằng 这是…"},
+ {t:["爸爸不",0,"汤，他",1,"啤酒。"], a:[["喝"],["喝"]], show:"爸爸不喝汤，他喝啤酒。", why:"Tiếng Trung nói 喝汤 (uống canh), 喝啤酒."},
+ {t:["A：你",0,"什么？ B：我要一碗面条。"], a:[["要"]], show:"你要什么？——我要一碗面条。", why:"B trả lời bằng 要 → câu hỏi cũng dùng 要: 你要什么？ (吃 phải dành cho câu 8)."},
+ {t:["A：你吃馒头吗？ B：不",0,"，我吃米饭。"], a:[["吃"]], show:"你吃馒头吗？——不吃，我吃米饭。", why:"Trả lời phủ định ngắn: 不 + động từ của câu hỏi → 不吃."}
+];
+
+// BÀI 2: CHỌN CÂU ĐÚNG
+var MC = [
+ {o:["我要一馒头。","我要一个馒头。","我要馒头一个。","我一个要馒头。"], a:1, why:"Số + lượng từ 个 + danh từ: 一个馒头."},
+ {o:["你喝什么吗？","什么你喝？","你喝什么？","你什么喝？"], a:2, why:"什么 đứng sau động từ (vị trí của tân ngữ), không thêm 吗."},
+ {o:["我吃鸡蛋汤。","我喝鸡蛋汤。","我吃一个汤。","我喝一个汤。"], a:1, why:"Canh dùng động từ 喝; lượng từ của 汤 là 碗, không dùng 个."},
+ {o:["我要一碗米饭。","我要一个碗米饭。","我要米饭一碗。","我要碗一米饭。"], a:0, why:"碗 đã là lượng từ, không thêm 个: 一碗米饭."},
+ {o:["这些是什么？——这是饺子，那是面条。","这些什么是？","什么是这些？","这些是什么吗？"], a:0, why:"Trật tự: 这些 + 是 + 什么？; trả lời từng món bằng 这是 / 那是."},
+ {o:["你要几包子？","你几个要包子？","你要几个包子？","你要包子几个？"], a:2, why:"几 + lượng từ + danh từ đứng sau động từ: 要几个包子."},
+ {o:["他喝不啤酒。","他不啤酒喝。","他不喝啤酒，他喝茶。","他啤酒不喝，茶喝。"], a:2, why:"不 đứng trước động từ: 不喝啤酒."},
+ {o:["一个 yì ge","一碗 yí wǎn","一些 yìxiē","一天 yí tiān"], a:2, why:"一 + thanh 1/2/3 → yì (一些 yìxiē, 一碗 yì wǎn, 一天 yì tiān); 一 + thanh 4 / 个 → yí (一个 yí ge)."}
+];
+var L = "ABCD";
+
+// BÀI 3: SẮP XẾP
+var ORDER = [
+ {t:["明天","中午","我","去","食堂","吃饭"], a:["明天中午我去食堂吃饭","我明天中午去食堂吃饭"], show:"明天中午我去食堂吃饭。"},
+ {t:["你","几个","要","饺子"], a:["你要几个饺子"], show:"你要几个饺子？"},
+ {t:["那些","什么","是"], a:["那些是什么"], show:"那些是什么？"},
+ {t:["我","要","一碗","鸡蛋汤","不要","米饭"], a:["我要一碗鸡蛋汤不要米饭","我不要米饭要一碗鸡蛋汤"], show:"我要一碗鸡蛋汤，不要米饭。"},
+ {t:["他","不","吃","馒头","他","吃","包子"], a:["他不吃馒头他吃包子","他吃包子他不吃馒头"], show:"他不吃馒头，他吃包子。"},
+ {t:["妈妈","不","喝","啤酒","喝","茶"], a:["妈妈不喝啤酒喝茶"], show:"妈妈不喝啤酒，喝茶。"},
+ {t:["这","是","学校","的","食堂"], a:["这是学校的食堂"], show:"这是学校的食堂。"}
+];
+
+// BÀI 4: ĐỌC HIỂU
+var PASSAGE = "今天星期三。中午，张东去食堂吃饭。食堂很大，这些是饺子，那些是面条。张东要三个包子，一碗鸡蛋汤。他不喝啤酒，他喝茶。玛丽不去食堂，她回学校，她吃一个馒头。";
+var READ = [
+ {q:"今天星期几？", o:["星期二","星期三","星期四"], a:1},
+ {q:"中午张东去哪儿？", o:["学校","银行","食堂"], a:2},
+ {q:"张东要几个包子？", o:["一个","三个","十个"], a:1},
+ {q:"张东不喝什么？", o:["茶","啤酒","鸡蛋汤"], a:1},
+ {q:"玛丽吃什么？", o:["馒头","包子","饺子"], a:0},
+ {q:"Theo đoạn văn, câu nào ĐÚNG?", o:["玛丽去食堂。","张东吃米饭。","那些是面条。"], a:2}
+];
+
+// BÀI 5: từ bài 7 dùng để đếm
+var W7 = ["中午","食堂","馒头","米饭","鸡蛋","汤","啤酒","这些","那些","一些","饺子","包子","面条","碗","个","要","吃","饭"];
+var PTS = [20,20,20,20,20];
+
+// ===== HIỂN THỊ =====
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+function shuffle(x){ x=x.slice(); for(var i=x.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=x[i]; x[i]=x[j]; x[j]=t; } return x; }
+
+// Bài 1
+var fBox = document.getElementById("fill");
+FILL.forEach(function(d,i){
+  var el = document.createElement("div"); el.className="item";
+  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+d.t.map(function(x){
+      return typeof x==="number" ? '<select class="fsel" id="s'+i+'_'+x+'"><option value="">　___　</option></select>' : esc(x);
+    }).join("")+'</span><div class="fb" id="ff'+i+'"></div>';
+  fBox.appendChild(el);
+});
+document.getElementById("bank").innerHTML = shuffle(BANK.map(function(w,k){return k;})).map(function(k){ return '<span class="chip" data-w="'+esc(BANK[k])+'">'+esc(BANK[k])+'</span>'; }).join("");
+function syncFill(){
+  var sels=[].slice.call(document.querySelectorAll(".fsel")), total={}, used={};
+  BANK.forEach(function(w){ total[w]=(total[w]||0)+1; });
+  sels.forEach(function(x){ if(x.value) used[x.value]=(used[x.value]||0)+1; });
+  var uniq=BANK.filter(function(w,i){ return BANK.indexOf(w)===i; });
+  sels.forEach(function(x){
+    var cur=x.value, h='<option value="">　___　</option>';
+    uniq.forEach(function(w){ var left=total[w]-(used[w]||0)+(cur===w?1:0); if(left>0) h+='<option'+(cur===w?' selected':'')+'>'+w+'</option>'; });
+    x.innerHTML=h; x.value=cur;
+  });
+  var u={}; document.querySelectorAll("#bank .chip").forEach(function(c){ var w=c.dataset.w; u[w]=(u[w]||0)+1; c.classList.toggle("used", u[w]<=(used[w]||0)); });
+}
+document.querySelectorAll(".fsel").forEach(function(x){ x.onchange=syncFill; });
+syncFill();
+
+// Bài 2 & 4: trắc nghiệm
+function mcBlock(boxId, prefix, items, qText){
+  var box=document.getElementById(boxId);
+  items.forEach(function(d,i){
+    var el=document.createElement("div"); el.className="item"+(prefix==="r"?" read":"");
+    el.innerHTML='<span class="num">'+(i+1)+'</span>'+(qText?'<span class="hz">'+esc(d.q)+'</span>':'<span class="pt">Chọn câu đúng:</span>')+
+      '<div class="opts">'+d.o.map(function(o,k){ return '<label class="opt" id="'+prefix+i+'_'+k+'"><input type="radio" name="'+prefix+i+'" value="'+k+'"><span class="l">'+L[k]+'</span><span class="hz">'+esc(o)+'</span></label>'; }).join("")+
+      '</div><div class="fb" id="'+prefix+'f'+i+'"></div>';
+    box.appendChild(el);
+    el.querySelectorAll("input").forEach(function(inp){ inp.onchange=function(){
+      el.querySelectorAll(".opt").forEach(function(o){ o.classList.remove("sel"); });
+      inp.parentNode.classList.add("sel"); }; });
+  });
+}
+mcBlock("mc","m",MC,false);
+document.getElementById("passage").innerHTML='<p>'+esc(PASSAGE)+'</p>';
+mcBlock("read","r",READ,true);
+
+// Bài 3
+var oBox = document.getElementById("order"), picked = [];
+ORDER.forEach(function(d,i){
+  picked[i] = [];
+  var el = document.createElement("div"); el.className="item";
+  el.innerHTML = '<span class="num">'+(i+1)+'</span><div class="line" id="ln'+i+'"></div><div class="tiles" id="tl'+i+'"></div>'+
+    '<button class="clear" id="cl'+i+'">↺ Xếp lại</button><div class="fb" id="of'+i+'"></div>';
+  oBox.appendChild(el);
+  var tl = el.querySelector(".tiles");
+  shuffle(d.t.map(function(w,j){return j;})).forEach(function(j){
+    var w=d.t[j], b = document.createElement("span"); b.className="tile"; b.textContent=w; b.dataset.j=j;
+    b.onclick = function(){ if(b.classList.contains("used")) return; b.classList.add("used"); picked[i].push(j); drawLine(i); };
+    tl.appendChild(b);
+  });
+  el.querySelector(".clear").onclick = function(){ picked[i]=[]; tl.querySelectorAll(".tile").forEach(function(t){t.classList.remove("used");}); drawLine(i); };
+});
+function drawLine(i){
+  var ln = document.getElementById("ln"+i); ln.innerHTML="";
+  picked[i].forEach(function(j,pos){
+    var c = document.createElement("span"); c.className="tile"; c.textContent=ORDER[i].t[j];
+    c.onclick = function(){ picked[i].splice(pos,1); document.querySelector('#tl'+i+' .tile[data-j="'+j+'"]').classList.remove("used"); drawLine(i); };
+    ln.appendChild(c);
+  });
+}
+
+// Bài 5: đếm chữ
+function hzCount(s){ var m=s.match(/[一-鿿]/g); return m?m.length:0; }
+function sentCount(s){ return s.split(/[。！？!?]/).filter(function(x){ return hzCount(x)>0; }).length; }
+function w7Used(s){ return W7.filter(function(w){ return s.indexOf(w)>-1; }); }
+var essayEl=document.getElementById("essay");
+function updCount(){ var v=essayEl.value; document.getElementById("nHz").textContent=hzCount(v); document.getElementById("nSent").textContent=sentCount(v); document.getElementById("nW").textContent=w7Used(v).length; }
+essayEl.addEventListener("input",updCount);
+
+// ===== CHẤM =====
+function okBox(f,html){ f.className="fb ok"; f.innerHTML='🌟 <b>Đúng rồi!</b>'+(html?'<div class="ans">'+html+'</div>':''); }
+function setFb(f,cls,head,ans){ f.className="fb "+cls; f.innerHTML=head+'<div class="ans">'+ans+'</div>'; }
+
+var lastReport = "", submitCount = 0, t0 = 0, tick = null, elapsed = 0;
+function fmt(sec){ sec=Math.round(sec); return ("0"+Math.floor(sec/60)).slice(-2)+":"+("0"+sec%60).slice(-2); }
+function normClass(s){ var d=String(s).replace(/\D/g,""); return d ? "K"+d : ""; }
+function normName(s){ return String(s).toUpperCase().replace(/\s+/g," ").trim(); }
+function startTimer(){ t0=Date.now(); clearInterval(tick); document.getElementById("timer").textContent="00:00";
+  tick=setInterval(function(){ document.getElementById("timer").textContent=fmt((Date.now()-t0)/1000); },1000); }
+// Dán URL Ứng dụng web của Apps Script bài 7 vào đây:
+var SEND_URL = "";
+var NAMES = ["Điền từ","Chọn câu đúng","Sắp xếp câu","Đọc hiểu","Viết đoạn văn"];
+var ICONS = ["✏️","🔍","🔤","📖","📝"];
+
+document.getElementById("stClass").addEventListener("input",function(){ var v=normClass(this.value); this.value = v || ""; });
+document.getElementById("stName").addEventListener("blur",function(){ this.value=normName(this.value); });
+document.getElementById("startBtn").onclick = function(){
+  var c=document.getElementById("stClass"), n=document.getElementById("stName");
+  c.value=normClass(c.value); n.value=normName(n.value);
+  if(!/^K\d{2,3}$/.test(c.value)){ alert("Bạn hãy ghi đúng tên lớp, VD: K67"); c.focus(); return; }
+  if(!n.value.trim()){ alert("Bạn hãy ghi họ tên nhé."); n.focus(); return; }
+  c.readOnly=true; n.readOnly=true;
+  this.style.display="none";
+  document.getElementById("quiz").hidden=false; document.getElementById("timerBar").hidden=false;
+  startTimer();
+  setTimeout(function(){ var g=document.querySelector(".p1"); window.scrollTo({top:g.getBoundingClientRect().top+window.scrollY-56,behavior:"smooth"}); },50);
+};
+
+var S=[0,0,0,0,0], REV=[[],[],[],[],[]], REP=[[],[],[],[],[]], essayScore=null, essayAI=null;
+var r1 = function(x){ return Math.round(x*10)/10; };
+
+function gradeObjective(){
+  var P=[0,0,0,0], TOT=[0,MC.length,ORDER.length,READ.length];
+  REV=[[],[],[],[],[]]; REP=[[],[],[],[],[]];
+  FILL.forEach(function(d,i){
+    var f=document.getElementById("ff"+i), got=0, vs=[], empty=true;
+    d.a.forEach(function(acc,k){ var v=document.getElementById("s"+i+"_"+k).value; vs.push(v||"___"); if(v) empty=false; TOT[0]++; if(acc.indexOf(v)>-1) got++; });
+    var tag = got===d.a.length?"Đúng":empty?"Chưa làm":got>0?"Đúng "+got+"/"+d.a.length:"Sai";
+    var key = esc(d.show)+' — '+esc(d.why);
+    if(empty) setFb(f,"empty",'⚪ <b>Bạn chưa chọn từ.</b>','👉 Đáp án: '+key);
+    else if(got===d.a.length) okBox(f,esc(d.why));
+    else setFb(f, got>0?"mid":"no", got>0?'🙂 <b>Đúng '+got+'/'+d.a.length+' ô.</b>':'💪 <b>Chưa đúng.</b>', '✏️ Đáp án: '+key);
+    P[0]+=got; REV[0].push([d.t.map(function(x){return typeof x==="number"?"___":x;}).join(""), empty?"":vs.join(" / "), d.a.map(function(x){return x.join("/");}).join(" / "), got/d.a.length]);
+    REP[0].push((i+1)+". "+(empty?"(bỏ trống)":vs.join(" / "))+" → "+tag);
+  });
+  [[MC,"m",1],[READ,"r",3]].forEach(function(g){
+    var items=g[0], pre=g[1], k=g[2];
+    items.forEach(function(d,i){
+      var c=document.querySelector('input[name="'+pre+i+'"]:checked'), v=c?+c.value:-1, f=document.getElementById(pre+"f"+i), pt=0, tag;
+      var key=L[d.a]+'. '+esc(d.o[d.a])+(d.why?' — '+esc(d.why):'');
+      document.getElementById(pre+i+"_"+d.a).classList.add("right");
+      if(v<0){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa chọn.</b>','👉 Đáp án: '+key); }
+      else if(v===d.a){ pt=1; tag="Đúng"; okBox(f,d.why?esc(d.why):''); }
+      else { tag="Sai"; document.getElementById(pre+i+"_"+v).classList.add("wrong"); setFb(f,"no",'💪 <b>Chưa đúng.</b>','✏️ Đáp án: '+key); }
+      P[k]+=pt; REV[k].push([d.q||d.o.join(" | "), v<0?"":L[v]+". "+d.o[v], L[d.a]+". "+d.o[d.a], pt]);
+      REP[k].push((i+1)+". "+(v<0?"(bỏ trống)":L[v]+". "+d.o[v])+" → "+tag);
+    });
+  });
+  ORDER.forEach(function(d,i){
+    var s = picked[i].map(function(j){return d.t[j];}).join(""), f=document.getElementById("of"+i), pt=0, tag;
+    if(!s){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa ghép câu.</b>','👉 Đáp án: '+esc(d.show)); }
+    else if(picked[i].length<d.t.length){ tag="Chưa dùng hết từ"; setFb(f,"no",'💪 <b>Bạn chưa dùng hết các từ.</b>','✏️ Đáp án: '+esc(d.show)); }
+    else if(d.a.indexOf(s)>-1){ pt=1; tag="Đúng"; okBox(f,esc(d.show)); }
+    else { tag="Sai"; setFb(f,"no",'💪 <b>Chưa đúng thứ tự.</b>','✏️ Đáp án: '+esc(d.show)); }
+    P[2]+=pt; REV[2].push([d.t.join(" / "), s, d.show, pt]);
+    REP[2].push((i+1)+". "+(s||"(bỏ trống)")+" → "+tag);
+  });
+  for(var k=0;k<4;k++) S[k]=P[k]/TOT[k]*PTS[k];
+}
+
+function renderAI(ai){
+  var box=document.getElementById("aiBox"); box.style.display="block";
+  var d=ai.diem||{};
+  var h='<h4>📊 Điểm theo tiêu chí: '+ai.tong+' / 20</h4><div class="crit">'+
+    '<div>Nội dung &amp; yêu cầu<br><b>'+(d.noi_dung??"–")+'</b> / 5</div>'+
+    '<div>Từ vựng bài 7<br><b>'+(d.tu_vung??"–")+'</b> / 5</div>'+
+    '<div>Ngữ pháp<br><b>'+(d.ngu_phap??"–")+'</b> / 6</div>'+
+    '<div>Chữ Hán &amp; dấu câu<br><b>'+(d.chu_han??"–")+'</b> / 4</div></div>';
+  if(ai.loi && ai.loi.length){
+    h+='<h4>✏️ Lỗi cần sửa</h4><table><tr><th>Bạn viết</th><th>Sửa lại</th><th>Giải thích</th></tr>'+
+      ai.loi.map(function(e){ return '<tr><td class="bad">'+esc(e.sai||"")+'</td><td class="good">'+esc(e.sua||"")+'</td><td>'+esc(e.giai_thich||"")+'</td></tr>'; }).join("")+'</table>';
+  } else h+='<h4>✏️ Không phát hiện lỗi đáng kể. Tuyệt vời!</h4>';
+  if(ai.ban_sua) h+='<h4>✅ Đoạn văn đã sửa</h4><div class="fixed">'+esc(ai.ban_sua)+'</div>';
+  if(ai.nhan_xet) h+='<h4>💬 Nhận xét</h4><div>'+esc(ai.nhan_xet)+'</div>';
+  box.innerHTML=h;
+}
+var SAMPLE = "昨天星期二。中午我去食堂吃饭。食堂很大，这些是饺子，那些是面条。我要三个包子，一碗鸡蛋汤。我不喝啤酒，我喝茶。我的朋友不吃包子，他吃米饭，喝汤。";
+
+function showTotals(pending){
+  var obj=S[0]+S[1]+S[2]+S[3];
+  var score = r1(obj + (essayScore||0));
+  var parts = S.map(function(s,k){ return "Bài "+(k+1)+": "+(k===4 && essayScore===null ? "chờ chấm" : r1(k===4?essayScore:s)+"/"+PTS[k]); });
+  document.getElementById("scoreText").textContent = (essayScore===null ? r1(obj)+" / 80" : score+" / 100");
+  document.getElementById("scoreSub").textContent = parts.join(" · ");
+  var msg = essayScore===null ? (pending ? "⏳ Bài 5 đang được chấm…" : "📝 Bài 5 sẽ do giáo viên chấm.") :
+    score>=90 ? "🎉 Xuất sắc!" : score>=75 ? "👍 Giỏi lắm! Xem lại vài lỗi nhỏ nhé." : score>=60 ? "🙂 Khá rồi! Đọc kỹ phần sửa và làm lại nhé." : "💪 Cố lên! Ôn lại bài 7 rồi thử lại nhé.";
+  document.getElementById("scoreMsg").textContent = msg+"  ⏱ Thời gian làm bài: "+fmt(elapsed);
+  function mark(p){ return p>=1?"✅":p>0?"🟡":"❌"; }
+  function tbl(rows){
+    return '<table><tr><th>#</th><th>Câu</th><th>Bài làm của bạn</th><th>Đáp án</th><th></th></tr>'+
+      rows.map(function(r,i){ return '<tr><td>'+(i+1)+'</td><td>'+esc(r[0])+'</td><td class="mine">'+(r[1]?esc(r[1]):'<i>(bỏ trống)</i>')+
+      '</td><td>'+esc(r[2])+'</td><td class="c">'+mark(r[3])+'</td></tr>'; }).join("")+'</table>';
+  }
+  document.getElementById("review").innerHTML = [0,1,2,3].map(function(k){
+    return '<h3>'+ICONS[k]+' Bài '+(k+1)+' – '+NAMES[k]+' ('+r1(S[k])+'/'+PTS[k]+')</h3>'+tbl(REV[k]); }).join("")+
+    '<h3>📝 Bài 5 – Viết đoạn văn ('+(essayScore===null?"chờ chấm":essayScore+"/20")+')</h3><p class="sub" style="text-align:left">Xem phần chấm và sửa lỗi chi tiết ngay dưới đoạn văn của bạn ở Bài 5.</p>'+
+    '<p class="sub" style="margin-top:8px">✅ đúng · 🟡 đúng một phần · ❌ chưa đúng</p>';
+  var lop=document.getElementById("stClass").value, name=document.getElementById("stName").value.trim();
+  lastReport = "BTVN BÀI 7 你吃什么 (nâng cao)\nHọc sinh: "+name+"\nLớp: "+lop+"\nThời gian làm: "+fmt(elapsed)+"\nĐiểm: "+document.getElementById("scoreText").textContent+" ("+parts.join(", ")+")\n\n"+
+    [0,1,2,3].map(function(k){ return "BÀI "+(k+1)+". "+NAMES[k].toUpperCase()+"\n"+REP[k].join("\n"); }).join("\n\n")+
+    "\n\nBÀI 5. VIẾT ĐOẠN VĂN\n"+(essayEl.value.trim()||"(bỏ trống)")+(essayAI&&essayAI.ban_sua?"\n→ Bản sửa: "+essayAI.ban_sua:"");
+}
+
+document.getElementById("submitBtn").onclick = function(){
+  var essay = essayEl.value.trim(), ef=document.getElementById("ef");
+  if(essay && hzCount(essay) < 10){ alert("Bài 5: bạn cần viết đoạn văn bằng chữ Hán nhé (ít nhất vài câu)."); essayEl.focus(); return; }
+  elapsed = Math.round((Date.now()-t0)/1000); clearInterval(tick);
+  document.getElementById("timer").textContent = fmt(elapsed)+" ✔";
+  gradeObjective();
+  essayScore=null; essayAI=null;
+  document.querySelectorAll("#quiz textarea").forEach(function(t){ t.readOnly=true; });
+  document.querySelectorAll("#quiz select").forEach(function(t){ t.disabled=true; });
+  document.querySelectorAll("#quiz input[type=radio]").forEach(function(t){ t.disabled=true; });
+  document.body.classList.add("locked");
+  var sb=document.getElementById("submitBtn"); sb.disabled=true; sb.textContent="✅ Đã nộp bài";
+  var res=document.getElementById("result"); res.style.display="block";
+  var st = document.getElementById("sendStatus");
+  if(!essay){ essayScore=0; setFb(ef,"empty",'⚪ <b>Bạn chưa viết đoạn văn.</b>','📖 Đoạn văn tham khảo: '+esc(SAMPLE)); }
+  var pending = !!(essay && SEND_URL);
+  showTotals(pending);
+  res.scrollIntoView({behavior:"smooth"});
+  if(!SEND_URL){
+    if(essay) setFb(ef,"mid",'📝 <b>Giáo viên sẽ chấm và sửa đoạn văn của bạn.</b>','📖 Trong lúc chờ, bạn so sánh với đoạn văn tham khảo: '+esc(SAMPLE));
+    st.textContent="📋 Bạn bấm “Sao chép kết quả” rồi gửi cho giáo viên nhé."; return;
+  }
+  submitCount++;
+  if(essay){ ef.className="fb mid"; ef.innerHTML='<span class="spin"></span><b>Đang chấm và sửa đoạn văn…</b> (khoảng 10–30 giây, bạn đừng tắt trang nhé)'; }
+  st.innerHTML = '<span class="spin"></span>Đang gửi bài cho giáo viên…';
+  var payload = {
+    action:"submit", bai:"第七课 · 你吃什么 (BTVN nâng cao)", lop:document.getElementById("stClass").value,
+    hoc_sinh:document.getElementById("stName").value.trim(), giay:elapsed, lan_nop:submitCount,
+    b1:r1(S[0]), b2:r1(S[1]), b3:r1(S[2]), b4:r1(S[3]), essay:essay,
+    chi_tiet:[0,1,2,3].map(function(k){ return "BÀI "+(k+1)+". "+NAMES[k].toUpperCase()+"\n"+REP[k].join("\n"); }).join("\n\n")
+  };
+  var ctl = new AbortController(), timer=setTimeout(function(){ ctl.abort(); },90000);
+  fetch(SEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),signal:ctl.signal})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      clearTimeout(timer);
+      if(d && d.ai){ essayAI=d.ai; essayScore=+d.ai.tong; renderAI(d.ai);
+        setFb(ef, essayScore>=16?"ok":essayScore>=10?"mid":"no", '📝 <b>Bài 5 đạt '+essayScore+' / 20.</b>', 'Xem chi tiết chấm và sửa lỗi bên dưới.'); }
+      else if(essay){ setFb(ef,"mid",'📝 <b>Giáo viên sẽ chấm đoạn văn của bạn.</b>','📖 Đoạn văn tham khảo: '+esc(SAMPLE)); }
+      showTotals(false);
+      st.textContent="✅ Đã gửi bài cho giáo viên.";
+      setTimeout(function(){ showBxh(payload.lop,payload.hoc_sinh); },1500);
+    })
+    .catch(function(){
+      clearTimeout(timer);
+      if(essay) setFb(ef,"mid",'⚠️ <b>Chưa nhận được kết quả chấm tự động.</b> Giáo viên sẽ chấm đoạn văn của bạn.','📖 Đoạn văn tham khảo: '+esc(SAMPLE));
+      showTotals(false);
+      st.textContent="⚠️ Chưa chắc bài đã được gửi (lỗi mạng). Bạn bấm “Sao chép kết quả” và gửi cho giáo viên nhé.";
+    });
+};
+
+document.getElementById("copyBtn").onclick = function(){
+  var ok=function(){ alert("Đã sao chép! Bạn dán (Ctrl+V) vào tin nhắn gửi giáo viên nhé."); };
+  if(navigator.clipboard){ navigator.clipboard.writeText(lastReport).then(ok,function(){ prompt("Sao chép đoạn này:",lastReport); }); }
+  else { prompt("Sao chép đoạn này:",lastReport); }
+};
+
+document.getElementById("retryBtn").onclick = function(){
+  document.querySelectorAll("#quiz textarea").forEach(function(t){ t.readOnly=false; t.value=""; });
+  document.querySelectorAll("#quiz select").forEach(function(t){ t.disabled=false; t.value=""; });
+  document.querySelectorAll("#quiz input[type=radio]").forEach(function(t){ t.disabled=false; t.checked=false; });
+  document.querySelectorAll(".opt").forEach(function(o){ o.classList.remove("sel","right","wrong"); });
+  document.body.classList.remove("locked");
+  var sb=document.getElementById("submitBtn"); sb.disabled=false; sb.textContent="✅ Nộp bài & chấm điểm";
+  document.getElementById("review").innerHTML="";
+  syncFill();
+  ORDER.forEach(function(d,i){ document.getElementById("cl"+i).click(); });
+  document.querySelectorAll(".fb").forEach(function(f){ f.className="fb"; });
+  var ab=document.getElementById("aiBox"); ab.style.display="none"; ab.innerHTML="";
+  updCount();
+  document.getElementById("result").style.display="none";
+  startTimer();
+  window.scrollTo({top:0,behavior:"smooth"});
+};
+
+// ===== BẢNG VÀNG =====
+var meName = "";
+function jsonp(url, cb){
+  var name="bxhcb"+Date.now(), sc=document.createElement("script"), done=false;
+  window[name]=function(d){ done=true; cb(d); delete window[name]; sc.remove(); };
+  sc.onerror=function(){ if(!done) cb(null); };
+  sc.src=url+(url.indexOf("?")>-1?"&":"?")+"callback="+name+"&t="+Date.now();
+  document.body.appendChild(sc);
+  setTimeout(function(){ if(!done){ done=true; cb(null); } },15000);
+}
+function showBxh(lop, me){
+  meName = me ? me.toUpperCase().replace(/\s+/g,"") : meName;
+  var box=document.getElementById("bxh"), body=document.getElementById("bxhBody"), sel=document.getElementById("bxhClass");
+  box.hidden=false; body.innerHTML='<div class="empty">⏳ Đang tải Bảng vàng…</div>';
+  if(!SEND_URL){ body.innerHTML='<div class="empty">Bảng vàng bài 7 sắp mở, bạn quay lại sau nhé.</div>'; box.scrollIntoView({behavior:"smooth"}); return; }
+  jsonp(SEND_URL+(lop?"?lop="+encodeURIComponent(lop):""), function(d){
+    if(!d){ body.innerHTML='<div class="empty">⚠️ Chưa tải được Bảng vàng. Bấm 🔄 để thử lại.</div>'; return; }
+    var lops=d.lops||[]; if(lop && lops.indexOf(normClass(lop))<0) lops.push(normClass(lop));
+    sel.innerHTML=lops.map(function(l){ return '<option'+(l===d.lop?' selected':'')+'>'+esc(l)+'</option>'; }).join("");
+    if(!d.lop){ if(lops.length){ showBxh(lops[0]); } else body.innerHTML='<div class="empty">Chưa có bạn nào nộp bài.</div>'; return; }
+    var rows=d.bxh||[], medal=["🥇","🥈","🥉"];
+    if(!rows.length){ body.innerHTML='<div class="empty">Lớp này chưa có bạn nào nộp bài.</div>'; return; }
+    body.innerHTML='<table><tr><th>Hạng</th><th>Học sinh</th><th>Điểm</th><th>Thời gian</th></tr>'+rows.map(function(r,i){
+      var me = meName && r.ten.toUpperCase().replace(/\s+/g,"")===meName;
+      return '<tr class="'+(i<3?'top'+(i+1):'')+(me?' me':'')+'"><td class="r">'+(medal[i]||(i+1))+'</td><td>'+esc(r.ten)+(me?' 👈':'')+'</td><td><b>'+r.diem+'</b></td><td>'+fmt(r.giay)+'</td></tr>';
+    }).join("")+'</table>';
+  });
+  box.scrollIntoView({behavior:"smooth"});
+}
+document.getElementById("bxhClass").onchange=function(){ showBxh(this.value); };
+document.getElementById("bxhReload").onclick=function(){ showBxh(document.getElementById("bxhClass").value); };
+document.getElementById("viewBxh").onclick=function(){ var c=document.getElementById("stClass").value.trim(); showBxh(c?normClass(c):""); };
+</script>
+</body>
+</html>
