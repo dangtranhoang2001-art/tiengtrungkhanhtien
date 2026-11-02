@@ -142,11 +142,17 @@ select:disabled{opacity:1;background:#f6f6f4}
     <label for="stName"><b>Họ tên:</b></label>
     <input id="stName" placeholder="NHẬP HỌ TÊN CỦA BẠN" autocomplete="off" style="text-transform:uppercase">
   </div>
-  <p class="note" style="margin-top:8px">⏱ Bấm <b>Bắt đầu</b> là đồng hồ chạy. Bài 1–4 chấm ngay khi nộp; <b>Bài 5 (viết đoạn văn)</b> được chấm theo thang tiêu chí và <b>tự động sửa lỗi</b> sau khi nộp (đợi khoảng 10–30 giây). Xếp hạng <b>BẢNG VÀNG</b>: điểm cao hơn đứng trên; bằng điểm thì ai làm <b>nhanh hơn</b> đứng trên. Chỉ tính <b>lần nộp đầu tiên</b>.</p>
+  <p class="note" style="margin-top:8px">⏱ Bấm <b>Bắt đầu</b> là đồng hồ chạy. Bài 1–4 chấm ngay khi nộp; <b>Bài 5 (viết đoạn văn)</b> được <b>cô chấm và sửa lỗi chi tiết</b> theo thang tiêu chí; kết quả có vào khoảng <b>12h, 18h và 21h</b> mỗi ngày — bấm <b>🔎 Xem kết quả bài viết</b> để xem. Xếp hạng <b>BẢNG VÀNG</b>: điểm cao hơn đứng trên; bằng điểm thì ai làm <b>nhanh hơn</b> đứng trên. Chỉ tính <b>lần nộp đầu tiên</b>.</p>
   <div class="toolbar">
     <button class="big" id="startBtn">▶️ Bắt đầu làm bài</button>
     <button class="alt" id="viewBxh">🏆 Xem Bảng vàng</button>
+    <button class="alt" id="viewKq">🔎 Xem kết quả bài viết</button>
   </div>
+</div>
+
+<div class="box" id="kqBox" hidden>
+  <h2 style="color:var(--purple);margin:0 0 6px">🔎 Kết quả bài viết (Bài 5)</h2>
+  <div id="kqBody"></div>
 </div>
 
 <div id="timerBar" class="timer" hidden>⏱ <span id="timer">00:00</span></div>
@@ -213,6 +219,7 @@ select:disabled{opacity:1;background:#f6f6f4}
   <div class="review" id="review"></div>
   <div class="toolbar" style="justify-content:center">
     <button id="copyBtn">📋 Sao chép kết quả</button>
+    <button class="alt" id="kqBtn2">🔎 Xem kết quả bài viết</button>
     <button class="alt" id="retryBtn">🔄 Làm lại</button>
   </div>
 </div>
@@ -431,8 +438,8 @@ function gradeObjective(){
   for(var k=0;k<4;k++) S[k]=P[k]/TOT[k]*PTS[k];
 }
 
-function renderAI(ai){
-  var box=document.getElementById("aiBox"); box.style.display="block";
+function renderAI(ai, boxId){
+  var box=document.getElementById(boxId||"aiBox"); box.style.display="block";
   var d=ai.diem||{};
   var h='<h4>📊 Điểm theo tiêu chí: '+ai.tong+' / 20</h4><div class="crit">'+
     '<div>Nội dung &amp; yêu cầu<br><b>'+(d.noi_dung??"–")+'</b> / 5</div>'+
@@ -441,7 +448,7 @@ function renderAI(ai){
     '<div>Chữ Hán &amp; dấu câu<br><b>'+(d.chu_han??"–")+'</b> / 4</div></div>';
   if(ai.loi && ai.loi.length){
     h+='<h4>✏️ Lỗi cần sửa</h4><table><tr><th>Bạn viết</th><th>Sửa lại</th><th>Giải thích</th></tr>'+
-      ai.loi.map(function(e){ return '<tr><td class="bad">'+esc(e.sai||"")+'</td><td class="good">'+esc(e.sua||"")+'</td><td>'+esc(e.giai_thich||"")+'</td></tr>'; }).join("")+'</table>';
+      ai.loi.map(function(e){ return '<tr><td class="bad">'+esc(e.sai||"")+'</td><td class="good">'+esc(e.sua||"")+'</td><td>'+(e.loai?'<b>['+esc(e.loai)+']</b> ':'')+esc(e.giai_thich||"")+'</td></tr>'; }).join("")+'</table>';
   } else h+='<h4>✏️ Không phát hiện lỗi đáng kể. Tuyệt vời!</h4>';
   if(ai.ban_sua) h+='<h4>✅ Đoạn văn đã sửa</h4><div class="fixed">'+esc(ai.ban_sua)+'</div>';
   if(ai.nhan_xet) h+='<h4>💬 Nhận xét</h4><div>'+esc(ai.nhan_xet)+'</div>';
@@ -455,7 +462,7 @@ function showTotals(pending){
   var parts = S.map(function(s,k){ return "Bài "+(k+1)+": "+(k===4 && essayScore===null ? "chờ chấm" : r1(k===4?essayScore:s)+"/"+PTS[k]); });
   document.getElementById("scoreText").textContent = (essayScore===null ? r1(obj)+" / 80" : score+" / 100");
   document.getElementById("scoreSub").textContent = parts.join(" · ");
-  var msg = essayScore===null ? (pending ? "⏳ Bài 5 đang được chấm…" : "📝 Bài 5 sẽ do giáo viên chấm.") :
+  var msg = essayScore===null ? "📝 Bài 5 (viết đoạn văn) đang chờ cô chấm." :
     score>=90 ? "🎉 Xuất sắc!" : score>=75 ? "👍 Giỏi lắm! Xem lại vài lỗi nhỏ nhé." : score>=60 ? "🙂 Khá rồi! Đọc kỹ phần sửa và làm lại nhé." : "💪 Cố lên! Ôn lại bài 7 rồi thử lại nhé.";
   document.getElementById("scoreMsg").textContent = msg+"  ⏱ Thời gian làm bài: "+fmt(elapsed);
   function mark(p){ return p>=1?"✅":p>0?"🟡":"❌"; }
@@ -497,33 +504,41 @@ document.getElementById("submitBtn").onclick = function(){
     st.textContent="📋 Bạn bấm “Sao chép kết quả” rồi gửi cho giáo viên nhé."; return;
   }
   submitCount++;
-  if(essay){ ef.className="fb mid"; ef.innerHTML='<span class="spin"></span><b>Đang chấm và sửa đoạn văn…</b> (khoảng 10–30 giây, bạn đừng tắt trang nhé)'; }
+  var subId = "b7-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  try{ localStorage.setItem("bai7_last_id", subId); }catch(e){}
   st.innerHTML = '<span class="spin"></span>Đang gửi bài cho giáo viên…';
   var payload = {
-    action:"submit", bai:"第七课 · 你吃什么 (BTVN nâng cao)", lop:document.getElementById("stClass").value,
+    action:"submit", id:subId, bai:"第七课 · 你吃什么 (BTVN nâng cao)", lop:document.getElementById("stClass").value,
     hoc_sinh:document.getElementById("stName").value.trim(), giay:elapsed, lan_nop:submitCount,
     b1:r1(S[0]), b2:r1(S[1]), b3:r1(S[2]), b4:r1(S[3]), essay:essay,
     chi_tiet:[0,1,2,3].map(function(k){ return "BÀI "+(k+1)+". "+NAMES[k].toUpperCase()+"\n"+REP[k].join("\n"); }).join("\n\n")
   };
-  var ctl = new AbortController(), timer=setTimeout(function(){ ctl.abort(); },90000);
-  fetch(SEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),signal:ctl.signal})
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      clearTimeout(timer);
-      if(d && d.ai){ essayAI=d.ai; essayScore=+d.ai.tong; renderAI(d.ai);
-        setFb(ef, essayScore>=16?"ok":essayScore>=10?"mid":"no", '📝 <b>Bài 5 đạt '+essayScore+' / 20.</b>', 'Xem chi tiết chấm và sửa lỗi bên dưới.'); }
-      else if(essay){ setFb(ef,"mid",'📝 <b>Giáo viên sẽ chấm đoạn văn của bạn.</b>','📖 Đoạn văn tham khảo: '+esc(SAMPLE)); }
-      showTotals(false);
-      st.textContent="✅ Đã gửi bài cho giáo viên.";
-      setTimeout(function(){ showBxh(payload.lop,payload.hoc_sinh); },1500);
-    })
-    .catch(function(){
-      clearTimeout(timer);
-      if(essay) setFb(ef,"mid",'⚠️ <b>Chưa nhận được kết quả chấm tự động.</b> Giáo viên sẽ chấm đoạn văn của bạn.','📖 Đoạn văn tham khảo: '+esc(SAMPLE));
-      showTotals(false);
-      st.textContent="⚠️ Chưa chắc bài đã được gửi (lỗi mạng). Bạn bấm “Sao chép kết quả” và gửi cho giáo viên nhé.";
-    });
+  var pendMsg = function(){ if(essay) setFb(ef,"mid",'📝 <b>Đã nộp đoạn văn — cô sẽ chấm và sửa lỗi chi tiết.</b>','⏰ Kết quả có vào khoảng 12h, 18h, 21h. Quay lại trang này, nhập đúng Lớp + Họ tên rồi bấm <b>🔎 Xem kết quả bài viết</b>.<br>📖 Trong lúc chờ, so sánh với đoạn văn tham khảo: '+esc(SAMPLE)); };
+  fetch(SEND_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)})
+    .then(function(){ pendMsg(); showTotals(false); st.textContent="✅ Đã gửi bài cho giáo viên."; setTimeout(function(){ showBxh(payload.lop,payload.hoc_sinh); },1500); })
+    .catch(function(){ pendMsg(); showTotals(false); st.textContent="⚠️ Chưa gửi được (lỗi mạng). Bạn bấm “Sao chép kết quả” và gửi cho giáo viên nhé."; });
 };
+
+// ===== XEM KẾT QUẢ BÀI VIẾT =====
+function showKq(){
+  var box=document.getElementById("kqBox"), body=document.getElementById("kqBody");
+  var lop=normClass(document.getElementById("stClass").value), ten=normName(document.getElementById("stName").value);
+  box.hidden=false;
+  if(!SEND_URL){ body.innerHTML='<div class="empty">Chức năng xem kết quả sắp mở.</div>'; box.scrollIntoView({behavior:"smooth"}); return; }
+  if(!lop || !ten){ body.innerHTML='<p class="note">✋ Bạn nhập <b>Lớp</b> và <b>Họ tên</b> ở trên (giống lúc nộp bài) rồi bấm lại nhé.</p>'; box.scrollIntoView({behavior:"smooth"}); return; }
+  body.innerHTML='<p class="note"><span class="spin"></span>Đang tìm bài của <b>'+esc(ten)+'</b> – lớp '+esc(lop)+'…</p>';
+  box.scrollIntoView({behavior:"smooth"});
+  jsonp(SEND_URL+"?kq=1&lop="+encodeURIComponent(lop)+"&ten="+encodeURIComponent(ten), function(d){
+    if(!d){ body.innerHTML='<p class="note">⚠️ Chưa tải được. Bạn thử lại sau ít phút nhé.</p>'; return; }
+    if(!d.found){ body.innerHTML='<p class="note">Không tìm thấy bài viết của bạn. Kiểm tra lại Lớp và Họ tên (phải giống lúc nộp).</p>'; return; }
+    var h='<h4 style="color:var(--purple)">📄 Đoạn văn bạn đã nộp</h4><div class="passage">'+esc(d.essay)+'</div>';
+    if(!d.graded){ body.innerHTML=h+'<p class="note">⏳ Bài viết <b>chưa được chấm</b>. Kết quả có vào khoảng 12h, 18h, 21h — bạn quay lại sau nhé.</p>'; return; }
+    body.innerHTML=h+'<p style="font-size:1.15rem"><b>Tổng điểm cả bài: '+d.tong+' / 100</b></p><div class="ai" id="kqAi"></div>';
+    renderAI(d.ai,"kqAi");
+  });
+}
+document.getElementById("viewKq").onclick=showKq;
+document.getElementById("kqBtn2").onclick=showKq;
 
 document.getElementById("copyBtn").onclick = function(){
   var ok=function(){ alert("Đã sao chép! Bạn dán (Ctrl+V) vào tin nhắn gửi giáo viên nhé."); };
