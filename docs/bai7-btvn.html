@@ -378,7 +378,7 @@ function normName(s){ return String(s).toUpperCase().replace(/\s+/g," ").trim();
 function startTimer(){ t0=Date.now(); clearInterval(tick); document.getElementById("timer").textContent="00:00";
   tick=setInterval(function(){ document.getElementById("timer").textContent=fmt((Date.now()-t0)/1000); },1000); }
 // Dán URL Ứng dụng web của Apps Script bài 7 vào đây:
-var SEND_URL = "";
+var SEND_URL = "https://script.google.com/macros/s/AKfycbz-Bpb92W75BGGXwhBLhfm91RrY-Q_HQk_IMOIci-DRZfPCMGqqJsW_x6JIbWQ7jM5L/exec";
 var NAMES = ["Điền từ","Chọn câu đúng","Sắp xếp câu","Đọc hiểu","Viết đoạn văn"];
 var ICONS = ["✏️","🔍","🔤","📖","📝"];
 
