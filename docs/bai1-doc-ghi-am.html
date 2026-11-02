@@ -36,6 +36,7 @@ button:disabled{opacity:.55;cursor:default}
 .syl{position:relative;background:#f1f5f9;border:2px solid #dbe3ec;border-radius:14px;padding:10px 8px 8px;text-align:center}
 .syl .no{position:absolute;top:6px;left:8px;font-size:.8rem;color:var(--muted);font-weight:700}
 .syl .py{font-size:2.3rem;font-weight:800;color:var(--head);line-height:1.15;font-family:Arial,"Noto Sans",sans-serif}
+.syl .py.two{font-size:1.5rem;line-height:1.75;margin-top:4px}
 .syl .hz{font-size:1rem;color:var(--muted)}
 .ctrl{display:flex;justify-content:center;gap:6px;margin-top:6px}
 .rec{width:48px;height:48px;border-radius:50%;padding:0;font-size:1.3rem;background:var(--red)}
@@ -120,14 +121,14 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;margin:24px 0 10px}
 <div id="quiz" hidden>
 
 <div class="box p1">
-  <h2>🔤 Phần 1. Đọc 15 âm tiết <span class="pt">(60 điểm)</span></h2>
-  <p class="note">Bấm 🎙 → đọc <b>1 lần</b> → máy tự dừng (hoặc bấm lại để dừng). Bấm ▶ để nghe lại, chưa hài lòng thì ghi lại. 🔊 là giọng máy đọc mẫu.</p>
+  <h2>🔤 Phần 1. Đọc 15 từ <span class="pt">(60 điểm)</span></h2>
+  <p class="note">Bấm 🎙 → đọc từ <b>1 lần</b> → máy tự dừng (hoặc bấm lại để dừng). Bấm ▶ để nghe lại, chưa hài lòng thì ghi lại. 🔊 là giọng máy đọc mẫu.</p>
   <div class="grid" id="grid"></div>
 </div>
 
 <div class="box p2">
-  <h2>📜 Phần 2. Đọc bài thơ 静夜思 <span class="pt">(40 điểm)</span></h2>
-  <p class="note">Đọc trọn <b>4 câu</b>, ngắt nhịp 2/3 (床前 / 明月光). Đọc xong bấm ⏹ để dừng.</p>
+  <h2>📜 Phần 2. Đọc bài thơ 春晓 <span class="pt">(40 điểm)</span></h2>
+  <p class="note">Đọc trọn <b>4 câu</b>, ngắt nhịp 2/3 (春眠 / 不觉晓). Đọc xong bấm ⏹ để dừng.</p>
   <div class="poem" id="poem"></div>
   <div class="poembox" id="poemBox">
     <div class="ctrl">
@@ -172,18 +173,28 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;margin:24px 0 10px}
 <script>
 // ===== DỮ LIỆU (thứ tự phải khớp với mảng SYL trong Apps Script) =====
 var SYL = [
- {py:"bàn", hz:"半", vi:"một nửa", tone:4, ini:"b"}, {py:"pà", hz:"怕", vi:"sợ", tone:4, ini:"p"}, {py:"dēng", hz:"灯", vi:"đèn", tone:1, ini:"d"},
- {py:"tàng", hz:"烫", vi:"bỏng, nóng", tone:4, ini:"t"}, {py:"gǎn", hz:"敢", vi:"dám", tone:3, ini:"g"}, {py:"kàn", hz:"看", vi:"nhìn, xem", tone:4, ini:"k"},
- {py:"péng", hz:"朋", vi:"bạn", tone:2, ini:"p"}, {py:"tóng", hz:"同", vi:"cùng", tone:2, ini:"t"}, {py:"kào", hz:"靠", vi:"dựa", tone:4, ini:"k"},
- {py:"fēng", hz:"风", vi:"gió", tone:1, ini:"f"}, {py:"nòng", hz:"弄", vi:"làm", tone:4, ini:"n"}, {py:"lǎn", hz:"懒", vi:"lười", tone:3, ini:"l"},
- {py:"hòu", hz:"后", vi:"sau", tone:4, ini:"h"}, {py:"yù", hz:"玉", vi:"ngọc", tone:4, ini:"y"}, {py:"mèng", hz:"梦", vi:"giấc mơ", tone:4, ini:"m"}
+ {py:"pà", hz:"怕", vi:"sợ", sy:[{py:"pà",tone:4,ini:"p"}]},
+ {py:"kàn", hz:"看", vi:"nhìn, xem", sy:[{py:"kàn",tone:4,ini:"k"}]},
+ {py:"tàng", hz:"烫", vi:"bỏng, nóng", sy:[{py:"tàng",tone:4,ini:"t"}]},
+ {py:"mèng", hz:"梦", vi:"giấc mơ", sy:[{py:"mèng",tone:4,ini:"m"}]},
+ {py:"fēng", hz:"风", vi:"gió", sy:[{py:"fēng",tone:1,ini:"f"}]},
+ {py:"bàn", hz:"半", vi:"một nửa", sy:[{py:"bàn",tone:4,ini:"b"}]},
+ {py:"kěpà", hz:"可怕", vi:"đáng sợ", sy:[{py:"kě",tone:3,ini:"k"},{py:"pà",tone:4,ini:"p"}]},
+ {py:"tóuténg", hz:"头疼", vi:"đau đầu", sy:[{py:"tóu",tone:2,ini:"t"},{py:"téng",tone:2,ini:"t"}]},
+ {py:"dàngāo", hz:"蛋糕", vi:"bánh ngọt", sy:[{py:"dàn",tone:4,ini:"d"},{py:"gāo",tone:1,ini:"g"}]},
+ {py:"hànbǎo", hz:"汉堡", vi:"hamburger", sy:[{py:"hàn",tone:4,ini:"h"},{py:"bǎo",tone:3,ini:"b"}]},
+ {py:"kělè", hz:"可乐", vi:"coca", sy:[{py:"kě",tone:3,ini:"k"},{py:"lè",tone:4,ini:"l"}]},
+ {py:"gōnggòng", hz:"公共", vi:"công cộng", sy:[{py:"gōng",tone:1,ini:"g"},{py:"gòng",tone:4,ini:"g"}]},
+ {py:"bāngmáng", hz:"帮忙", vi:"giúp đỡ", sy:[{py:"bāng",tone:1,ini:"b"},{py:"máng",tone:2,ini:"m"}]},
+ {py:"nǔlì", hz:"努力", vi:"cố gắng", sy:[{py:"nǔ",tone:3,ini:"n"},{py:"lì",tone:4,ini:"l"}]},
+ {py:"ménkǒu", hz:"门口", vi:"cửa ra vào", sy:[{py:"mén",tone:2,ini:"m"},{py:"kǒu",tone:3,ini:"k"}]}
 ];
 var ASP={p:1,t:1,k:1}, UNASP={b:1,d:1,g:1};
 var POEM = [
- [["床","chuáng"],["前","qián"],["明","míng"],["月","yuè"],["光","guāng"],["，",""]],
- [["疑","yí"],["是","shì"],["地","dì"],["上","shàng"],["霜","shuāng"],["。",""]],
- [["举","jǔ"],["头","tóu"],["望","wàng"],["明","míng"],["月","yuè"],["，",""]],
- [["低","dī"],["头","tóu"],["思","sī"],["故","gù"],["乡","xiāng"],["。",""]]
+ [["春","chūn"],["眠","mián"],["不","bù"],["觉","jué"],["晓","xiǎo"],["，",""]],
+ [["处","chù"],["处","chù"],["闻","wén"],["啼","tí"],["鸟","niǎo"],["。",""]],
+ [["夜","yè"],["来","lái"],["风","fēng"],["雨","yǔ"],["声","shēng"],["，",""]],
+ [["花","huā"],["落","luò"],["知","zhī"],["多","duō"],["少","shǎo"],["。",""]]
 ];
 // Dán URL Ứng dụng web của Apps Script bài 1 (ghi âm) vào đây:
 var SEND_URL = "";
@@ -196,11 +207,11 @@ var $ = function(id){ return document.getElementById(id); };
 
 // ===== GIAO DIỆN =====
 $("grid").innerHTML = SYL.map(function(s,i){
-  return '<div class="syl" id="c'+i+'"><span class="no">'+(i+1)+'</span><div class="py">'+s.py+'</div><div class="hz">'+s.hz+' · '+s.vi+'</div>'+
+  return '<div class="syl" id="c'+i+'"><span class="no">'+(i+1)+'</span><div class="py'+(s.sy.length>1?' two':'')+'">'+s.py+'</div><div class="hz">'+s.hz+' · '+s.vi+'</div>'+
     '<div class="ctrl"><button class="rec" data-i="'+i+'" title="Ghi âm">🎙</button><button class="play" data-i="'+i+'" title="Nghe lại" disabled>▶</button>'+
     '<button class="tts" data-i="'+i+'" title="Giọng máy đọc mẫu">🔊</button></div><div class="meter"><i></i></div><div class="st">Chưa ghi âm</div><div class="res"></div></div>';
 }).join("");
-$("poem").innerHTML = '<div class="t"><ruby>静<rt>Jìng</rt></ruby><ruby>夜<rt>yè</rt></ruby><ruby>思<rt>sī</rt></ruby></div><div class="a">唐 · 李白 (Táng · Lǐ Bái)</div>'+
+$("poem").innerHTML = '<div class="t"><ruby>春<rt>Chūn</rt></ruby><ruby>晓<rt>xiǎo</rt></ruby></div><div class="a">唐 · 孟浩然 (Táng · Mèng Hàorán)</div>'+
   POEM.map(function(l){ return '<div class="l">'+l.map(function(c){ return c[1]?'<ruby>'+c[0]+'<rt>'+c[1]+'</rt></ruby>':c[0]; }).join("")+'</div>'; }).join("");
 
 // ===== GHI ÂM =====
@@ -312,10 +323,10 @@ function toneShape(x){
   return {fall:s0-s1, rise:s1-s0, range:mx-mn};
 }
 function localCheck(i){
-  var s=SYL[i], x=CLIPS[i].pcm, r={pen:0, loi:[]};
+  var s=SYL[i], s0=s.sy[0], x=CLIPS[i].pcm, r={pen:0, loi:[]};
   try{
-    if(ASP[s.ini]){ var t=vot(x); if(t!==null && t<20){ r.pen+=2; r.loi.push("có thể thiếu bật hơi"); } }
-    if(s.tone===4){ var sh=toneShape(x); if(sh && sh.fall<1.5 && (sh.rise>2 || sh.range<2.5)){ r.pen+=2; r.loi.push("thanh 4 chưa rơi xuống"); } }
+    if(ASP[s0.ini]){ var t=vot(x); if(t!==null && t<20){ r.pen+=2; r.loi.push("có thể thiếu bật hơi"); } }
+    if(s.sy.length===1 && s0.tone===4){ var sh=toneShape(x); if(sh && sh.fall<1.5 && (sh.rise>2 || sh.range<2.5)){ r.pen+=2; r.loi.push("thanh 4 chưa rơi xuống"); } }
   }catch(e){}
   return r;
 }
@@ -346,7 +357,7 @@ document.querySelectorAll("#grid .rec").forEach(function(btn){
   btn.onclick=function(){
     var i=+btn.dataset.i, card=$("c"+i);
     if(rec && rec.btn===btn){ stopRec(); return; }
-    startRec(null, btn, card.querySelector(".meter"), 3, function(x){
+    startRec(null, btn, card.querySelector(".meter"), 4, function(x){
       var c=CLIPS[i], a=analyze(x), q=quality(a,false); c.tries++;
       if(q){ c.ok=false; c.pcm=null; docLai++; card.querySelector(".play").disabled=true; setCard(card,"bad","🔁 "+q); return; }
       c.pcm=trim(x,a); c.ok=true; c.redo=false; card.querySelector(".play").disabled=false; setCard(card,"ok","✅ Đã ghi");
@@ -410,7 +421,7 @@ function localScore(){
 $("submitBtn").onclick=function(){
   var m=missing();
   if(m.syl.length||m.poem){
-    alert("Bạn chưa ghi âm đạt yêu cầu: "+(m.syl.length?"âm tiết số "+m.syl.join(", "):"")+(m.syl.length&&m.poem?" và ":"")+(m.poem?"bài thơ":"")+".");
+    alert("Bạn chưa ghi âm đạt yêu cầu: "+(m.syl.length?"từ số "+m.syl.join(", "):"")+(m.syl.length&&m.poem?" và ":"")+(m.poem?"bài thơ":"")+".");
     var first=m.syl.length?$("c"+(m.syl[0]-1)):$("poemBox"); first.scrollIntoView({behavior:"smooth",block:"center"}); return;
   }
   if(rec) stopRec();
@@ -473,7 +484,7 @@ function finishAI(ch){
     res.innerHTML=mark(r.diem)+" <b>"+r.diem+"/4</b>"+(r.nhan_xet?"<br>"+esc(r.nhan_xet):"");
   });
   var bt=ch.bai_tho;
-  var h='<h3>🔤 Phần 1 – 15 âm tiết ('+ch.p1+'/60)</h3><table><tr><th>#</th><th>Âm tiết</th><th>Điểm</th><th>Nhận xét</th><th></th></tr>'+
+  var h='<h3>🔤 Phần 1 – 15 từ ('+ch.p1+'/60)</h3><table><tr><th>#</th><th>Từ</th><th>Điểm</th><th>Nhận xét</th><th></th></tr>'+
     ch.am_tiet.map(function(r,i){ return '<tr><td>'+(i+1)+'</td><td class="pyc">'+SYL[i].py+'</td><td>'+r.diem+'/4</td><td>'+esc([(r.loi||[]).join(", "), r.nhan_xet].filter(Boolean).join(" – "))+'</td><td class="c">'+mark(r.diem)+'</td></tr>'; }).join("")+'</table>'+
     '<h3>📜 Phần 2 – Bài thơ ('+ch.p2+'/40 · lưu loát '+bt.luu_loat+'/6)</h3>'+
     (bt.loi.length?'<div class="chips">Chữ đọc chưa đúng: '+bt.loi.map(function(e){ return '<span title="'+esc(e.mo_ta||"")+'">'+esc(e.chu)+' · '+esc(e.mo_ta||e.loai)+'</span>'; }).join("")+'</div>':'<p>Không phát hiện chữ đọc sai. Tuyệt vời!</p>')+
@@ -492,7 +503,7 @@ function finishLocal(loc, all, status, sent){
   $("scoreSub").textContent="Phần 1 (chấm sơ bộ trên máy): "+loc.p1+"/60 · Phần 2 (bài thơ): giáo viên chấm";
   $("scoreMsg").textContent=msgFor(loc.p1,60)+"  ⏱ "+fmt(elapsed);
   $("sendStatus").textContent=status;
-  $("review").innerHTML='<h3>🔤 Phần 1 – chấm sơ bộ ('+loc.p1+'/60)</h3><p class="sub" style="text-align:left">Máy chỉ kiểm tra được bật hơi và thanh 4, giáo viên sẽ nghe lại để chấm chính xác.</p><table><tr><th>#</th><th>Âm tiết</th><th>Điểm</th><th>Ghi chú</th><th></th></tr>'+
+  $("review").innerHTML='<h3>🔤 Phần 1 – chấm sơ bộ ('+loc.p1+'/60)</h3><p class="sub" style="text-align:left">Máy chỉ kiểm tra được bật hơi và thanh 4, giáo viên sẽ nghe lại để chấm chính xác.</p><table><tr><th>#</th><th>Từ</th><th>Điểm</th><th>Ghi chú</th><th></th></tr>'+
     loc.rows.map(function(r,i){ return '<tr><td>'+(i+1)+'</td><td class="pyc">'+SYL[i].py+'</td><td>'+r.diem+'/4</td><td>'+esc(r.loi.join(", "))+'</td><td class="c">'+mark(r.diem)+'</td></tr>'; }).join("")+'</table>';
   lastReport="BTVN BÀI 1 – ĐỌC & GHI ÂM\nHọc sinh: "+$("stName").value+"\nLớp: "+$("stClass").value+"\nPhần 1 (sơ bộ): "+loc.p1+"/60\n"+
     loc.rows.map(function(r,i){ return (i+1)+". "+SYL[i].py+" "+r.diem+"/4"+(r.loi.length?" ("+r.loi.join(", ")+")":""); }).join("\n");
