@@ -433,7 +433,7 @@ body.done .ch.tf span,body.done .ch.let span,body.done .ch.abc{opacity:.55}
 </div>
 <script>
 var KEY = {"1": "F", "2": "T", "3": "T", "4": "F", "5": "T", "6": "F", "7": "B", "8": "D", "9": "A", "10": "C", "11": "B", "12": "C", "13": "A", "14": "C", "15": "B"};
-var SEND_URL = "https://script.google.com/macros/s/AKfycbxLF5XCI6upCFiYUYm6qF6IU3HVJiAnKJTgnTysIu4zwcDr2wIzEouO36qKGwLptn9N/exec";
+var SEND_URL = "https://script.google.com/macros/s/AKfycbwhuMYEXRqgzc25qkJURaKPfEh4zDemZJd--36Oifal9xN1iZwsl1vVl_k35ft0vEaPeg/exec";
 var TITLE = "Đề luyện nghe HSK 2 · Nghe 2 (BTVN)";
 var PT = function(n){ return n<=10 ? 6 : 8; }; // điểm mỗi câu, đơn vị 0,1
 var MAXP = [30,30,40];
@@ -520,7 +520,7 @@ document.getElementById("retryBtn").onclick=function(){
   f(); window.addEventListener("resize",f); })();
 prog();
 // ===== BẢNG VÀNG =====
-var BXH_URL = "", meName = "";
+var BXH_URL = "https://script.google.com/macros/s/AKfycbwhuMYEXRqgzc25qkJURaKPfEh4zDemZJd--36Oifal9xN1iZwsl1vVl_k35ft0vEaPeg/exec", meName = "";
 function jsonp(url, cb){
   var name="bxhcb"+Date.now(), sc=document.createElement("script"), done=false;
   window[name]=function(d){ done=true; cb(d); delete window[name]; sc.remove(); };
