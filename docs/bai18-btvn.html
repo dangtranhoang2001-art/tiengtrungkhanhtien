@@ -58,6 +58,7 @@ textarea:focus{outline:none;border-color:var(--head)}
 .fb.no{display:block;background:#f9efed;border:1px solid var(--red)}
 .fb.empty{display:block;background:#f3f3f3;border:1px dashed #bbb}
 .fb .ans{margin-top:3px}
+.fb .why{margin:5px 0 2px;padding:6px 10px;background:rgba(255,255,255,.7);border-radius:8px;line-height:1.6}
 .result{text-align:center;display:none}
 .result .score{font-size:3rem;font-weight:800;color:var(--head)}
 .result .sub{color:var(--muted)}
@@ -215,7 +216,7 @@ select:disabled{opacity:1;background:#f6f6f4}
   <div id="bxhBody"></div>
 </div>
 
-<footer>第十八课 · 我去邮局寄包裹 · 汉语加油站 · <span style="opacity:.6">bản 06/11b</span></footer>
+<footer>第十八课 · 我去邮局寄包裹 · 汉语加油站 · <span style="opacity:.6">bản 06/11c</span></footer>
 </div>
 
 <script>
@@ -232,16 +233,16 @@ var WORDS = [
 // ===== BÀI 2: ĐIỀN TỪ =====
 var BANK = ["坐","顺便","份","寄","没问题","骑","回来","当","用","张","替","去","坐","帮","办"];
 var FILL = [
- {t:["下午我去邮局",0,"包裹。"], a:[["寄"]], show:"下午我去邮局寄包裹。", why:"Câu liên động chỉ mục đích: 去 + nơi chốn + làm gì → 去邮局寄包裹."},
- {t:["你去书店，",0,"替我买一本词典吧。"], a:[["顺便"]], show:"你去书店，顺便替我买一本词典吧。", why:"顺便: nhân lúc làm việc này thì tiện làm luôn việc khác."},
- {t:["明天我去给外贸代表团",0,"翻译。"], a:[["当"]], show:"明天我去给外贸代表团当翻译。", why:"给 + người + 当 + nghề/vai trò: làm … cho ai."},
- {t:["我们",0,"飞机去上海，",1,"火车回来。"], a:[["坐"],["坐"]], show:"我们坐飞机去上海，坐火车回来。", why:"Máy bay, tàu hoả dùng 坐; 坐 + phương tiện đứng TRƯỚC 去 / 回来."},
- {t:["他不坐车，他",0,"车去学校。"], a:[["骑"]], show:"他不坐车，他骑车去学校。", why:"Xe đạp dùng 骑. Phương thức (骑车) đứng trước động từ chính (去)."},
- {t:["上课的时候，我们",0,"汉语跟老师聊天儿。"], a:[["用"]], show:"上课的时候，我们用汉语跟老师聊天儿。", why:"用 + công cụ / ngôn ngữ + động từ: làm gì bằng cái gì."},
- {t:["我要买一",0,"青年报和五",1,"邮票。"], a:[["份"],["张"]], show:"我要买一份青年报和五张邮票。", why:"Báo dùng lượng từ 份; tem dùng 张."},
- {t:["A：帮我浇一下儿花，行吗？ B：行，",0,"。"], a:[["没问题"]], show:"A：帮我浇一下儿花，行吗？——B：行，没问题。", why:"没问题: đồng ý lời nhờ vả (không vấn đề gì)."},
- {t:["珍妮星期五",0,"上海旅行，下星期一",1,"。"], a:[["去"],["回来"]], show:"珍妮星期五去上海旅行，下星期一回来。", why:"去 + nơi chốn + mục đích; trở về nơi xuất phát dùng 回来."},
- {t:["我没有时间，你",0,"我去银行换钱，好吗？"], a:[["替","帮"]], show:"我没有时间，你替（帮）我去银行换钱，好吗？", why:"替 / 帮 + người + động từ: làm thay / làm giúp ai (dùng 替 hoặc 帮 đều đúng)."}
+ {t:["下午我去邮局",0,"包裹。"], a:[["寄"]], show:"下午我去邮局寄包裹。", why:"Câu liên động chỉ mục đích: 去 + nơi chốn + làm gì → 去邮局寄包裹.", err:{"拿":"拿包裹 = đi lấy bưu phẩm, nhưng câu muốn nói đi GỬI → 寄.","办":"办 đi với 事 (办事), không đi với 包裹."}},
+ {t:["你去书店，",0,"替我买一本词典吧。"], a:[["顺便"]], show:"你去书店，顺便替我买一本词典吧。", why:"顺便: nhân lúc làm việc này thì tiện làm luôn việc khác.", err:{"替":"Sau chỗ trống đã có 替 rồi; cần từ chỉ “tiện thể” → 顺便.","帮":"Sau chỗ trống đã có 替; cần “tiện thể” → 顺便."}},
+ {t:["明天我去给外贸代表团",0,"翻译。"], a:[["当"]], show:"明天我去给外贸代表团当翻译。", why:"给 + người + 当 + nghề/vai trò: làm … cho ai.", err:{"办":"Làm nghề/vai trò (phiên dịch, giáo viên…) dùng 当, không dùng 办."}},
+ {t:["我们",0,"飞机去上海，",1,"火车回来。"], a:[["坐"],["坐"]], show:"我们坐飞机去上海，坐火车回来。", why:"Máy bay, tàu hoả dùng 坐; 坐 + phương tiện đứng TRƯỚC 去 / 回来.", err:{"骑":"骑 chỉ dùng cho xe đạp, xe máy, ngựa (phải ngồi “cưỡi”). Máy bay, tàu hoả dùng 坐."}},
+ {t:["他不坐车，他",0,"车去学校。"], a:[["骑"]], show:"他不坐车，他骑车去学校。", why:"Xe đạp dùng 骑. Phương thức (骑车) đứng trước động từ chính (去).", err:{"坐":"Câu đã nói 不坐车 (không đi xe buýt) → vế sau phải là cách khác: 骑车 (đạp xe)."}},
+ {t:["上课的时候，我们",0,"汉语跟老师聊天儿。"], a:[["用"]], show:"上课的时候，我们用汉语跟老师聊天儿。", why:"用 + công cụ / ngôn ngữ + động từ: làm gì bằng cái gì.", err:{"坐":"Ngôn ngữ / công cụ dùng 用: 用汉语 = bằng tiếng Hán."}},
+ {t:["我要买一",0,"青年报和五",1,"邮票。"], a:[["份"],["张"]], show:"我要买一份青年报和五张邮票。", why:"Báo dùng lượng từ 份; tem dùng 张.", err:{"张":"Báo dùng 份 (一份报), tem dùng 张 (五张邮票) — bạn bị đảo hai lượng từ."}},
+ {t:["A：帮我浇一下儿花，行吗？ B：行，",0,"。"], a:[["没问题"]], show:"A：帮我浇一下儿花，行吗？——B：行，没问题。", why:"没问题: đồng ý lời nhờ vả (không vấn đề gì).", err:{"顺便":"Đáp lại lời nhờ vả: 行，没问题 (được, không vấn đề gì)."}},
+ {t:["珍妮星期五",0,"上海旅行，下星期一",1,"。"], a:[["去"],["回来"]], show:"珍妮星期五去上海旅行，下星期一回来。", why:"去 + nơi chốn + mục đích; trở về nơi xuất phát dùng 回来.", err:{"回来":"Ô đầu là đi đến Thượng Hải → 去; ô sau là trở về → 回来."}},
+ {t:["我没有时间，你",0,"我去银行换钱，好吗？"], a:[["替","帮"]], show:"我没有时间，你替（帮）我去银行换钱，好吗？", why:"替 / 帮 + người + động từ: làm thay / làm giúp ai (dùng 替 hoặc 帮 đều đúng).", err:{"办":"Làm giúp / làm thay ai: 替 hoặc 帮 + người + động từ."}}
 ];
 
 // ===== BÀI 3: GHÉP CÂU HỎI – CÂU TRẢ LỜI =====
@@ -257,30 +258,31 @@ var MATCH = [
  {q:"代表团明天去哪儿参观？", a:7, why:"哪儿 hỏi nơi chốn → 去北京参观."}
 ];
 var L = "ABCDEFGHIJ";
+var ANS_WHY = {8:"Câu này SAI trật tự: phương thức (坐飞机) phải đứng TRƯỚC 去上海 → 我们坐飞机去上海.",9:"Câu này SAI trật tự: 去 + nơi chốn đứng trước, mục đích đứng sau → 我去邮局寄包裹."};
 
 // ===== BÀI 4: SẮP XẾP =====
 var ORDER = [
- {t:["邮局","我","寄","下午","去","包裹"], a:["下午我去邮局寄包裹","我下午去邮局寄包裹"], show:"下午我去邮局寄包裹。"},
- {t:["上海","代表团","去","参观","飞机","坐"], a:["代表团坐飞机去上海参观"], show:"代表团坐飞机去上海参观。"},
- {t:["替","你","几张","顺便","买","我","吧","邮票"], a:["你顺便替我买几张邮票吧"], show:"你顺便替我买几张邮票吧。"},
- {t:["翻译","她","代表团","去","当","给"], a:["她去给代表团当翻译"], show:"她去给代表团当翻译。"},
- {t:["中国朋友","汉语","我们","聊天儿","跟","用"], a:["我们用汉语跟中国朋友聊天儿","我们跟中国朋友用汉语聊天儿"], show:"我们用汉语跟中国朋友聊天儿。"},
- {t:["一下儿","请","花","帮","浇","我"], a:["请帮我浇一下儿花"], show:"请帮我浇一下儿花。"},
- {t:["书","骑车","他","去","买","书店"], a:["他骑车去书店买书"], show:"他骑车去书店买书。"},
- {t:["还是","坐","你","去","火车","坐","飞机","去"], a:["你坐火车去还是坐飞机去","你坐飞机去还是坐火车去"], show:"你坐火车去还是坐飞机去？"}
+ {t:["邮局","我","寄","下午","去","包裹"], a:["下午我去邮局寄包裹","我下午去邮局寄包裹"], show:"下午我去邮局寄包裹。", why:"Mẫu: (thời gian) + 主语 + 去 + nơi chốn + làm gì. Mục đích (寄包裹) luôn đứng SAU nơi chốn."},
+ {t:["上海","代表团","去","参观","飞机","坐"], a:["代表团坐飞机去上海参观"], show:"代表团坐飞机去上海参观。", why:"Phương thức 坐飞机 đứng trước 去上海; mục đích 参观 đứng cuối: 坐飞机 → 去上海 → 参观."},
+ {t:["替","你","几张","顺便","买","我","吧","邮票"], a:["你顺便替我买几张邮票吧"], show:"你顺便替我买几张邮票吧。", why:"顺便 đứng sau chủ ngữ, trước 替我; 替 + người + động từ: 顺便替我买…"},
+ {t:["翻译","她","代表团","去","当","给"], a:["她去给代表团当翻译"], show:"她去给代表团当翻译。", why:"去 đứng trước, phần mục đích “给代表团当翻译” đứng sau. 给 + người đứng trước động từ 当."},
+ {t:["中国朋友","汉语","我们","聊天儿","跟","用"], a:["我们用汉语跟中国朋友聊天儿","我们跟中国朋友用汉语聊天儿"], show:"我们用汉语跟中国朋友聊天儿。", why:"用汉语 (phương thức) và 跟中国朋友 (đối tượng) đều đứng TRƯỚC động từ 聊天儿."},
+ {t:["一下儿","请","花","帮","浇","我"], a:["请帮我浇一下儿花"], show:"请帮我浇一下儿花。", why:"请 đứng đầu câu; 帮 + người + động từ + 一下儿 + tân ngữ: 帮我浇一下儿花."},
+ {t:["书","骑车","他","去","买","书店"], a:["他骑车去书店买书"], show:"他骑车去书店买书。", why:"Thứ tự: 骑车 (cách đi) → 去书店 (nơi đến) → 买书 (mục đích)."},
+ {t:["还是","坐","你","去","火车","坐","飞机","去"], a:["你坐火车去还是坐飞机去","你坐飞机去还是坐火车去"], show:"你坐火车去还是坐飞机去？", why:"Câu hỏi lựa chọn: A 还是 B, mỗi vế đều là 坐 + phương tiện + 去."}
 ];
 
 // ===== BÀI 5: DỊCH TRUNG ⇄ VIỆT =====
 // d:"vi" = dịch sang tiếng Việt (k: ý cần có, so khớp không dấu); d:"zh" = dịch sang tiếng Trung
 var TRANS = [
- {d:"vi", q:"星期天我想骑车去书店买几本中文杂志，你要不要跟我一起去？", show:"Chủ nhật mình muốn đạp xe đến hiệu sách mua mấy cuốn tạp chí tiếng Trung, cậu có muốn đi cùng mình không?", k:[["chu nhat"],["dap xe","di xe dap","xe dap"],["hieu sach","nha sach"],["tap chi"],["di cung","di voi","cung di","di chung"]]},
- {d:"vi", q:"我姐姐常常跟外贸代表团去上海、北京参观，给他们当翻译。", show:"Chị tôi thường cùng đoàn đại biểu ngoại thương đi tham quan Thượng Hải, Bắc Kinh, làm phiên dịch cho họ.", k:[["chi"],["doan"],["tham quan"],["phien dich"],["cho ho","cho doan","cho cac"]]},
- {d:"vi", q:"你去银行换钱的时候，顺便帮我寄一下儿这个包裹，行吗？", show:"Lúc cậu đi ngân hàng đổi tiền, tiện thể gửi giúp mình bưu phẩm này được không?", k:[["ngan hang"],["doi tien"],["tien the","nhan tien","tien"],["gui"],["buu pham","buu kien","goi","kien hang"]]},
- {d:"vi", q:"我下星期去上海旅行，八号回来，这几天你帮我浇浇花，好吗？", show:"Tuần sau mình đi Thượng Hải du lịch, mùng 8 về, mấy hôm này cậu tưới hoa giúp mình nhé?", k:[["tuan sau"],["du lich"],["mung 8","ngay 8","mong 8","mung tam","ngay tam"],["tuoi"],["hoa"]]},
- {d:"zh", q:"Ngày nào anh ấy cũng đạp xe đến trường học tiếng Hán, không đi xe buýt.", show:"他每天都骑车去学校学习汉语，不坐车。", k:[["骑车去学校","骑自行车去学校"],["学汉语","学习汉语"],["不坐车","不坐公共汽车","不坐公交车"]]},
- {d:"zh", q:"Ngày mai tôi đi máy bay đến Thượng Hải làm phiên dịch cho đoàn đại biểu, thứ sáu về.", show:"明天我坐飞机去上海给代表团当翻译，星期五回来。", k:[["坐飞机去上海"],["给代表团当翻译"],["星期五回来","星期五回"]]},
- {d:"zh", q:"Cậu đi bưu điện à? Tiện thể mua giúp mình năm con tem và một tờ báo nhé.", show:"你去邮局吗？顺便替（帮）我买五张邮票和一份报吧。", k:[["去邮局"],["顺便"],["替我买","帮我买"],["五张邮票"],["一份报"]]},
- {d:"zh", q:"Bạn ấy không đi tàu hoả, bạn ấy cùng bạn bè đi máy bay đến Bắc Kinh du lịch.", show:"他不坐火车，他跟朋友一起坐飞机去北京旅行。", k:[["不坐火车"],["跟朋友"],["坐飞机去北京"],["旅行","旅游"]]}
+ {d:"vi", q:"星期天我想骑车去书店买几本中文杂志，你要不要跟我一起去？", show:"Chủ nhật mình muốn đạp xe đến hiệu sách mua mấy cuốn tạp chí tiếng Trung, cậu có muốn đi cùng mình không?", k:[["chu nhat"],["dap xe","di xe dap","xe dap"],["hieu sach","nha sach"],["tap chi"],["di cung","di voi","cung di","di chung"]], h:["Thiếu/sai “星期天” = Chủ nhật.", "Thiếu “骑车” = đạp xe.", "Thiếu “书店” = hiệu sách.", "Thiếu “杂志” = tạp chí.", "“要不要跟我一起去” = có muốn đi cùng mình không."], bad:[]},
+ {d:"vi", q:"我姐姐常常跟外贸代表团去上海、北京参观，给他们当翻译。", show:"Chị tôi thường cùng đoàn đại biểu ngoại thương đi tham quan Thượng Hải, Bắc Kinh, làm phiên dịch cho họ.", k:[["chi"],["doan"],["tham quan"],["phien dich"],["cho ho","cho doan","cho cac"]], h:["Thiếu chủ ngữ “我姐姐” = chị tôi.", "“代表团” = đoàn đại biểu.", "“参观” = tham quan.", "“当翻译” = làm phiên dịch.", "“给他们” = cho họ."], bad:[]},
+ {d:"vi", q:"你去银行换钱的时候，顺便帮我寄一下儿这个包裹，行吗？", show:"Lúc cậu đi ngân hàng đổi tiền, tiện thể gửi giúp mình bưu phẩm này được không?", k:[["ngan hang"],["doi tien"],["tien the","nhan tien","tien"],["gui"],["buu pham","buu kien","goi","kien hang"]], h:["“银行” = ngân hàng.", "“换钱” = đổi tiền.", "“顺便” = tiện thể, nhân tiện.", "“寄” = gửi.", "“包裹” = bưu phẩm, bưu kiện."], bad:[]},
+ {d:"vi", q:"我下星期去上海旅行，八号回来，这几天你帮我浇浇花，好吗？", show:"Tuần sau mình đi Thượng Hải du lịch, mùng 8 về, mấy hôm này cậu tưới hoa giúp mình nhé?", k:[["tuan sau"],["du lich"],["mung 8","ngay 8","mong 8","mung tam","ngay tam"],["tuoi"],["hoa"]], h:["“下星期” = tuần sau (không phải tuần này).", "“旅行” = du lịch.", "“八号” = mùng 8 (ngày 8).", "“浇” = tưới.", "“花” = hoa."], bad:[]},
+ {d:"zh", q:"Ngày nào anh ấy cũng đạp xe đến trường học tiếng Hán, không đi xe buýt.", show:"他每天都骑车去学校学习汉语，不坐车。", k:[["骑车去学校","骑自行车去学校"],["学汉语","学习汉语"],["不坐车","不坐公共汽车","不坐公交车"]], h:["Cần “骑车去学校”: 骑车 (cách đi) đứng TRƯỚC 去学校.", "Cần “学习汉语 / 学汉语” sau 去学校 (mục đích).", "“không đi xe buýt” = 不坐车 (phủ định dùng 不 + 坐)."], bad:[["去学校骑车", "❗ Sai trật tự: không nói 去学校骑车, phải là 骑车去学校."], ["没坐车", "❗ Thói quen hằng ngày phủ định bằng 不 (不坐车), không dùng 没."]]},
+ {d:"zh", q:"Ngày mai tôi đi máy bay đến Thượng Hải làm phiên dịch cho đoàn đại biểu, thứ sáu về.", show:"明天我坐飞机去上海给代表团当翻译，星期五回来。", k:[["坐飞机去上海"],["给代表团当翻译"],["星期五回来","星期五回"]], h:["Cần “坐飞机去上海”: phương tiện đứng TRƯỚC 去 + nơi chốn.", "“làm phiên dịch cho đoàn” = 给代表团当翻译 (给 + người đứng trước 当).", "“thứ sáu về” = 星期五回来 (thời gian đứng trước động từ)."], bad:[["去上海坐飞机", "❗ Sai trật tự kiểu tiếng Việt: phải là 坐飞机去上海."], ["当翻译给", "❗ Sai trật tự: 给代表团 phải đứng TRƯỚC 当翻译."], ["回来星期五", "❗ Thời gian 星期五 đứng trước 回来."]]},
+ {d:"zh", q:"Cậu đi bưu điện à? Tiện thể mua giúp mình năm con tem và một tờ báo nhé.", show:"你去邮局吗？顺便替（帮）我买五张邮票和一份报吧。", k:[["去邮局"],["顺便"],["替我买","帮我买"],["五张邮票"],["一份报"]], h:["“đi bưu điện” = 去邮局.", "“tiện thể” = 顺便.", "“mua giúp mình” = 替我买 / 帮我买 (替/帮 + người đứng TRƯỚC 买).", "“năm con tem” = 五张邮票 (lượng từ 张).", "“một tờ báo” = 一份报 (lượng từ 份)."], bad:[["买替我", "❗ 替我 / 帮我 phải đứng TRƯỚC động từ 买."], ["买帮我", "❗ 帮我 phải đứng TRƯỚC động từ 买."], ["五个邮票", "❗ Tem dùng lượng từ 张, không dùng 个."], ["一张报", "❗ Báo dùng lượng từ 份, không dùng 张."], ["一个报", "❗ Báo dùng lượng từ 份, không dùng 个."]]},
+ {d:"zh", q:"Bạn ấy không đi tàu hoả, bạn ấy cùng bạn bè đi máy bay đến Bắc Kinh du lịch.", show:"他不坐火车，他跟朋友一起坐飞机去北京旅行。", k:[["不坐火车"],["跟朋友"],["坐飞机去北京"],["旅行","旅游"]], h:["“không đi tàu hoả” = 不坐火车.", "“cùng bạn bè” = 跟朋友 (一起), đứng trước động từ.", "Cần “坐飞机去北京”: phương tiện TRƯỚC 去 + nơi chốn.", "“du lịch” = 旅行 / 旅游, đứng cuối (mục đích)."], bad:[["去北京坐飞机", "❗ Sai trật tự: phải là 坐飞机去北京."], ["没坐火车", "❗ Nói chung việc không đi tàu → 不坐火车 (没 chỉ dùng cho việc đã không xảy ra)."], ["坐飞机跟朋友", "❗ 跟朋友(一起) đứng trước 坐飞机."]]}
 ];
 var PTS = [20,20,20,20,20];
 
@@ -543,7 +545,8 @@ document.getElementById("submitBtn").onclick = function(){
     var key = esc(d.show)+' — '+esc(d.why);
     if(empty) setFb(f,"empty",'⚪ <b>Bạn chưa chọn từ.</b>','👉 Đáp án: '+key);
     else if(got===d.a.length) okBox(f,esc(d.why));
-    else setFb(f, got>0?"mid":"no", got>0?'🙂 <b>Đúng '+got+'/'+d.a.length+' ô.</b>':'💪 <b>Chưa đúng.</b>', '✏️ Đáp án: '+key);
+    else { var em=[]; d.a.forEach(function(acc,k){ var v=document.getElementById("s"+i+"_"+k).value; if(v && acc.indexOf(v)<0){ em.push('❗ Ô '+(k+1)+': bạn chọn <b>'+esc(v)+'</b>'+((d.err&&d.err[v])?' — '+esc(d.err[v]):' — chưa phù hợp, cần <b>'+esc(acc[0])+'</b>.')); } });
+      setFb(f, got>0?"mid":"no", (got>0?'🙂 <b>Đúng '+got+'/'+d.a.length+' ô.</b>':'💪 <b>Chưa đúng.</b>')+(em.length?'<div class="why">'+em.join('<br>')+'</div>':''), '✏️ Đáp án: '+key); }
     P[1]+=got; REV[1].push([d.t.map(function(x){return typeof x==="number"?"___":x;}).join(""), empty?"":vs.join(" / "), d.a.map(function(x){return x.join("/");}).join(" / "), got/d.a.length]);
     REP[1].push((i+1)+". "+(empty?"(bỏ trống)":vs.join(" / "))+" → "+tag);
   });
@@ -553,7 +556,7 @@ document.getElementById("submitBtn").onclick = function(){
     var key = L[d.a]+'. '+esc(ANS[d.a])+' — '+esc(d.why);
     if(v===""){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa chọn.</b>','👉 Đáp án: '+key); }
     else if(+v===d.a){ pt=1; tag="Đúng"; okBox(f,esc(d.why)); }
-    else { tag="Sai"; setFb(f,"no",'💪 <b>Chưa đúng.</b>','✏️ Đáp án: '+key); }
+    else { tag="Sai"; setFb(f,"no",'💪 <b>Chưa đúng.</b><div class="why">❗ Bạn chọn '+L[+v]+'. '+esc(ANS[+v])+' — '+esc(ANS_WHY[+v]||"câu này không trả lời đúng ý của câu hỏi.")+'</div>','✏️ Đáp án: '+key); }
     P[2]+=pt; REV[2].push([d.q, v===""?"":L[+v]+". "+ANS[+v], L[d.a]+". "+ANS[d.a], pt]);
     REP[2].push((i+1)+". "+(v===""?"(bỏ trống)":L[+v]+". "+ANS[+v])+" → "+tag);
   });
@@ -563,7 +566,7 @@ document.getElementById("submitBtn").onclick = function(){
     if(!s){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa ghép câu.</b>','👉 Đáp án: '+esc(d.show)); }
     else if(picked[i].length<d.t.length){ tag="Chưa dùng hết từ"; setFb(f,"no",'💪 <b>Bạn chưa dùng hết các từ.</b>','✏️ Đáp án: '+esc(d.show)); }
     else if(d.a.indexOf(s)>-1){ pt=1; tag="Đúng"; okBox(f,esc(d.show)); }
-    else { tag="Sai"; setFb(f,"no",'💪 <b>Chưa đúng thứ tự.</b>','✏️ Đáp án: '+esc(d.show)); }
+    else { tag="Sai"; setFb(f,"no",'💪 <b>Chưa đúng thứ tự.</b><div class="why">❗ Bạn xếp: '+esc(s)+'<br>💡 '+esc(d.why)+'</div>','✏️ Đáp án: '+esc(d.show)); }
     P[3]+=pt; REV[3].push([d.t.join(" / "), s, d.show, pt]);
     REP[3].push((i+1)+". "+(s||"(bỏ trống)")+" → "+tag);
   });
@@ -575,9 +578,15 @@ document.getElementById("submitBtn").onclick = function(){
     else if(d.d==="vi" && hasHanzi(raw)){ tag="Chưa dịch sang tiếng Việt"; setFb(f,"no",'✋ <b>Câu này cần dịch sang tiếng Việt.</b>','👉 Đáp án: '+esc(d.show)); }
     else {
       r = d.d==="zh" ? keyRatio(clean(raw),d.k) : keyRatio(" "+viNorm(raw)+" ",d.k);
+      var tt = d.d==="zh" ? clean(raw) : " "+viNorm(raw)+" ", notes=[];
+      (d.bad||[]).forEach(function(b){ if(tt.indexOf(b[0])>-1) notes.push(b[1]); });
+      d.k.forEach(function(g,gi){ if(!g.some(function(k){return tt.indexOf(k)>-1;}) && d.h) notes.push('🔸 '+d.h[gi]); });
+      if(notes.length && r>=0.99) r=0.75;
+      var nh = notes.length ? '<div class="why">'+notes.map(esc).join('<br>')+'</div>' : '';
       if(r>=0.99){ pt=1; tag="Đúng"; okBox(f,'📖 Đáp án mẫu: '+esc(d.show)); }
-      else if(r>=0.5){ pt=0.5; tag="Gần đúng"; setFb(f,"mid",'🙂 <b>Gần đúng, còn thiếu hoặc sai một phần.</b>','✏️ Đáp án: '+esc(d.show)); }
-      else { tag="Chưa đúng"; setFb(f,"no",'💪 <b>Chưa đúng.</b>','✏️ Đáp án: '+esc(d.show)); }
+      else if(r>=0.5){ pt=0.5; tag="Gần đúng"; setFb(f,"mid",'🙂 <b>Gần đúng, còn thiếu hoặc sai một phần:</b>'+nh,'✏️ Đáp án: '+esc(d.show)); }
+      else { tag="Chưa đúng"; setFb(f,"no",'💪 <b>Chưa đúng. Bạn cần lưu ý:</b>'+nh,'✏️ Đáp án: '+esc(d.show)); }
+      if(notes.length) tag += " ("+notes.join(" | ").replace(/[❗🔸]\s?/g,"")+")";
     }
     P[4]+=pt; REV[4].push([d.q, raw, d.show, pt]);
     REP[4].push((i+1)+". "+d.q+"\n   Bạn viết: "+(raw||"(bỏ trống)")+" → "+tag);
