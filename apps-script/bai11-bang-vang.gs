@@ -10,8 +10,9 @@ var HEADERS = ["Thời gian nộp","Lớp","Học sinh","Điểm (/10)","Thời 
 
 function sheet_() {
   var sh = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-  if (sh.getLastRow() === 0 || sh.getRange(1,1).getValue() !== HEADERS[0]) {
-    if (sh.getLastRow() > 0) sh.insertRowBefore(1);
+  var cur = sh.getLastRow() ? sh.getRange(1,1,1,HEADERS.length).getValues()[0].join("|") : "";
+  if (cur !== HEADERS.join("|")) {
+    if (sh.getLastRow() > 0 && sh.getRange(1,1).getValue() !== HEADERS[0]) sh.insertRowBefore(1);
     sh.getRange(1,1,1,HEADERS.length).setValues([HEADERS]).setFontWeight("bold").setBackground("#2f5d62").setFontColor("#ffffff");
     sh.setFrozenRows(1);
   }
