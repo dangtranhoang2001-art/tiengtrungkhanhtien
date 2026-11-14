@@ -180,17 +180,117 @@ select:disabled{opacity:1;background:#f6f6f4}
 .bk .chipw{font-size:1.1rem;padding:4px 9px}
 .locked .chipw,.locked .bk{pointer-events:none}
 .sortfb{margin-top:10px}
+
+/* ================= GIAO DIỆN TRÒ CHƠI ================= */
+:root{--g1:#ff7a59;--g2:#ffb200;--g3:#8e5cf7;--g4:#00b8a9;--g5:#ff4f8b;--ink:#2a2350}
+body{background-color:#2b2364;background-image:radial-gradient(circle at 15% 10%,#5b4bd6 0,transparent 45%),radial-gradient(circle at 85% 30%,#d6457f 0,transparent 40%),radial-gradient(circle at 50% 100%,#1fa2c9 0,transparent 50%);background-attachment:fixed;font-family:"Nunito","Segoe UI Rounded","Segoe UI",Roboto,"Noto Sans","Noto Sans SC","Microsoft YaHei",Arial,sans-serif}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(#fff 1px,transparent 1.5px);background-size:46px 46px;opacity:.13}
+.wrap{position:relative}
+header.game{background:linear-gradient(135deg,#ffcf3f,#ff8a3d 55%,#ff4f8b);border-radius:24px;padding:18px 20px 16px;text-align:center;color:#3a1e00;border:4px solid #fff;box-shadow:0 8px 0 #c2410c,0 14px 30px rgba(0,0,0,.35)}
+header.game .badge{display:inline-block;background:#3a1e00;color:#ffd84d;font-weight:900;letter-spacing:2px;border-radius:30px;padding:2px 14px;font-size:.85rem}
+header.game .zh{font-size:2.1rem;font-weight:900;color:#fff;text-shadow:0 3px 0 #c2410c,0 0 12px rgba(255,255,255,.5);margin-top:4px}
+header.game h1{margin:0;font-size:1.15rem;font-weight:800}
+/* bản đồ màn chơi */
+.map{display:flex;justify-content:space-between;align-items:center;margin:16px 4px 4px;position:relative}
+.map::before{content:"";position:absolute;left:8%;right:8%;top:50%;height:6px;border-radius:3px;background:repeating-linear-gradient(90deg,#ffffff88 0 12px,transparent 12px 22px);transform:translateY(-50%)}
+.lv{position:relative;z-index:1;width:58px;height:58px;border-radius:50%;background:#4a3f8f;border:4px solid #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:900;cursor:pointer;box-shadow:0 5px 0 #1d1747;transition:transform .2s}
+.lv:hover{transform:translateY(-3px)}
+.lv .ic{font-size:1.4rem;line-height:1}
+.lv .n{font-size:.7rem;opacity:.9}
+.lv.part{background:linear-gradient(180deg,#ffd84d,#ff9f1c);color:#3a1e00}
+.lv.done{background:linear-gradient(180deg,#5ee27b,#14a44d)}
+.lv.done::after{content:"✔";position:absolute;top:-8px;right:-8px;background:#fff;color:#14a44d;border-radius:50%;width:22px;height:22px;font-size:.8rem;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 #0b6b31}
+.lv .st{position:absolute;bottom:-20px;font-size:.8rem;letter-spacing:-1px;white-space:nowrap}
+/* màn hình bắt đầu */
+#gate{background:#fff;border:4px solid #ffd84d;border-radius:22px;box-shadow:0 8px 0 #c79a00,0 14px 30px rgba(0,0,0,.3);text-align:center}
+#gate .name{justify-content:center}
+#gate .name input{border:3px solid #d9d2ff;border-radius:14px;font-weight:800}
+#gate .name input:focus{outline:none;border-color:var(--g3)}
+.mission{font-size:1.05rem;font-weight:800;color:var(--g3);margin:4px 0 10px}
+button{border-radius:16px;font-weight:900;letter-spacing:.3px;box-shadow:0 5px 0 rgba(0,0,0,.25);transition:transform .08s,box-shadow .08s}
+button:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+button.big{background:linear-gradient(180deg,#5ee27b,#14a44d);font-size:1.3rem;padding:14px 30px;box-shadow:0 6px 0 #0b6b31}
+#startBtn{animation:bob 1.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px) scale(1.03)}}
+button.alt{background:#fff;color:var(--g3);border:3px solid var(--g3);box-shadow:0 5px 0 #5b3bb8}
+/* HUD */
+.hud{position:sticky;top:6px;z-index:20;margin:12px 0 0;display:flex;gap:10px;align-items:center;background:#1d1747ee;border:3px solid #fff;border-radius:40px;padding:6px 12px;color:#fff;font-weight:900;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.hud[hidden]{display:none}
+.hud .pill{background:#ffffff1f;border-radius:20px;padding:3px 12px;white-space:nowrap}
+.hud .xp{flex:1;height:14px;background:#ffffff26;border-radius:10px;overflow:hidden;min-width:60px}
+.hud .xp i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd84d,#5ee27b);border-radius:10px;transition:width .35s}
+.hud .coin{color:#ffd84d}
+.coinpop{position:fixed;z-index:50;pointer-events:none;font-weight:900;color:#ffd84d;font-size:1.3rem;text-shadow:0 2px 0 #7a4b00;animation:pop .8s ease-out forwards}
+@keyframes pop{to{transform:translateY(-50px);opacity:0}}
+.timer{display:none!important}
+/* khung màn chơi */
+.box{border:none;border-radius:22px;box-shadow:0 8px 0 rgba(0,0,0,.18),0 12px 28px rgba(0,0,0,.25);padding:18px 16px;margin-top:22px}
+.box[class*=" p"]{position:relative;padding-top:4px;background:#fff}
+.box[class*=" p"] h2{position:relative;top:-16px;margin:0 -22px 0;color:#fff!important;padding:10px 16px;border-radius:16px;font-size:1.15rem;font-weight:900;box-shadow:0 5px 0 rgba(0,0,0,.22);text-shadow:0 2px 0 rgba(0,0,0,.2)}
+.box[class*=" p"] h2 .pt{color:#ffffffd9;font-weight:800}
+.box[class*=" p"] h2 .lvdone{float:right;background:#fff;color:#14a44d;border-radius:12px;padding:0 10px;font-size:.85rem;text-shadow:none;display:none}
+.box.cleared h2 .lvdone{display:inline-block}
+.p1 h2{background:linear-gradient(90deg,#4f7cff,#8e5cf7)} .p2 h2{background:linear-gradient(90deg,#ff9f1c,#ff6b3d)}
+.p3 h2{background:linear-gradient(90deg,#ff4f8b,#c13bd6)} .p4 h2{background:linear-gradient(90deg,#00b8a9,#2a8cf0)}
+.p5 h2{background:linear-gradient(90deg,#5ac85a,#00a37a)}
+.item{border:none!important;border-radius:16px;background:#f5f3ff!important;box-shadow:inset 0 0 0 2px #e6e0ff}
+.p2 .item{background:#fff6ea!important;box-shadow:inset 0 0 0 2px #ffe1b8}
+.p3 .item{background:#fff1f6!important}
+.p4 .item{background:#ecfbf9!important;box-shadow:inset 0 0 0 2px #c4efe9}
+.num{background:linear-gradient(180deg,#ffd84d,#ff9f1c);color:#3a1e00;font-weight:900;box-shadow:0 2px 0 #c2410c}
+.opt{border:3px solid #e1dcff;border-radius:16px;font-weight:800;box-shadow:0 4px 0 #d3ccf7;transition:transform .1s}
+.opt:hover{transform:translateY(-2px)}
+.opt .l{background:#efeaff;border-radius:8px;text-align:center;color:var(--g3)}
+.opt.sel{border-color:#8e5cf7;background:#efe8ff;box-shadow:0 4px 0 #6a3fe0;transform:scale(1.03)}
+.opt.right{border-color:#14a44d;background:#e3f9e9;box-shadow:0 4px 0 #0b6b31}
+.opt.wrong{border-color:#e5484d;background:#ffe9ea;box-shadow:0 4px 0 #a61b20}
+.qtype{border-radius:20px;padding:2px 10px}
+.tag{border-width:3px;box-shadow:0 4px 0 #e2b77d}
+.money-in input,select{border:3px solid #ffd0a1!important;border-radius:12px!important;font-weight:800}
+.money-in input:focus{border-color:#ff9f1c!important}
+.dl{border:none;box-shadow:inset 0 0 0 2px #ffd6e6;border-radius:16px}
+.turn .say{background:#fff;border-radius:4px 16px 16px 16px;padding:4px 12px;box-shadow:0 2px 0 #e9d7ef;flex:0 1 auto}
+.turn.s .who{background:#2a8cf0;color:#fff} .turn.m .who{background:#ff4f8b;color:#fff}
+.ansbank{border:3px dashed #ff8fb7;border-radius:16px;background:#fff8fb}
+.tok{border:3px solid #c4efe9;box-shadow:0 3px 0 #9edbd2;font-weight:700}
+.tok.pick{border-color:#e5484d;box-shadow:0 3px 0 #a61b20}
+.tok.p{border:none;box-shadow:none}
+.pool{border:3px dashed #9ad79a;border-radius:18px;background:#f4fff2}
+.chipw{border:3px solid #ffc978;box-shadow:0 4px 0 #f0a640;border-radius:14px}
+.bk{border:3px solid #fff;border-radius:20px;box-shadow:0 6px 0 rgba(0,0,0,.18);background:linear-gradient(180deg,#fff,#f2f2f2)}
+.bk:nth-child(1){background:linear-gradient(180deg,#fff,#efeaff)} .bk:nth-child(2){background:linear-gradient(180deg,#fff,#ffeef4)}
+.bk:nth-child(3){background:linear-gradient(180deg,#fff,#e9f6ff)} .bk:nth-child(4){background:linear-gradient(180deg,#fff,#fff4e3)}
+.bk:nth-child(5){background:linear-gradient(180deg,#fff,#e9fbef)}
+.bk .bh{font-size:2rem;color:var(--ink)}
+.bk .bh::before{content:"🧺 ";font-size:1.2rem}
+.bk.ready{animation:wig .6s ease-in-out infinite;border-color:#ffd84d}
+@keyframes wig{25%{transform:rotate(-1.5deg)}75%{transform:rotate(1.5deg)}}
+.fb{border-radius:14px!important}
+/* kết quả */
+.result{background:linear-gradient(180deg,#fffbe6,#fff)!important;border:4px solid #ffd84d!important}
+.result .trophy{font-size:4rem;line-height:1;animation:bob 1.6s ease-in-out infinite}
+.result .rank{display:inline-block;background:linear-gradient(90deg,#8e5cf7,#ff4f8b);color:#fff;font-weight:900;border-radius:30px;padding:4px 18px;margin:6px 0;font-size:1.1rem}
+.result .score{color:#ff7a1a;text-shadow:0 3px 0 #ffd84d;font-weight:900}
+.stars5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0}
+.stars5 div{background:#fff;border-radius:14px;padding:6px 2px;box-shadow:inset 0 0 0 2px #f1e3a6;font-size:.8rem;font-weight:800;color:#6b5a1f}
+.stars5 b{display:block;font-size:1.2rem;letter-spacing:-2px}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+footer{color:#ffffffb3}
+@media(max-width:600px){.lv{width:48px;height:48px}.lv .ic{font-size:1.1rem}header.game .zh{font-size:1.6rem}.hud{font-size:.85rem;gap:6px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<header>
+<header class="game">
+  <span class="badge">🎮 BTVN · 汉语加油站</span>
   <div class="zh">第十九课 · 可以试试吗</div>
-  <h1>Bài tập về nhà</h1>
+  <h1>Nhiệm vụ: Đi mua sắm ở cửa hàng quần áo 🛍️</h1>
 </header>
+<div class="map"><div class="lv" id="lv0"><span class="ic">⚡</span><span class="n">MÀN 1</span><span class="st" id="lvs0"></span></div><div class="lv" id="lv1"><span class="ic">💴</span><span class="n">MÀN 2</span><span class="st" id="lvs1"></span></div><div class="lv" id="lv2"><span class="ic">🛍️</span><span class="n">MÀN 3</span><span class="st" id="lvs2"></span></div><div class="lv" id="lv3"><span class="ic">🔍</span><span class="n">MÀN 4</span><span class="st" id="lvs3"></span></div><div class="lv" id="lv4"><span class="ic">🧺</span><span class="n">MÀN 5</span><span class="st" id="lvs4"></span></div></div>
 
 <div class="box" id="gate">
+  <div class="mission">Vượt qua 5 màn · Gom đủ 🪙 · Giành ⭐⭐⭐ để lên Bảng vàng!</div>
   <div class="name">
     <label for="stClass"><b>Lớp:</b></label>
     <input id="stClass" placeholder="VD: K67" inputmode="numeric" autocomplete="off" style="max-width:140px;min-width:100px;text-transform:uppercase;font-weight:700">
@@ -199,50 +299,51 @@ select:disabled{opacity:1;background:#f6f6f4}
   </div>
   <p class="note" style="margin-top:8px">⏱ Bấm <b>Bắt đầu</b> là đồng hồ chạy. Xếp hạng <b>BẢNG VÀNG</b>: điểm cao hơn đứng trên; bằng điểm thì ai làm <b>nhanh hơn</b> đứng trên. Chỉ tính <b>lần nộp đầu tiên</b>.</p>
   <div class="toolbar">
-    <button class="big" id="startBtn">▶️ Bắt đầu làm bài</button>
+    <button class="big" id="startBtn">▶ CHƠI NGAY</button>
     <button class="alt" id="viewBxh">🏆 Xem Bảng vàng</button>
   </div>
 </div>
 
+<div class="hud" id="hud" hidden><span class="pill">⏱ <span id="hudTime">00:00</span></span><span class="xp"><i id="hudXp"></i></span><span class="pill coin">🪙 <span id="hudCoin">0</span></span></div>
 <div id="timerBar" class="timer" hidden>⏱ <span id="timer">00:00</span></div>
 
 <div id="quiz" hidden>
 
 <div class="box p1">
-  <h2>⚡ Bài 1. Trắc nghiệm nhanh từ vựng <span class="pt">(20 điểm)</span></h2>
+  <h2>⚡ MÀN 1 · Trắc nghiệm nhanh từ vựng <span class="pt">(20 điểm)</span><span class="lvdone">✔ Đã làm xong</span></h2>
   <p class="note">Chọn đáp án đúng. Có 3 kiểu câu: <b>nghĩa của từ</b>, <b>chọn chữ Hán</b>, <b>chọn cách đọc đúng</b> (chú ý thanh điệu!).</p>
   <div id="mcq"></div>
 </div>
 
 <div class="box p2">
-  <h2>💴 Bài 2. Giá tiền &amp; giảm giá <span class="pt">(20 điểm)</span></h2>
+  <h2>💴 MÀN 2 · Giá tiền &amp; giảm giá <span class="pt">(20 điểm)</span><span class="lvdone">✔ Đã làm xong</span></h2>
   <p class="note">Câu 1–4: đọc giá bằng chữ Hán → <b>viết thành số</b> (VD: 46.5). Câu 5–8: tính <b>số tiền phải trả</b> sau khi giảm giá. Chỉ gõ số.</p>
   <div class="tip">💡 打八折 = trả <b>80%</b> giá (giảm 20%) · 1 块 = 10 毛</div>
   <div id="money"></div>
 </div>
 
 <div class="box p3">
-  <h2>🛍️ Bài 3. Đi mua sắm – hoàn thành hội thoại <span class="pt">(20 điểm)</span></h2>
+  <h2>🛍️ MÀN 3 · Đi mua sắm – hoàn thành hội thoại <span class="pt">(20 điểm)</span><span class="lvdone">✔ Đã làm xong</span></h2>
   <p class="note">Bạn là <b>玛丽</b>. Chọn câu phù hợp cho mỗi lượt nói của 玛丽. Có 10 câu cho 8 chỗ → <b>thừa 2 câu</b> (là câu sai ngữ pháp!). Câu đã chọn sẽ <b>ẩn đi</b>.</p>
   <div class="ansbank" id="dlbank"></div>
   <div id="dialog"></div>
 </div>
 
 <div class="box p4">
-  <h2>🔍 Bài 4. Thám tử tìm lỗi sai <span class="pt">(20 điểm)</span></h2>
+  <h2>🔍 MÀN 4 · Thám tử tìm lỗi sai <span class="pt">(20 điểm)</span><span class="lvdone">✔ Đã làm xong</span></h2>
   <p class="note">Mỗi câu có <b>1 chỗ sai</b>. ① Bấm vào từ sai (½ điểm). ② Chọn từ sửa lại cho đúng (½ điểm).</p>
   <div id="spot"></div>
 </div>
 
 <div class="box p5">
-  <h2>🧺 Bài 5. Xếp đồ vào giỏ lượng từ <span class="pt">(20 điểm)</span></h2>
+  <h2>🧺 MÀN 5 · Xếp đồ vào giỏ lượng từ <span class="pt">(20 điểm)</span><span class="lvdone">✔ Đã làm xong</span></h2>
   <p class="note">Bấm 1 món đồ, rồi bấm vào <b>giỏ lượng từ</b> phù hợp. Bấm vào món trong giỏ để lấy ra.</p>
   <div class="pool" id="pool"></div>
   <div class="baskets" id="baskets"></div>
 </div>
 
 <div class="toolbar" style="justify-content:center;margin-top:18px">
-  <button class="big" id="submitBtn">✅ Nộp bài &amp; chấm điểm</button>
+  <button class="big" id="submitBtn">🏁 VỀ ĐÍCH – Nộp bài</button>
 </div>
 
 </div>
@@ -265,7 +366,7 @@ select:disabled{opacity:1;background:#f6f6f4}
   <div id="bxhBody"></div>
 </div>
 
-<footer>第十九课 · 可以试试吗 · 汉语加油站 · <span style="opacity:.6">bản 14/11b</span></footer>
+<footer>第十九课 · 可以试试吗 · 汉语加油站 · <span style="opacity:.6">bản 14/11c</span></footer>
 </div>
 
 <script>
@@ -596,7 +697,7 @@ document.getElementById("copyBtn").onclick = function(){
 
 document.getElementById("retryBtn").onclick = function(){
   document.body.classList.remove("locked");
-  var sb=document.getElementById("submitBtn"); sb.disabled=false; sb.textContent="✅ Nộp bài & chấm điểm";
+  var sb=document.getElementById("submitBtn"); sb.disabled=false; sb.textContent="🏁 VỀ ĐÍCH – Nộp bài";
   document.getElementById("review").innerHTML="";
   renderAll();
   document.getElementById("result").style.display="none";
@@ -637,6 +738,66 @@ function showBxh(lop, me){
 document.getElementById("bxhClass").onchange=function(){ showBxh(this.value); };
 document.getElementById("bxhReload").onclick=function(){ showBxh(document.getElementById("bxhClass").value); };
 document.getElementById("viewBxh").onclick=function(){ var c=document.getElementById("stClass").value.trim(); showBxh(c?normClass(c):""); };
+
+// ================= LỚP TRÒ CHƠI: bản đồ, HUD, xu, sao, pháo hoa =================
+var LV_ICON = ["⚡","💴","🛍️","🔍","🧺"];
+function lvCount(k){
+  if(k===0) return [mcqPick.filter(function(v){return v>=0;}).length, MCQ.length];
+  if(k===1) return [MONEY.filter(function(d,i){ return document.getElementById("m"+i).value.trim(); }).length, MONEY.length];
+  if(k===2) return [gapIdx.filter(function(a,g){ return document.getElementById("d"+g).value!==""; }).length, gapIdx.length];
+  if(k===3) return [SPOT.filter(function(d,i){ return spotPick[i]>=0 && document.getElementById("fs"+i).value!==""; }).length, SPOT.length];
+  return [place.filter(function(v){return v>=0;}).length, THINGS.length];
+}
+var lastDone = -1;
+function updateHud(ev){
+  var done=0, all=0;
+  for(var k=0;k<5;k++){
+    var c=lvCount(k); done+=c[0]; all+=c[1];
+    var lv=document.getElementById("lv"+k); lv.classList.toggle("part", c[0]>0 && c[0]<c[1]); lv.classList.toggle("done", c[0]===c[1]);
+    document.querySelector(".p"+(k+1)).classList.toggle("cleared", c[0]===c[1]);
+  }
+  document.getElementById("hudXp").style.width=(done/all*100)+"%";
+  document.getElementById("hudCoin").textContent=done+"/"+all;
+  if(lastDone>=0 && done>lastDone && ev && ev.clientX!==undefined) coinPop(ev.clientX, ev.clientY);
+  lastDone=done;
+}
+function coinPop(x,y){ var s=document.createElement("div"); s.className="coinpop"; s.textContent="+🪙"; s.style.left=(x-14)+"px"; s.style.top=(y-20)+"px"; document.body.appendChild(s); setTimeout(function(){ s.remove(); },800); }
+["click","change","input"].forEach(function(t){ document.getElementById("quiz").addEventListener(t,function(e){ setTimeout(function(){ updateHud(t==="click"?e:{clientX:window.innerWidth/2,clientY:window.innerHeight/2}); },0); }); });
+document.querySelectorAll(".lv").forEach(function(lv,k){ lv.onclick=function(){
+  if(document.getElementById("quiz").hidden) return;
+  var b=document.querySelector(".p"+(k+1)); window.scrollTo({top:b.getBoundingClientRect().top+window.scrollY-80,behavior:"smooth"}); }; });
+// đồng hồ trên HUD
+setInterval(function(){ document.getElementById("hudTime").textContent=document.getElementById("timer").textContent; },500);
+document.getElementById("startBtn").addEventListener("click",function(){ if(!document.getElementById("quiz").hidden){ document.getElementById("hud").hidden=false; lastDone=0; updateHud(); } });
+
+// sao + danh hiệu + pháo hoa khi nộp bài
+function starsOf(x){ return x>=0.9?3:x>=0.6?2:x>0?1:0; }
+document.getElementById("submitBtn").addEventListener("click",function(){
+  setTimeout(function(){
+    var sub=document.getElementById("scoreSub").textContent.match(/[\d.]+\/20/g)||[];
+    var total=parseFloat(document.getElementById("scoreText").textContent)||0;
+    var html='<div class="trophy">'+(total>=90?"🏆":total>=70?"🥈":total>=50?"🥉":"🎯")+'</div>'+
+      '<div class="rank">'+(total>=90?"👑 Bậc thầy mua sắm":total>=70?"🛍️ Khách hàng sành sỏi":total>=50?"🧺 Người mua tập sự":"🐣 Tân binh – thử lại nhé!")+'</div>';
+    var st='<div class="stars5">'+sub.map(function(t,k){ var v=parseFloat(t)/20, n=starsOf(v);
+      return '<div>'+LV_ICON[k]+' Màn '+(k+1)+'<b>'+"⭐".repeat(n)+"☆".repeat(3-n)+'</b></div>'; }).join("")+'</div>';
+    var r=document.getElementById("result");
+    var old=document.getElementById("gameTop"); if(old) old.remove();
+    var d=document.createElement("div"); d.id="gameTop"; d.innerHTML=html; r.insertBefore(d,r.firstChild);
+    var o2=document.getElementById("gameStars"); if(o2) o2.remove();
+    var s=document.createElement("div"); s.id="gameStars"; s.innerHTML=st; document.getElementById("scoreMsg").after(s);
+    for(var k=0;k<sub.length;k++){ var n=starsOf(parseFloat(sub[k])/20); document.getElementById("lvs"+k).textContent="⭐".repeat(n); }
+    if(total>=50) confetti(total>=90?220:120);
+  },60);
+});
+document.getElementById("retryBtn").addEventListener("click",function(){ for(var k=0;k<5;k++) document.getElementById("lvs"+k).textContent=""; lastDone=0; updateHud(); });
+function confetti(n){
+  var c=document.createElement("canvas"); c.id="confetti"; document.body.appendChild(c);
+  var x=c.getContext("2d"), W=c.width=innerWidth, H=c.height=innerHeight, P=[], cols=["#ffd84d","#ff4f8b","#8e5cf7","#5ee27b","#2a8cf0","#ff9f1c"];
+  for(var i=0;i<n;i++) P.push({x:W/2+(Math.random()-.5)*W*.3,y:H*.35,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,r:Math.random()*6+4,c:cols[i%cols.length],a:Math.random()*6,s:(Math.random()-.5)*.3});
+  var t=0; (function f(){ x.clearRect(0,0,W,H); P.forEach(function(p){ p.vy+=.35; p.vx*=.99; p.x+=p.vx; p.y+=p.vy; p.a+=p.s;
+      x.save(); x.translate(p.x,p.y); x.rotate(p.a); x.fillStyle=p.c; x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2); x.restore(); });
+    if(++t<170) requestAnimationFrame(f); else c.remove(); })();
+}
 </script>
 </body>
 </html>
