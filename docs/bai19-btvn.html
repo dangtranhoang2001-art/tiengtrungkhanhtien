@@ -180,6 +180,8 @@ select:disabled{opacity:1;background:#f6f6f4}
 .bk .chipw{font-size:1.1rem;padding:4px 9px}
 .locked .chipw,.locked .bk{pointer-events:none}
 .sortfb{margin-top:10px}
+.wrongs{display:inline-block;color:#b5554b;text-decoration:underline wavy #e3a19a;text-underline-offset:6px}
+.p4 textarea{min-height:44px}
 </style>
 </head>
 <body>
@@ -229,8 +231,8 @@ select:disabled{opacity:1;background:#f6f6f4}
 </div>
 
 <div class="box p4">
-  <h2>🔍 Bài 4. Thám tử tìm lỗi sai <span class="pt">(20 điểm)</span></h2>
-  <p class="note">Mỗi câu có <b>1 chỗ sai</b>. ① Bấm vào từ sai (½ điểm). ② Chọn từ sửa lại cho đúng (½ điểm).</p>
+  <h2>🔍 Bài 4. Sửa câu sai <span class="pt">(20 điểm)</span></h2>
+  <p class="note">Mỗi câu có <b>1 chỗ sai</b>. Gõ lại <b>cả câu đúng</b> bằng chữ Hán (dấu câu không ảnh hưởng điểm). Sửa đúng chỗ sai nhưng câu còn thiếu/thừa chữ được ½ điểm.</p>
   <div id="spot"></div>
 </div>
 
@@ -265,7 +267,7 @@ select:disabled{opacity:1;background:#f6f6f4}
   <div id="bxhBody"></div>
 </div>
 
-<footer>第十九课 · 可以试试吗 · 汉语加油站 · <span style="opacity:.6">bản 14/11b</span></footer>
+<footer>第十九课 · 可以试试吗 · 汉语加油站 · <span style="opacity:.6">bản 14/11d</span></footer>
 </div>
 
 <script>
@@ -319,17 +321,17 @@ var DL_GAP_WHY = ["Trả lời câu hỏi “你要买什么？” → nói món
  "Người bán đáp “三百太少了” → Mary trả giá ba trăm: 三百行不行？",
  "Người bán chốt 三百五 → Mary đồng ý mua: 好，给你钱。"];
 
-// ===== BÀI 4: TÌM LỖI SAI =====
-// w: vị trí từ sai; f: [đáp án đúng, 2 phương án nhiễu]
+// ===== BÀI 4: SỬA CÂU SAI (học sinh gõ lại cả câu đúng) =====
+// a: các câu đúng được chấp nhận (bỏ dấu câu); k: phần sửa then chốt (đúng phần này mà câu chưa khớp → ½ điểm)
 var SPOT = [
- {t:["这件","衣服","一点儿","长","。"], w:2, f:["有点儿","又","正"], show:"这件衣服有点儿长。", why:"Chê “hơi dài” → 有点儿 đứng TRƯỚC tính từ. 一点儿 chỉ đứng SAU tính từ."},
- {t:["太","贵","了","，","便宜","有点儿","吧","。"], w:5, f:["一点儿","又","太"], show:"太贵了，便宜一点儿吧。", why:"Đề nghị bớt giá: tính từ + 一点儿 → 便宜一点儿吧."},
- {t:["我","想","买","一","件","鞋","。"], w:4, f:["双","本","张"], show:"我想买一双鞋。", why:"Giày dùng lượng từ 双 (đôi), không dùng 件."},
- {t:["这件","毛衣","又","好看","很","便宜","。"], w:4, f:["又","太","有点儿"], show:"这件毛衣又好看又便宜。", why:"Cấu trúc cố định 又…又…: đã có 又 ở vế trước thì vế sau cũng phải là 又."},
- {t:["我","正在","试试","这件","羽绒服","呢","。"], w:2, f:["试","试一试","试了试"], show:"我正在试这件羽绒服呢。", why:"Động tác đang tiến hành (正在…呢) không dùng động từ lặp lại → 正在试."},
- {t:["你","复习一复习","今天的","生词","吧","。"], w:1, f:["复习复习","复复习习","复习一复"], show:"你复习复习今天的生词吧。", why:"Động từ 2 âm tiết lặp lại theo kiểu ABAB, giữa không thêm 一 → 复习复习."},
- {t:["这件","衣服","有点儿","合适","。"], w:2, f:["很","一点儿","太"], show:"这件衣服很合适。", why:"有点儿 chỉ dùng cho điều không vừa ý; 合适 là ý tốt → 很合适 (hoặc 正合适)."},
- {t:["这","个","羽绒服","太","肥","了","。"], w:1, f:["件","双","本"], show:"这件羽绒服太肥了。", why:"Áo, quần áo dùng lượng từ 件: 这件羽绒服."}
+ {q:"这件衣服一点儿长。", a:["这件衣服有点儿长","这件衣服有一点儿长","这件衣服有点长","这件衣服有一点长"], k:["有点儿长","有一点儿长","有点长","有一点长"], show:"这件衣服有点儿长。", why:"Chê “hơi dài” → 有点儿 đứng TRƯỚC tính từ. 一点儿 chỉ đứng SAU tính từ."},
+ {q:"太贵了，便宜有点儿吧。", a:["太贵了便宜一点儿吧","太贵了便宜一点吧","太贵了便宜点儿吧"], k:["便宜一点儿","便宜一点","便宜点儿"], show:"太贵了，便宜一点儿吧。", why:"Đề nghị bớt giá: tính từ + 一点儿 → 便宜一点儿吧."},
+ {q:"我想买一件鞋。", a:["我想买一双鞋"], k:["一双鞋"], show:"我想买一双鞋。", why:"Giày dùng lượng từ 双 (đôi), không dùng 件."},
+ {q:"这件毛衣又好看很便宜。", a:["这件毛衣又好看又便宜","这件毛衣又便宜又好看"], k:["又好看又便宜","又便宜又好看"], show:"这件毛衣又好看又便宜。", why:"Cấu trúc cố định 又…又…: vế trước có 又 thì vế sau cũng phải là 又."},
+ {q:"我正在试试这件羽绒服呢。", a:["我正在试这件羽绒服呢","我在试这件羽绒服呢","我正在试这件羽绒服"], k:["正在试这件","在试这件"], show:"我正在试这件羽绒服呢。", why:"Động tác đang tiến hành (正在…呢) không dùng động từ lặp lại → 正在试."},
+ {q:"你复习一复习今天的生词吧。", a:["你复习复习今天的生词吧"], k:["复习复习"], show:"你复习复习今天的生词吧。", why:"Động từ 2 âm tiết lặp lại theo kiểu ABAB, giữa không thêm 一 → 复习复习."},
+ {q:"这件衣服有点儿合适。", a:["这件衣服很合适","这件衣服正合适","这件衣服非常合适","这件衣服太合适了"], k:["很合适","正合适","非常合适","太合适了"], show:"这件衣服很合适。（正合适）", why:"有点儿 chỉ dùng cho điều không vừa ý; 合适 là ý tốt → 很合适 / 正合适."},
+ {q:"这个羽绒服太肥了。", a:["这件羽绒服太肥了"], k:["这件羽绒服"], show:"这件羽绒服太肥了。", why:"Áo, quần áo dùng lượng từ 件: 这件羽绒服."}
 ];
 
 // ===== BÀI 5: GIỎ LƯỢNG TỪ =====
@@ -403,26 +405,14 @@ function syncDialog(){
 }
 
 // ===== HIỂN THỊ BÀI 4 =====
-var spotPick = [], spotFix = [];
 function renderSpot(){
-  var box=document.getElementById("spot"); box.innerHTML=""; spotPick=[]; spotFix=[];
+  var box=document.getElementById("spot"); box.innerHTML="";
   SPOT.forEach(function(d,i){
-    spotPick[i]=-1; spotFix[i]=shuffle([0,1,2]);
     var el=document.createElement("div"); el.className="item";
-    el.innerHTML='<span class="num">'+(i+1)+'</span><div class="sent">'+d.t.map(function(w,j){
-        return /^[，。！？]$/.test(w) ? '<span class="tok p">'+w+'</span>' : '<span class="tok" data-i="'+i+'" data-j="'+j+'">'+esc(w)+'</span>'; }).join("")+'</div>'+
-      '<div class="fix" id="fx'+i+'">✏️ Sửa “<b id="fw'+i+'"></b>” thành: <select id="fs'+i+'"><option value="">　___　</option>'+
-        spotFix[i].map(function(k){ return '<option value="'+k+'">'+esc(d.f[k])+'</option>'; }).join("")+'</select></div><div class="fb" id="sf'+i+'"></div>';
+    el.innerHTML='<span class="num">'+(i+1)+'</span><span class="hz wrongs">'+esc(d.q)+'</span>'+
+      '<textarea id="sp'+i+'" rows="1" placeholder="Gõ lại câu đúng bằng chữ Hán…"></textarea><div class="fb" id="sf'+i+'"></div>';
     box.appendChild(el);
   });
-  box.querySelectorAll(".tok[data-j]").forEach(function(t){ t.onclick=function(){
-    var i=+t.dataset.i, j=+t.dataset.j;
-    t.parentNode.querySelectorAll(".tok").forEach(function(x){ x.classList.remove("pick"); });
-    if(spotPick[i]===j){ spotPick[i]=-1; document.getElementById("fx"+i).classList.remove("show"); return; }
-    spotPick[i]=j; t.classList.add("pick");
-    document.getElementById("fw"+i).textContent=SPOT[i].t[j];
-    document.getElementById("fx"+i).classList.add("show");
-  }; });
 }
 
 // ===== HIỂN THỊ BÀI 5 =====
@@ -461,7 +451,7 @@ function normName(s){ return String(s).toUpperCase().replace(/\s+/g," ").trim();
 function startTimer(){ t0=Date.now(); clearInterval(tick); document.getElementById("timer").textContent="00:00";
   tick=setInterval(function(){ document.getElementById("timer").textContent=fmt((Date.now()-t0)/1000); },1000); }
 var SEND_URL = "";
-var NAMES = ["Trắc nghiệm từ vựng","Giá tiền & giảm giá","Hội thoại mua sắm","Tìm & sửa lỗi sai","Giỏ lượng từ"];
+var NAMES = ["Trắc nghiệm từ vựng","Giá tiền & giảm giá","Hội thoại mua sắm","Sửa câu sai","Giỏ lượng từ"];
 var ICONS = ["⚡","💴","🛍️","🔍","🧺"];
 
 document.getElementById("stClass").addEventListener("input",function(){ var v=normClass(this.value); this.value = v || ""; });
@@ -522,13 +512,15 @@ document.getElementById("submitBtn").onclick = function(){
 
   // Bài 4
   SPOT.forEach(function(d,i){
-    var j=spotPick[i], fx=document.getElementById("fs"+i).value, f=document.getElementById("sf"+i), pt=0, tag;
+    var raw=document.getElementById("sp"+i).value.trim(), t=raw.replace(/[\s，。！？、,.!?（）()]/g,""), f=document.getElementById("sf"+i), pt=0, tag;
     var key=esc(d.show)+' — '+esc(d.why);
-    if(j<0){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa chọn từ sai.</b>','👉 Sai ở “<b>'+esc(d.t[d.w])+'</b>” → sửa: '+key); }
-    else if(j!==d.w){ tag="Chọn sai chỗ"; setFb(f,"no",'💪 <b>Chỗ sai không phải “'+esc(d.t[j])+'”.</b>','✏️ Sai ở “<b>'+esc(d.t[d.w])+'</b>” → sửa: '+key); }
-    else if(fx==="0"){ pt=1; tag="Đúng"; okBox(f,key); }
-    else { pt=0.5; tag=fx===""?"Tìm đúng, chưa sửa":"Tìm đúng, sửa sai"; setFb(f,"mid",'🙂 <b>Tìm đúng chỗ sai!</b> '+(fx===""?'Nhưng bạn chưa chọn từ sửa.':'Nhưng sửa thành “'+esc(d.f[+fx])+'” chưa đúng.'),'✏️ Đáp án: '+key); }
-    P[3]+=pt; REV[3].push([d.t.join(""), j<0?"":(d.t[j]+(fx!==""?" → "+d.f[+fx]:"")), d.t[d.w]+" → "+d.f[0], pt]); REP[3].push((i+1)+". "+d.t.join("")+" → "+tag);
+    if(!raw){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa sửa câu này.</b>','👉 Đáp án: '+key); }
+    else if(!/[一-鿿]/.test(raw)){ tag="Không dùng chữ Hán"; setFb(f,"no",'✋ <b>Bạn cần gõ bằng chữ Hán nhé.</b>','👉 Đáp án: '+key); }
+    else if(d.a.indexOf(t)>-1){ pt=1; tag="Đúng"; okBox(f,key); }
+    else if(t===d.q.replace(/[，。！？]/g,"")){ tag="Chưa sửa"; setFb(f,"no",'💪 <b>Bạn gõ lại y nguyên câu sai rồi.</b>','✏️ Đáp án: '+key); }
+    else if(d.k.some(function(k){ return t.indexOf(k)>-1; })){ pt=0.5; tag="Sửa đúng chỗ sai, câu còn lỗi khác"; setFb(f,"mid",'🙂 <b>Bạn đã sửa đúng chỗ sai</b>, nhưng câu còn thiếu hoặc thừa chữ.','✏️ Đáp án: '+key); }
+    else { tag="Chưa đúng"; setFb(f,"no",'💪 <b>Chưa đúng.</b>','✏️ Đáp án: '+key); }
+    P[3]+=pt; REV[3].push([d.q, raw, d.show, pt]); REP[3].push((i+1)+". "+d.q+"\n   Bạn sửa: "+(raw||"(bỏ trống)")+" → "+tag);
   });
 
   // Bài 5
@@ -562,7 +554,7 @@ document.getElementById("submitBtn").onclick = function(){
   document.getElementById("review").innerHTML = S.map(function(s,k){
     return '<h3>'+ICONS[k]+' Bài '+(k+1)+' – '+NAMES[k]+' ('+r1(s)+'/'+PTS[k]+')</h3>'+tbl(REV[k]); }).join("")+
     '<p class="sub" style="margin-top:8px">✅ đúng · 🟡 đúng một nửa · ❌ chưa đúng</p>';
-  document.querySelectorAll("#quiz input").forEach(function(t){ t.readOnly=true; });
+  document.querySelectorAll("#quiz input, #quiz textarea").forEach(function(t){ t.readOnly=true; });
   document.querySelectorAll("#quiz select").forEach(function(t){ t.disabled=true; });
   document.body.classList.add("locked");
   var sb=document.getElementById("submitBtn"); sb.disabled=true; sb.textContent="✅ Đã nộp bài";
