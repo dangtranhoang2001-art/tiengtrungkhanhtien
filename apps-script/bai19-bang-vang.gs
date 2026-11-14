@@ -6,7 +6,7 @@
  *   - Người có quyền truy cập: Bất kỳ ai
  */
 var HEADERS = ["Thời gian nộp","Lớp","Học sinh","Điểm (/100)","Thời gian làm (giây)","Thời gian làm",
-  "Bài 1 Trò chơi từ vựng (/20)","Bài 2 Điền từ (/20)","Bài 3 Ghép câu (/20)","Bài 4 Sắp xếp (/20)","Bài 5 Dịch (/20)",
+  "Bài 1 Trắc nghiệm từ vựng (/20)","Bài 2 Giá tiền & giảm giá (/20)","Bài 3 Hội thoại (/20)","Bài 4 Tìm lỗi sai (/20)","Bài 5 Giỏ lượng từ (/20)",
   "Lần nộp","Chi tiết bài làm"];
 
 function sheet_() {

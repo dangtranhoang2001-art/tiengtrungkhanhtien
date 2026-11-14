@@ -127,6 +127,59 @@ select:disabled{opacity:1;background:#f6f6f4}
 .oline{position:absolute;inset:0;pointer-events:none;z-index:2}
 .gdone{text-align:center;font-size:1.15rem;font-weight:700;color:var(--green);margin-top:12px;display:none}
 .locked .ot,.locked .gtools button{pointer-events:none}
+
+/* ===== Bài 19: dạng bài mới ===== */
+.tip{background:#fff8ec;border:1px dashed var(--orange);border-radius:10px;padding:6px 12px;margin:6px 0;font-size:.98rem}
+.qtype{display:inline-block;font-size:.8rem;font-weight:700;color:#fff;background:var(--blue);border-radius:8px;padding:1px 8px;margin-left:4px;vertical-align:middle}
+.qtype.t2{background:var(--orange)} .qtype.t3{background:var(--purple)}
+.mq{font-size:1.35rem;font-weight:700;margin-top:4px}
+.opt .l{color:var(--blue)}
+.locked .opt{pointer-events:none}
+/* giá tiền */
+.tag{display:inline-flex;align-items:center;gap:8px;background:#fff;border:2px solid #e2b77d;border-radius:10px 22px 22px 10px;padding:6px 16px 6px 12px;font-size:1.35rem;font-weight:700;position:relative}
+.tag::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--bg);border:2px solid #e2b77d}
+.tag .off{background:var(--red);color:#fff;border-radius:8px;font-size:1rem;padding:1px 8px}
+.money-in{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:1.1rem}
+.money-in input{width:140px;padding:8px 10px;border:2px solid #cfccc4;border-radius:10px;font-size:1.2rem;font-weight:700;text-align:right}
+.money-in input:focus{outline:none;border-color:var(--head)}
+.locked .money-in input{background:#f6f6f4}
+/* hội thoại */
+.dl{background:#fff;border-radius:12px;padding:10px 12px;margin-top:10px;border:1px solid #e6e3dc}
+.dl h3{margin:2px 0 6px;font-size:1.05rem;color:var(--purple)}
+.turn{display:flex;gap:8px;align-items:flex-start;margin:7px 0}
+.turn .who{flex:0 0 auto;font-weight:700;border-radius:14px;padding:3px 10px;font-size:.95rem}
+.turn.s .who{background:#e3eef7;color:var(--blue)}
+.turn.m .who{background:#f3e6ea;color:var(--pink)}
+.turn .say{font-size:1.25rem;flex:1}
+.turn.m{flex-wrap:wrap}
+.turn.m select{max-width:100%}
+.turn .fb{flex-basis:100%}
+/* tìm lỗi */
+.sent{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tok{font-size:1.35rem;padding:4px 10px;border:2px solid transparent;border-radius:10px;background:#fff;cursor:pointer;user-select:none}
+.tok:hover{border-color:#e2c9a0}
+.tok.pick{border-color:var(--red);background:#fbe7e4;text-decoration:line-through;text-decoration-color:var(--red)}
+.tok.p{cursor:default;background:none;padding:4px 0;margin-left:-6px}
+.fix{margin-top:8px;font-size:1.05rem;display:none}
+.fix.show{display:block}
+.locked .tok{pointer-events:none}
+/* giỏ lượng từ */
+.pool{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:10px;border:2px dashed #cfc6b6;border-radius:12px;background:#fff;margin:8px 0}
+.pool:empty::before{content:"🎉 Đã xếp hết đồ vào giỏ!";color:var(--green);font-weight:600}
+.chipw{background:#fffaf2;border:2px solid #e2b77d;border-radius:12px;padding:6px 12px;font-size:1.3rem;font-weight:700;cursor:pointer;user-select:none;text-align:center;line-height:1.2}
+.chipw small{display:block;font-size:.72rem;font-weight:500;color:var(--muted)}
+.chipw.sel{background:#fff6b8;border-color:#e8b10e;box-shadow:0 0 0 3px #ffe066;transform:scale(1.05)}
+.chipw.right{border-color:var(--green);background:#eef6f0}
+.chipw.wrong{border-color:var(--red);background:#f9efed}
+.baskets{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.bk{border:2px solid var(--pink);border-radius:16px;background:#fbf3f5;min-height:130px;padding:8px;cursor:pointer;transition:background .15s}
+.bk.ready{background:#fff0c7;border-color:#e8b10e}
+.bk .bh{text-align:center;font-size:1.6rem;font-weight:800;color:var(--pink)}
+.bk .bh small{display:block;font-size:.8rem;color:var(--muted);font-weight:600}
+.bk .in{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}
+.bk .chipw{font-size:1.1rem;padding:4px 9px}
+.locked .chipw,.locked .bk{pointer-events:none}
+.sortfb{margin-top:10px}
 </style>
 </head>
 <body>
@@ -156,40 +209,36 @@ select:disabled{opacity:1;background:#f6f6f4}
 <div id="quiz" hidden>
 
 <div class="box p1">
-  <h2>🎮 Bài 1. Trò chơi ghép từ với nghĩa <span class="pt">(20 điểm)</span></h2>
-  <p class="note">Bấm 1 <b>thẻ chữ Hán</b> rồi bấm <b>thẻ nghĩa tiếng Việt</b> tương ứng. Ghép đúng thì 2 thẻ biến mất. Chọn sai cặp thì từ đó mất điểm. Qua <b>2 màn</b> nhé!</p>
-  <div class="gtop"><span class="round" id="gRound"></span><span class="combo" id="gCombo"></span></div>
-  <div class="gbar"><i id="gBar"></i></div>
-  <div class="gtools"><button class="alt" id="gHint">💡 Gợi ý (<span id="gHiN">3</span>)</button></div>
-  <div class="gmsg" id="gMsg"></div>
-  <div class="owrap" id="oWrap"><div class="oboard" id="oBoard"></div><svg class="oline" id="oLine"></svg></div>
-  <div class="gdone" id="gDone"></div>
+  <h2>⚡ Bài 1. Trắc nghiệm nhanh từ vựng <span class="pt">(20 điểm)</span></h2>
+  <p class="note">Chọn đáp án đúng. Có 3 kiểu câu: <b>nghĩa của từ</b>, <b>chọn chữ Hán</b>, <b>chọn cách đọc đúng</b> (chú ý thanh điệu!).</p>
+  <div id="mcq"></div>
 </div>
 
 <div class="box p2">
-  <h2>✏️ Bài 2. Chọn từ điền vào chỗ trống <span class="pt">(20 điểm)</span></h2>
-  <p class="note">Mỗi từ trong khung chỉ dùng <b>1 lần</b> (từ nào có 2 thẻ thì dùng được 2 lần). Từ đã chọn sẽ <b>ẩn đi</b>; bỏ chọn thì từ hiện lại. Có <b>2 từ thừa</b>.</p>
-  <div class="bank" id="bank"></div>
-  <div id="fill"></div>
+  <h2>💴 Bài 2. Giá tiền &amp; giảm giá <span class="pt">(20 điểm)</span></h2>
+  <p class="note">Câu 1–4: đọc giá bằng chữ Hán → <b>viết thành số</b> (VD: 46.5). Câu 5–8: tính <b>số tiền phải trả</b> sau khi giảm giá. Chỉ gõ số.</p>
+  <div class="tip">💡 打八折 = trả <b>80%</b> giá (giảm 20%) · 1 块 = 10 毛</div>
+  <div id="money"></div>
 </div>
 
 <div class="box p3">
-  <h2>🔗 Bài 3. Ghép câu hỏi với câu trả lời phù hợp <span class="pt">(20 điểm)</span></h2>
-  <p class="note">Có 10 câu trả lời cho 8 câu hỏi → <b>thừa 2 câu</b>. Câu trả lời đã chọn sẽ <b>ẩn đi</b>; bỏ chọn thì hiện lại.</p>
-  <div class="ansbank" id="ansbank"></div>
-  <div id="fix"></div>
+  <h2>🛍️ Bài 3. Đi mua sắm – hoàn thành hội thoại <span class="pt">(20 điểm)</span></h2>
+  <p class="note">Bạn là <b>玛丽</b>. Chọn câu phù hợp cho mỗi lượt nói của 玛丽. Có 10 câu cho 8 chỗ → <b>thừa 2 câu</b> (là câu sai ngữ pháp!). Câu đã chọn sẽ <b>ẩn đi</b>.</p>
+  <div class="ansbank" id="dlbank"></div>
+  <div id="dialog"></div>
 </div>
 
 <div class="box p4">
-  <h2>🔤 Bài 4. Sắp xếp thành câu đúng <span class="pt">(20 điểm)</span></h2>
-  <p class="note">Bấm lần lượt các từ theo đúng thứ tự. Bấm vào từ đã chọn để bỏ ra. Phải dùng hết các từ.</p>
-  <div id="order"></div>
+  <h2>🔍 Bài 4. Thám tử tìm lỗi sai <span class="pt">(20 điểm)</span></h2>
+  <p class="note">Mỗi câu có <b>1 chỗ sai</b>. ① Bấm vào từ sai (½ điểm). ② Chọn từ sửa lại cho đúng (½ điểm).</p>
+  <div id="spot"></div>
 </div>
 
 <div class="box p5">
-  <h2>🌏 Bài 5. Dịch Trung ⇄ Việt <span class="pt">(20 điểm)</span></h2>
-  <p class="note">Câu 1–4: dịch sang <b>tiếng Việt</b> (gõ có dấu hoặc không dấu đều được). Câu 5–8: dịch sang <b>tiếng Trung</b>, viết bằng chữ Hán. Dấu câu không ảnh hưởng điểm.</p>
-  <div id="trans"></div>
+  <h2>🧺 Bài 5. Xếp đồ vào giỏ lượng từ <span class="pt">(20 điểm)</span></h2>
+  <p class="note">Bấm 1 món đồ, rồi bấm vào <b>giỏ lượng từ</b> phù hợp. Bấm vào món trong giỏ để lấy ra.</p>
+  <div class="pool" id="pool"></div>
+  <div class="baskets" id="baskets"></div>
 </div>
 
 <div class="toolbar" style="justify-content:center;margin-top:18px">
@@ -216,292 +265,195 @@ select:disabled{opacity:1;background:#f6f6f4}
   <div id="bxhBody"></div>
 </div>
 
-<footer>第十九课 · 可以试试吗 · 汉语加油站 · <span style="opacity:.6">bản 14/11</span></footer>
+<footer>第十九课 · 可以试试吗 · 汉语加油站 · <span style="opacity:.6">bản 14/11b</span></footer>
 </div>
 
 <script>
-// ===== BÀI 1: TRÒ CHƠI GHÉP TỪ =====
-var WORDS = [
- ["羽绒服","yǔróngfú","áo lông vũ"],["便宜","piányi","rẻ"],["贵","guì","đắt"],["长","cháng","dài"],
- ["短","duǎn","ngắn"],["深","shēn","đậm (màu)"],["浅","qiǎn","nhạt (màu)"],["试","shì","thử"],
- ["可以","kěyǐ","có thể, được"],["当然","dāngrán","tất nhiên"],["肥","féi","rộng (quần áo)"],["胖","pàng","béo, mập (người)"],
- ["瘦","shòu","chật (quần áo); gầy"],["合适","héshì","vừa vặn, thích hợp"],["好看","hǎokàn","đẹp, ưa nhìn"],["种","zhǒng","loại (lượng từ)"],
- ["打折","dǎ zhé","giảm giá"],["颜色","yánsè","màu sắc"],["售货员","shòuhuòyuán","người bán hàng"],["毛衣","máoyī","áo len"],
- ["鞋","xié","giày"],["双","shuāng","đôi (lượng từ)"],["怎么卖","zěnme mài","bán thế nào (hỏi giá)"],["一点儿","yìdiǎnr","một chút"]
+// ===== BÀI 1: TRẮC NGHIỆM NHANH (đáp án đúng luôn ở vị trí 0, khi hiển thị sẽ xáo) =====
+var MCQ = [
+ {k:1, q:"羽绒服", o:["áo lông vũ","áo len","áo sơ mi","áo mưa"], why:"羽绒服 yǔróngfú = áo lông vũ (áo phao). Áo len là 毛衣."},
+ {k:2, q:"chật (quần áo)", o:["瘦","肥","胖","短"], why:"瘦 shòu: quần áo chật / người gầy. 肥 = rộng (quần áo), 胖 = béo (người)."},
+ {k:3, q:"便宜", o:["piányi","biànyí","piànyi","biányi"], why:"便宜 đọc piányi (宜 thanh nhẹ). 便 còn đọc biàn trong 方便, 顺便."},
+ {k:1, q:"合适", o:["vừa vặn, thích hợp","đẹp, ưa nhìn","đắt","rộng"], why:"合适 héshì = vừa vặn, thích hợp. Đẹp là 好看."},
+ {k:2, q:"nhạt (màu)", o:["浅","深","短","长"], why:"浅 qiǎn = nhạt; 深 shēn = đậm."},
+ {k:3, q:"打折", o:["dǎ zhé","dǎ zhě","dà zhé","dǎ zé"], why:"打折 dǎ zhé: 打 thanh 3, 折 thanh 2, âm zh."},
+ {k:1, q:"当然", o:["tất nhiên","có thể","lúc đó","thích hợp"], why:"当然 dāngrán = tất nhiên. 可以 = có thể."},
+ {k:2, q:"giày", o:["鞋","写","谢","双"], why:"鞋 xié = giày. 写 xiě (viết), 谢 xiè (cảm ơn) đọc gần giống nhưng khác chữ, khác thanh."},
+ {k:1, q:"售货员", o:["người bán hàng","khách hàng","giáo viên","phiên dịch"], why:"售货员 shòuhuòyuán = người bán hàng."},
+ {k:3, q:"试试", o:["shìshi","sìsi","shíshi","shìshì"], why:"试试 shìshi: âm sh (uốn lưỡi), chữ lặp lại thứ hai đọc thanh nhẹ."},
+ {k:2, q:"một đôi giày", o:["一双鞋","一件鞋","一个鞋","一张鞋"], why:"Giày đi theo đôi → lượng từ 双: 一双鞋."},
+ {k:1, q:"颜色", o:["màu sắc","kích cỡ","giá cả","kiểu dáng"], why:"颜色 yánsè = màu sắc: 深颜色 / 浅颜色."}
+];
+var KT = {1:["Nghĩa của từ","t1"],2:["Chọn chữ Hán","t2"],3:["Cách đọc đúng","t3"]};
+
+// ===== BÀI 2: GIÁ TIỀN & GIẢM GIÁ =====
+var MONEY = [
+ {q:"三十一块八毛九", a:31.89, why:"块 = đồng (元), 毛 = hào (角), 分 = xu → 31.89 元."},
+ {q:"四十六块五", a:46.5, why:"Đơn vị cuối có thể không nói: 四十六块五（毛）= 46.50 元."},
+ {q:"一百块零五毛", a:100.5, why:"零 = 0 ở giữa: 一百块零五毛 = 100.50 元."},
+ {q:"两块（钱）", a:2, why:"Số 2 trước 块 đọc là 两: 两块 = 2 元."},
+ {p:400, z:"八", a:320, why:"打八折 = trả 80%: 400 × 80% = 320 块（三百二）."},
+ {p:300, z:"七", a:210, why:"打七折 = trả 70%: 300 × 70% = 210 块."},
+ {p:120, z:"五", a:60, why:"打五折 = trả 50% (giảm một nửa): 120 × 50% = 60 块."},
+ {p:500, z:"九", a:450, why:"打九折 = trả 90% (chỉ giảm 10%): 500 × 90% = 450 块."}
+];
+var ITEMS2 = {400:"一件羽绒服",300:"一双鞋",120:"一件毛衣",500:"一件大衣"};
+
+// ===== BÀI 3: HỘI THOẠI =====
+var DL_OPTS = ["我看看毛衣。","颜色有点儿深，有浅一点儿的吗？","我试试可以吗？","不大不小，正合适。","这种羽绒服怎么卖？","太贵了，便宜一点儿吧。","三百行不行？","好，给你钱。","我想试一试试。","便宜有点儿吧。"];
+var DL_WHY = {8:"Câu SAI: động từ lặp lại là 试试 hoặc 试一试, không nói 试一试试.",9:"Câu SAI trật tự: đề nghị bớt giá là 便宜一点儿吧."};
+var DIALOGS = [
+ {title:"（一）在商店买毛衣", lines:[
+  ["s","售货员：你好，你要买什么？"],["m",0],["s","售货员：这件怎么样？又好又便宜。"],["m",1],
+  ["s","售货员：有，你看看这件。"],["m",2],["s","售货员：当然可以。……怎么样？"],["m",3]]},
+ {title:"（二）买羽绒服、讲价", lines:[
+  ["m",4],["s","售货员：一件四百块。"],["m",5],["s","售货员：好吧，可以打九折，三百六。"],
+  ["m",6],["s","售货员：三百太少了，不卖。三百五吧。"],["m",7]]}
+];
+var DL_GAP_WHY = ["Trả lời câu hỏi “你要买什么？” → nói món muốn xem: 我看看毛衣。",
+ "Người bán hỏi “这件怎么样？” rồi đáp “有，你看看这件” → Mary chê màu và hỏi cái nhạt hơn.",
+ "Người bán đáp “当然可以” → Mary đã xin phép: 我试试可以吗？",
+ "Sau khi thử, người bán hỏi “怎么样？” → 不大不小，正合适。",
+ "Người bán trả lời giá “一件四百块” → Mary hỏi giá: 这种羽绒服怎么卖？",
+ "Người bán đáp “好吧，可以打九折” → Mary vừa xin bớt giá: 太贵了，便宜一点儿吧。",
+ "Người bán đáp “三百太少了” → Mary trả giá ba trăm: 三百行不行？",
+ "Người bán chốt 三百五 → Mary đồng ý mua: 好，给你钱。"];
+
+// ===== BÀI 4: TÌM LỖI SAI =====
+// w: vị trí từ sai; f: [đáp án đúng, 2 phương án nhiễu]
+var SPOT = [
+ {t:["这件","衣服","一点儿","长","。"], w:2, f:["有点儿","又","正"], show:"这件衣服有点儿长。", why:"Chê “hơi dài” → 有点儿 đứng TRƯỚC tính từ. 一点儿 chỉ đứng SAU tính từ."},
+ {t:["太","贵","了","，","便宜","有点儿","吧","。"], w:5, f:["一点儿","又","太"], show:"太贵了，便宜一点儿吧。", why:"Đề nghị bớt giá: tính từ + 一点儿 → 便宜一点儿吧."},
+ {t:["我","想","买","一","件","鞋","。"], w:4, f:["双","本","张"], show:"我想买一双鞋。", why:"Giày dùng lượng từ 双 (đôi), không dùng 件."},
+ {t:["这件","毛衣","又","好看","很","便宜","。"], w:4, f:["又","太","有点儿"], show:"这件毛衣又好看又便宜。", why:"Cấu trúc cố định 又…又…: đã có 又 ở vế trước thì vế sau cũng phải là 又."},
+ {t:["我","正在","试试","这件","羽绒服","呢","。"], w:2, f:["试","试一试","试了试"], show:"我正在试这件羽绒服呢。", why:"Động tác đang tiến hành (正在…呢) không dùng động từ lặp lại → 正在试."},
+ {t:["你","复习一复习","今天的","生词","吧","。"], w:1, f:["复习复习","复复习习","复习一复"], show:"你复习复习今天的生词吧。", why:"Động từ 2 âm tiết lặp lại theo kiểu ABAB, giữa không thêm 一 → 复习复习."},
+ {t:["这件","衣服","有点儿","合适","。"], w:2, f:["很","一点儿","太"], show:"这件衣服很合适。", why:"有点儿 chỉ dùng cho điều không vừa ý; 合适 là ý tốt → 很合适 (hoặc 正合适)."},
+ {t:["这","个","羽绒服","太","肥","了","。"], w:1, f:["件","双","本"], show:"这件羽绒服太肥了。", why:"Áo, quần áo dùng lượng từ 件: 这件羽绒服."}
 ];
 
-// ===== BÀI 2: ĐIỀN TỪ =====
-var BANK = ["又","又","有点儿","一点儿","一点儿","试试","双","正","种","还是","当然","折","件","太"];
-var FILL = [
- {t:["这件羽绒服",0,"好",1,"便宜。"], a:[["又"],["又"]], show:"这件羽绒服又好又便宜。", why:"又 + tính từ + 又 + tính từ: vừa… vừa… (hai đặc điểm cùng có).", err:{"太":"太…了 là “quá”, không nối hai tính từ. Vừa… vừa… → 又…又….","有点儿":"有点儿 dùng khi chê; câu này khen hai ý → 又…又…."}},
- {t:["这件",0,"长，有没有短",1,"的？"], a:[["有点儿"],["一点儿"]], show:"这件有点儿长，有没有短一点儿的？", why:"有点儿 + tính từ: hơi… (không vừa ý). Tính từ + 一点儿: … hơn một chút (so sánh).", err:{"一点儿":"Ô 1 là chê “hơi dài” → 有点儿 đứng TRƯỚC tính từ; 一点儿 đứng SAU tính từ (短一点儿).","有点儿":"Ô 2 là so sánh “ngắn hơn một chút” → 短一点儿 (tính từ + 一点儿).","太":"太长 cần có 了 ở cuối (太长了). Ở đây là “hơi dài” → 有点儿长."}},
- {t:["我可以",0,"这件毛衣吗？"], a:[["试试"]], show:"我可以试试这件毛衣吗？", why:"Động từ lặp lại 试试: thử xem, ngữ khí nhẹ nhàng, lịch sự."},
- {t:["我想买一",0,"鞋。"], a:[["双"]], show:"我想买一双鞋。", why:"Giày đi theo đôi → lượng từ 双: 一双鞋.", err:{"件":"件 dùng cho áo, quần áo. Giày dùng 双 (đôi).","种":"Mua một đôi giày → 一双鞋. 种 là “loại”."}},
- {t:["太贵了，便宜",0,"吧。"], a:[["一点儿"]], show:"太贵了，便宜一点儿吧。", why:"Đề nghị bớt giá: 便宜一点儿吧 (tính từ + 一点儿).", err:{"有点儿":"Sai trật tự: không nói 便宜有点儿. Đề nghị “rẻ hơn chút” → 便宜一点儿吧."}},
- {t:["这件不大不小，",0,"合适。"], a:[["正"]], show:"这件不大不小，正合适。", why:"正 + 合适: vừa đúng, vừa vặn.", err:{"太":"太合适 phải có 了 ở cuối (太合适了). Câu này không có 了 → 正合适.","有点儿":"有点儿 chỉ dùng cho ý không vừa lòng; 合适 là ý tốt → 正合适."}},
- {t:["这",0,"苹果多少钱一斤？"], a:[["种"]], show:"这种苹果多少钱一斤？", why:"Hỏi giá theo loại hàng: 这种 + danh từ (loại này).", err:{"件":"件 dùng cho quần áo, sự việc; hỏi loại táo → 这种苹果.","双":"双 dùng cho vật đi theo đôi (giày, đũa); táo → 这种苹果."}},
- {t:["你要深颜色的",0,"要浅颜色的？"], a:[["还是"]], show:"你要深颜色的还是要浅颜色的？", why:"Câu hỏi lựa chọn: A 还是 B? (hay là)."},
- {t:["A：我试试可以吗？ B：",0,"可以。"], a:[["当然"]], show:"A：我试试可以吗？——B：当然可以。", why:"当然可以: tất nhiên là được."},
- {t:["这件衣服打八",0,"，三百二十块。"], a:[["折"]], show:"这件衣服打八折，三百二十块。", why:"打 + số + 折: 打八折 = trả 80% giá (giảm 20%). 400 × 80% = 320."}
-];
+// ===== BÀI 5: GIỎ LƯỢNG TỪ =====
+var BASKETS = [["件","jiàn · áo, quần áo"],["双","shuāng · đồ đi theo đôi"],["本","běn · sách, vở"],["张","zhāng · vật mỏng, phẳng"],["个","gè · dùng chung"]];
+var THINGS = [["羽绒服","yǔróngfú",0],["毛衣","máoyī",0],["衣服","yīfu",0],["鞋","xié",1],["词典","cídiǎn",2],["杂志","zázhì",2],["书","shū",2],["邮票","yóupiào",3],["桌子","zhuōzi",3],["箱子","xiāngzi",4],["苹果","píngguǒ",4],["面包","miànbāo",4]];
 
-// ===== BÀI 3: GHÉP CÂU HỎI – CÂU TRẢ LỜI =====
-var ANS = ["当然可以。","一双二百五十块。","这件有点儿合适。","我要浅颜色的。","一件四百块。","又便宜又好看。","可以打八折，三百二吧。","便宜有点儿吧。","对，有没有瘦一点儿的？","不大不小，正合适。"];
-var MATCH = [
- {q:"这种羽绒服怎么卖？", a:4, why:"Hỏi giá áo → 一件四百块 (áo dùng lượng từ 件)."},
- {q:"这件有点儿肥吧？", a:8, why:"Đồng ý là hơi rộng → hỏi chiếc chật hơn: 有没有瘦一点儿的？"},
- {q:"我试试可以吗？", a:0, why:"Xin phép thử → 当然可以。"},
- {q:"你要深颜色的还是浅颜色的？", a:3, why:"Câu hỏi lựa chọn → chọn một: 我要浅颜色的。"},
- {q:"四百太贵了，便宜一点儿吧。", a:6, why:"Người bán đồng ý bớt giá → 可以打八折，三百二吧 (400 × 80% = 320)."},
- {q:"这件合适吗？", a:9, why:"Hỏi có vừa không → 不大不小，正合适。"},
- {q:"这双鞋多少钱？", a:1, why:"Hỏi giá giày → 一双二百五十块 (giày dùng lượng từ 双)."},
- {q:"那家商店的东西怎么样？", a:5, why:"Hỏi nhận xét chung → 又便宜又好看 (vừa rẻ vừa đẹp)."}
-];
-var L = "ABCDEFGHIJ";
-var ANS_WHY = {2:"Câu này SAI: 有点儿 chỉ dùng cho điều không vừa ý; 合适 là ý tốt → 很合适 / 正合适.",7:"Câu này SAI trật tự: đề nghị bớt giá là 便宜一点儿吧 (tính từ + 一点儿).",1:"Câu này nói giá một ĐÔI (双) → dùng cho giày, không phải áo.",4:"Câu này nói giá một CHIẾC áo (件), không phải đôi giày."};
-
-// ===== BÀI 4: SẮP XẾP =====
-var ORDER = [
- {t:["有没有","这件","短","长","一点儿","有点儿","的"], a:["这件有点儿长有没有短一点儿的"], show:"这件有点儿长，有没有短一点儿的？", why:"有点儿 đứng TRƯỚC tính từ (有点儿长 – hơi dài); 一点儿 đứng SAU tính từ (短一点儿 – ngắn hơn chút)."},
- {t:["吗","我","这件","试试","可以","羽绒服"], a:["我试试这件羽绒服可以吗","我可以试试这件羽绒服吗"], show:"我试试这件羽绒服可以吗？", why:"Xin phép: 我 + 试试 + tân ngữ + 可以吗？ hoặc 我可以 + 试试 + tân ngữ + 吗？"},
- {t:["又","苹果","好吃","这种","大","又"], a:["这种苹果又大又好吃","这种苹果又好吃又大"], show:"这种苹果又大又好吃。", why:"Chủ ngữ (这种苹果) + 又 + tính từ + 又 + tính từ."},
- {t:["还是","深","你","颜色的","要","浅","要","颜色的"], a:["你要深颜色的还是要浅颜色的","你要浅颜色的还是要深颜色的"], show:"你要深颜色的还是要浅颜色的？", why:"Câu hỏi lựa chọn: 你要 A 还是要 B？"},
- {t:["一点儿","贵","了","便宜","太","吧"], a:["太贵了便宜一点儿吧"], show:"太贵了，便宜一点儿吧。", why:"太 + tính từ + 了 (chê đắt), sau đó đề nghị: 便宜一点儿吧."},
- {t:["正","毛衣","不大不小","这件","合适"], a:["这件毛衣不大不小正合适"], show:"这件毛衣不大不小，正合适。", why:"Chủ ngữ + 不大不小 (miêu tả) + 正合适 (kết luận)."},
- {t:["羽绒服","打","这种","折","可以","八"], a:["这种羽绒服可以打八折"], show:"这种羽绒服可以打八折。", why:"可以 đứng trước động từ: 可以 + 打八折 (打 + số + 折)."},
- {t:["怎么样","这本","你","词典","看看"], a:["你看看这本词典怎么样"], show:"你看看这本词典怎么样？", why:"看看 (xem thử) + tân ngữ, rồi hỏi 怎么样 ở cuối câu."}
-];
-
-// ===== BÀI 5: DỊCH TRUNG ⇄ VIỆT =====
-// d:"vi" = dịch sang tiếng Việt (k: ý cần có, so khớp không dấu); d:"zh" = dịch sang tiếng Trung
-var TRANS = [
- {d:"vi", q:"这件羽绒服又好看又便宜，颜色也很合适，我想试试。", show:"Chiếc áo lông vũ này vừa đẹp vừa rẻ, màu cũng rất hợp, tôi muốn thử xem.", k:[["ao long vu","ao phao","ao long"],["vua"],["re"],["mau"],["thu"]], h:["“羽绒服” = áo lông vũ (áo phao).", "“又…又…” = vừa… vừa….", "“便宜” = rẻ.", "“颜色” = màu sắc.", "“试试” = thử xem."], bad:[]},
- {d:"vi", q:"这双鞋有点儿小，有没有大一点儿的？", show:"Đôi giày này hơi nhỏ, có đôi nào to hơn một chút không?", k:[["giay"],["hoi"],["nho","chat"],["to hon","lon hon","rong hon","to mot chut","lon mot chut"]], h:["“鞋” = giày (“双” = đôi).", "“有点儿” = hơi (không vừa ý).", "“小” = nhỏ.", "“大一点儿的” = cái to hơn một chút."], bad:[]},
- {d:"vi", q:"售货员说这种毛衣可以打八折，一件三百二十块。", show:"Người bán hàng nói loại áo len này có thể giảm 20%, ba trăm hai mươi tệ một chiếc.", k:[["nguoi ban","nhan vien"],["ao len"],["giam 20","giam gia 20","giam hai muoi","giam gia hai muoi","con 80","tra 80","bang 80"],["320","ba tram hai"]], h:["“售货员” = người bán hàng.", "“毛衣” = áo len.", "“打八折” = trả 80% giá = giảm 20%.", "“三百二十块” = 320 tệ."], bad:[["giam 80","❗ 打八折 = trả 80% giá = GIẢM 20%, không phải giảm 80%."],["giam gia 80","❗ 打八折 = trả 80% giá = GIẢM 20%, không phải giảm 80%."],["giam tam muoi","❗ 打八折 = trả 80% giá = GIẢM 20%."]]},
- {d:"vi", q:"太贵了！便宜一点儿吧，三百块行不行？", show:"Đắt quá! Rẻ hơn một chút đi, ba trăm tệ được không?", k:[["dat qua","qua dat"],["re hon","re mot chut","bot"],["300","ba tram"],["duoc"]], h:["“太贵了” = đắt quá.", "“便宜一点儿吧” = rẻ hơn một chút đi (bớt chút đi).", "“三百块” = 300 tệ.", "“行不行” = được không."], bad:[]},
- {d:"zh", q:"Chiếc này hơi dài, có chiếc nào ngắn hơn một chút không?", show:"这件有点儿长，有没有短一点儿的？", k:[["这件"],["有点儿长","有一点儿长","有点长","有一点长"],["短一点儿","短一点"]], h:["“chiếc này” (áo) = 这件.", "“hơi dài” (chê) = 有点儿长: 有点儿 đứng TRƯỚC tính từ.", "“ngắn hơn một chút” = 短一点儿: 一点儿 đứng SAU tính từ."], bad:[["长一点儿","❗ “hơi dài” là 有点儿长; 长一点儿 nghĩa là “dài hơn một chút”."],["短有点儿","❗ So sánh: tính từ + 一点儿 → 短一点儿."],["这个","❗ Quần áo dùng lượng từ 件: 这件."]]},
- {d:"zh", q:"Tôi có thể mặc thử chiếc áo len này không?", show:"我可以试试这件毛衣吗？（我试试这件毛衣可以吗？）", k:[["试试","试一试","试一下"],["这件毛衣"],["可以"]], h:["“mặc thử” = 试试 / 试一试.", "“chiếc áo len này” = 这件毛衣 (lượng từ 件).", "“có thể … không” = 可以…吗."], bad:[["这个毛衣","❗ Áo len dùng lượng từ 件: 这件毛衣."]]},
- {d:"zh", q:"Đôi giày này vừa rẻ vừa đẹp, nhưng hơi nhỏ.", show:"这双鞋又便宜又好看，可是（但是）有点儿小。", k:[["这双鞋"],["又便宜又好看","又好看又便宜"],["有点儿小","有一点儿小","有点小","有一点小"]], h:["“đôi giày này” = 这双鞋 (lượng từ 双).", "“vừa rẻ vừa đẹp” = 又便宜又好看.", "“hơi nhỏ” = 有点儿小 (有点儿 đứng trước tính từ)."], bad:[["这个鞋","❗ Giày dùng lượng từ 双: 这双鞋."],["这件鞋","❗ 件 dùng cho áo; giày dùng 双."],["小一点儿","❗ “hơi nhỏ” (chê) = 有点儿小; 小一点儿 = “nhỏ hơn một chút”."]]},
- {d:"zh", q:"Loại áo lông vũ này bán thế nào? — Bốn trăm tệ một chiếc.", show:"这种羽绒服怎么卖？——一件四百块。", k:[["这种羽绒服"],["怎么卖","多少钱"],["一件四百","四百块一件","四百元一件"]], h:["“loại áo lông vũ này” = 这种羽绒服 (种 = loại).", "“bán thế nào” = 怎么卖.", "“bốn trăm tệ một chiếc” = 一件四百块 (áo dùng 件)."], bad:[["四百块一个","❗ Áo dùng lượng từ 件, không dùng 个."],["一个四百","❗ Áo dùng lượng từ 件, không dùng 个."]]}
-];
 var PTS = [20,20,20,20,20];
 
-// ===== HIỂN THỊ =====
+// ===== TIỆN ÍCH =====
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
-// ---- trò chơi nối thẻ kiểu Pikachu ----
 function shuffle(x){ x=x.slice(); for(var i=x.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=x[i]; x[i]=x[j]; x[j]=t; } return x; }
-var COLS=4, ROWS=6;
-function gLayout(){ var wide=window.innerWidth>=620; COLS=wide?6:4; ROWS=wide?4:6; }
-function gSize(){ var b=document.getElementById("oBoard"); var h=Math.max(260,Math.min(window.innerHeight-(COLS===6?330:250), ROWS*(COLS===6?92:86))); b.style.height=h+"px"; b.style.gridTemplateRows="repeat("+ROWS+",1fr)"; }
-window.addEventListener("resize",function(){ if(G.grid) gSize(); });
-var G = {levels:[], lv:0, err:{}, done:{}, hinted:{}, sel:null, combo:0, best:0, grid:null, shN:3, hiN:3};
-function gInit(){
-  var order = shuffle(WORDS.map(function(w,i){return i;}));
-  G.levels=[order.slice(0,12), order.slice(12)]; G.lv=0; G.err={}; G.done={}; G.hinted={}; G.combo=0; G.best=0; G.shN=3; G.hiN=3;
-  document.getElementById("gDone").style.display="none"; gLevel();
-}
-function gLevel(){
-  gLayout(); var ids=G.levels[G.lv], tiles=[];
-  ids.forEach(function(i){ tiles.push({w:i,s:"zh"}); tiles.push({w:i,s:"vi"}); });
-  while(tiles.length<ROWS*COLS) tiles.push(null);
-  G.grid=[]; for(var r=0;r<ROWS+2;r++){ G.grid.push([]); for(var c=0;c<COLS+2;c++) G.grid[r].push(null); }
-  placeBalanced(tiles);
-  G.sel=null; draw(); gStatus(""); 
-}
-// xếp ngẫu nhiên nhưng cân đối: mỗi hàng nửa chữ Hán – nửa tiếng Việt, xen kẽ, không dồn một phía
-function typePattern(){
-  var pat=[];
-  for(var r=1;r<=ROWS;r++){ var row=[]; for(var c=1;c<=COLS;c++) row.push((r+c)%2?"zh":"vi");
-    for(var k=0;k<COLS-1;k++) if(Math.random()<0.35){ var t=row[k]; row[k]=row[k+1]; row[k+1]=t; k++; }
-    pat.push(row); }
-  return pat;
-}
-function placeBalanced(tiles){
-  var zh=shuffle(tiles.filter(function(t){return t&&t.s==="zh";})), vi=shuffle(tiles.filter(function(t){return t&&t.s==="vi";}));
-  var pat=typePattern(), zs=[], vs=[];
-  for(var r=1;r<=ROWS;r++) for(var c=1;c<=COLS;c++) (pat[r-1][c-1]==="zh"?zs:vs).push([r,c]);
-  zs=shuffle(zs); vs=shuffle(vs);
-  zs.forEach(function(p,i){ G.grid[p[0]][p[1]]=zh[i]||null; });
-  vs.forEach(function(p,i){ G.grid[p[0]][p[1]]=vi[i]||null; });
-}
-function draw(){
-  var b=document.getElementById("oBoard"); b.style.gridTemplateColumns="repeat("+COLS+",1fr)"; gSize(); b.innerHTML="";
-  for(var r=1;r<=ROWS;r++) for(var c=1;c<=COLS;c++){
-    var t=G.grid[r][c], d=document.createElement("div");
-    d.className="ot "+(t?t.s:"gone"); d.dataset.r=r; d.dataset.c=c;
-    if(t){ d.textContent = t.s==="zh" ? WORDS[t.w][0] : WORDS[t.w][2]; d.onclick=(function(rr,cc){ return function(){ pick(rr,cc); }; })(r,c); }
-    b.appendChild(d);
-  }
-  document.getElementById("oLine").innerHTML="";
-}
-function cellEl(r,c){ return document.querySelector('#oBoard .ot[data-r="'+r+'"][data-c="'+c+'"]'); }
-function gStatus(msg){
-  var ids=G.levels[G.lv], n=ids.filter(function(i){return G.done[i];}).length, all=Object.keys(G.done).length;
-  document.getElementById("gRound").textContent="Màn "+(G.lv+1)+"/2 · đã ghép "+n+"/"+ids.length+" cặp";
-  document.getElementById("gBar").style.width=(all/WORDS.length*100)+"%";
-  document.getElementById("gCombo").textContent = G.combo>=2 ? "🔥 Combo x"+G.combo : "";
-  document.getElementById("gHiN").textContent=G.hiN;
-  if(msg!==undefined) document.getElementById("gMsg").innerHTML=msg;
-}
-// tìm đường nối tối đa 2 lần rẽ (BFS theo số lần rẽ)
-function findPath(a,b){
-  var R=ROWS+2, C=COLS+2, D=[[-1,0],[1,0],[0,-1],[0,1]], best={}, q=[];
-  for(var d=0;d<4;d++) q.push({r:a[0],c:a[1],d:d,t:0,p:[[a[0],a[1]]]});
-  while(q.length){
-    var s=q.shift(), nr=s.r+D[s.d][0], nc=s.c+D[s.d][1];
-    if(nr<0||nc<0||nr>=R||nc>=C) continue;
-    if(nr===b[0]&&nc===b[1]) return s.p.concat([[nr,nc]]);
-    if(G.grid[nr][nc]) continue;
-    for(var d2=0;d2<4;d2++){
-      var t=s.t+(d2===s.d?0:1); if(t>2) continue;
-      var key=nr+","+nc+","+d2; if(key in best && best[key]<=t) continue; best[key]=t;
-      var item={r:nr,c:nc,d:d2,t:t,p: d2===s.d ? s.p : s.p.concat([[nr,nc]])};
-      if(d2===s.d) q.unshift(item); else q.push(item);
-    }
-  }
-  return null;
-}
-function pairs(){
-  var list=[], pos={};
-  for(var r=1;r<=ROWS;r++) for(var c=1;c<=COLS;c++){ var t=G.grid[r][c]; if(t){ (pos[t.w]=pos[t.w]||[]).push([r,c]); } }
-  Object.keys(pos).forEach(function(w){ if(pos[w].length===2) list.push(pos[w]); });
-  return list;
-}
-function anyMove(){ return pairs().some(function(p){ return findPath(p[0],p[1]); }); }
-function reshuffle(silent){
-  var cells=[], tiles=[];
-  for(var r=1;r<=ROWS;r++) for(var c=1;c<=COLS;c++) if(G.grid[r][c]){ cells.push([r,c]); tiles.push(G.grid[r][c]); }
-  var tries=0;
-  var zc=cells.filter(function(p,i){return tiles[i].s==="zh";}), vc=cells.filter(function(p,i){return tiles[i].s==="vi";});
-  var zt=tiles.filter(function(t){return t.s==="zh";}), vt=tiles.filter(function(t){return t.s==="vi";});
-  do { var a=shuffle(zt), b=shuffle(vt); zc.forEach(function(p,i){ G.grid[p[0]][p[1]]=a[i]; }); vc.forEach(function(p,i){ G.grid[p[0]][p[1]]=b[i]; }); tries++; } while(cells.length && !anyMove() && tries<50);
-  if(!silent){ G.sel=null; draw(); }
-}
-function center(r,c){
-  var wrap=document.getElementById("oWrap").getBoundingClientRect(), e=cellEl(Math.min(Math.max(r,1),ROWS),Math.min(Math.max(c,1),COLS)).getBoundingClientRect();
-  var x=e.left-wrap.left+e.width/2, y=e.top-wrap.top+e.height/2;
-  if(c===0) x=10; if(c===COLS+1) x=wrap.width-10; if(r===0) y=10; if(r===ROWS+1) y=wrap.height-10;
-  return x+","+y;
-}
-function showLine(p){
-  document.getElementById("oLine").innerHTML='<polyline points="'+p.map(function(q){return center(q[0],q[1]);}).join(" ")+'" fill="none" stroke="#e0a21b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>';
-  setTimeout(function(){ document.getElementById("oLine").innerHTML=""; },420);
-}
-function pick(r,c){
-  var t=G.grid[r][c]; if(!t) return;
-  var el=cellEl(r,c);
-  if(!G.sel){ G.sel=[r,c]; el.classList.add("sel"); return; }
-  var s=G.sel, st=G.grid[s[0]][s[1]], sel=cellEl(s[0],s[1]);
-  if(s[0]===r&&s[1]===c){ sel.classList.remove("sel"); G.sel=null; return; }
-  if(st.s===t.s){ sel.classList.remove("sel"); G.sel=[r,c]; el.classList.add("sel"); return; }   // cùng loại thẻ → đổi lựa chọn
-  if(st.w!==t.w){
-    var zw = st.s==="zh"?st.w:t.w; G.err[zw]=(G.err[zw]||0)+1; G.combo=0;
-    sel.classList.add("bad"); el.classList.add("bad");
-    setTimeout(function(){ sel.classList.remove("bad","sel"); el.classList.remove("bad"); },380);
-    G.sel=null; gStatus("❌ Không phải một cặp: <b>"+esc(WORDS[zw][0])+"</b> không có nghĩa này."); return;
-  }
-  G.done[t.w]=true; G.combo++; G.best=Math.max(G.best,G.combo);
-  G.grid[s[0]][s[1]]=null; G.grid[r][c]=null; G.sel=null;
-  sel.classList.add("gone"); el.classList.add("gone"); sel.classList.remove("sel");
-  gStatus("✅ <b>"+esc(WORDS[t.w][0])+"</b> "+esc(WORDS[t.w][1])+" — "+esc(WORDS[t.w][2]));
-  if(G.levels[G.lv].every(function(i){return G.done[i];})){
-    if(G.lv<1){ setTimeout(function(){ G.lv++; gLevel(); gStatus("🎉 Qua màn 1! Sang màn 2."); },800); }
-    else { var ok=WORDS.filter(function(w,i){return !G.err[i] && !G.hinted[i];}).length, d=document.getElementById("gDone");
-      d.style.display="block"; d.textContent="🏆 Hoàn thành! Ghép đúng ngay: "+ok+"/"+WORDS.length+" từ · Combo cao nhất x"+G.best; }
-  }
-}
-document.getElementById("gHint").onclick=function(){
-  if(G.hiN<=0) return; var p=pairs()[0]; if(!p) return;
-  G.hiN--; var w=G.grid[p[0][0]][p[0][1]].w; G.hinted[w]=true;
-  [p[0],p[1]].forEach(function(q){ var e=cellEl(q[0],q[1]); e.classList.add("hint"); setTimeout(function(){ e.classList.remove("hint"); },1900); });
-  gStatus("💡 Gợi ý một cặp (từ được gợi ý sẽ không tính điểm).");
-};
-gInit();
-
-var fBox = document.getElementById("fill");
-FILL.forEach(function(d,i){
-  var el = document.createElement("div"); el.className="item";
-  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+d.t.map(function(x){
-      return typeof x==="number" ? '<select class="fsel" id="s'+i+'_'+x+'"><option value="">　___　</option></select>' : esc(x);
-    }).join("")+'</span><div class="fb" id="ff'+i+'"></div>';
-  fBox.appendChild(el);
-});
-document.getElementById("bank").innerHTML = shuffle(BANK.map(function(w,k){return k;})).map(function(k){ return '<span class="chip" data-w="'+esc(BANK[k])+'">'+esc(BANK[k])+'</span>'; }).join("");
-function syncFill(){
-  var sels=[].slice.call(document.querySelectorAll(".fsel")), total={}, used={};
-  BANK.forEach(function(w){ total[w]=(total[w]||0)+1; });
-  sels.forEach(function(x){ if(x.value) used[x.value]=(used[x.value]||0)+1; });
-  var uniq=BANK.filter(function(w,i){ return BANK.indexOf(w)===i; });
-  sels.forEach(function(x){
-    var cur=x.value, h='<option value="">　___　</option>';
-    uniq.forEach(function(w){ var left=total[w]-(used[w]||0)+(cur===w?1:0); if(left>0) h+='<option'+(cur===w?' selected':'')+'>'+w+'</option>'; });
-    x.innerHTML=h; x.value=cur;
-  });
-  var u={}; document.querySelectorAll("#bank .chip").forEach(function(c){ var w=c.dataset.w; u[w]=(u[w]||0)+1; c.classList.toggle("used", u[w]<=(used[w]||0)); });
-}
-document.querySelectorAll(".fsel").forEach(function(x){ x.onchange=syncFill; });
-syncFill();
-
-document.getElementById("ansbank").innerHTML = ANS.map(function(a,k){ return '<div id="ab'+k+'"><b>'+L[k]+'.</b> '+esc(a)+'</div>'; }).join("");
-function syncMatch(){
-  var used = {};
-  MATCH.forEach(function(d,i){ var v=document.getElementById("x"+i).value; if(v!=="") used[v]=i; });
-  MATCH.forEach(function(d,i){
-    var x=document.getElementById("x"+i), cur=x.value, h='<option value="">　_　</option>';
-    ANS.forEach(function(a,k){ if(!(String(k) in used) || used[k]===i) h+='<option value="'+k+'"'+(cur===String(k)?' selected':'')+'>'+L[k]+'</option>'; });
-    x.innerHTML=h; x.value=cur;
-  });
-  ANS.forEach(function(a,k){ document.getElementById("ab"+k).classList.toggle("used", String(k) in used); });
-}
-var xBox = document.getElementById("fix");
-MATCH.forEach(function(d,i){
-  var el = document.createElement("div"); el.className="item";
-  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="hz">'+esc(d.q)+'</span> → <select id="x'+i+'"><option value="">　_　</option>'+
-    ANS.map(function(a,k){ return '<option value="'+k+'">'+L[k]+'</option>'; }).join("")+'</select><div class="fb" id="xf'+i+'"></div>';
-  xBox.appendChild(el);
-  el.querySelector("select").onchange = syncMatch;
-});
-
-var oBox = document.getElementById("order"), picked = [];
-ORDER.forEach(function(d,i){
-  picked[i] = [];
-  var el = document.createElement("div"); el.className="item";
-  el.innerHTML = '<span class="num">'+(i+1)+'</span><div class="line" id="ln'+i+'"></div><div class="tiles" id="tl'+i+'"></div>'+
-    '<button class="clear" id="cl'+i+'">↺ Xếp lại</button><div class="fb" id="of'+i+'"></div>';
-  oBox.appendChild(el);
-  var tl = el.querySelector(".tiles");
-  d.t.forEach(function(w,j){
-    var b = document.createElement("span"); b.className="tile"; b.textContent=w; b.dataset.j=j;
-    b.onclick = function(){ if(b.classList.contains("used")) return; b.classList.add("used"); picked[i].push(j); drawLine(i); };
-    tl.appendChild(b);
-  });
-  el.querySelector(".clear").onclick = function(){ picked[i]=[]; tl.querySelectorAll(".tile").forEach(function(t){t.classList.remove("used");}); drawLine(i); };
-});
-function drawLine(i){
-  var ln = document.getElementById("ln"+i); ln.innerHTML="";
-  picked[i].forEach(function(j,pos){
-    var c = document.createElement("span"); c.className="tile"; c.textContent=ORDER[i].t[j];
-    c.onclick = function(){ picked[i].splice(pos,1); document.querySelector('#tl'+i+' .tile[data-j="'+j+'"]').classList.remove("used"); drawLine(i); };
-    ln.appendChild(c);
-  });
-}
-
-var tBox = document.getElementById("trans");
-TRANS.forEach(function(d,i){
-  var el = document.createElement("div"); el.className="item";
-  el.innerHTML = '<span class="num">'+(i+1)+'</span><span class="pt">'+(d.d==="vi"?"Dịch sang tiếng Việt:":"Dịch sang tiếng Trung:")+'</span><br><b'+(d.d==="vi"?' class="hz"':'')+'>'+esc(d.q)+'</b>'+
-    '<textarea id="t'+i+'" placeholder="'+(d.d==="vi"?"Viết câu tiếng Việt…":"用汉字写…")+'"></textarea><div class="fb" id="tf'+i+'"></div>';
-  tBox.appendChild(el);
-});
-
-// ===== CHẤM =====
-function clean(s){ return s.replace(/[\s，。！？、：；,.!?:;“”"'（）()…—\-]/g,""); }
-function hasHanzi(s){ return /[一-鿿]/.test(s); }
-function viNorm(s){ return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim(); }
-function keyRatio(t,keys){ var h=0; keys.forEach(function(g){ if(g.some(function(k){return t.indexOf(k)>-1;})) h++; }); return h/keys.length; }
 function okBox(f,html){ f.className="fb ok"; f.innerHTML='🌟 <b>Đúng rồi!</b>'+(html?'<div class="ans">'+html+'</div>':''); }
 function setFb(f,cls,head,ans){ f.className="fb "+cls; f.innerHTML=head+'<div class="ans">'+ans+'</div>'; }
+var L = "ABCDEFGHIJ";
 
+// ===== HIỂN THỊ BÀI 1 =====
+var mcqOrder = [], mcqPick = [];
+function renderMcq(){
+  var box=document.getElementById("mcq"); box.innerHTML=""; mcqOrder=[]; mcqPick=[];
+  MCQ.forEach(function(d,i){
+    mcqOrder[i]=shuffle([0,1,2,3]); mcqPick[i]=-1;
+    var el=document.createElement("div"); el.className="item";
+    el.innerHTML='<span class="num">'+(i+1)+'</span><span class="qtype '+KT[d.k][1]+'">'+KT[d.k][0]+'</span><div class="mq">'+esc(d.q)+'</div>'+
+      '<div class="opts">'+mcqOrder[i].map(function(oi,p){ return '<label class="opt" data-i="'+i+'" data-o="'+oi+'"><span class="l">'+L[p]+'.</span>'+esc(d.o[oi])+'</label>'; }).join("")+'</div><div class="fb" id="mf'+i+'"></div>';
+    box.appendChild(el);
+  });
+  box.querySelectorAll(".opt").forEach(function(o){ o.onclick=function(){
+    var i=+o.dataset.i; mcqPick[i]=+o.dataset.o;
+    o.parentNode.querySelectorAll(".opt").forEach(function(x){ x.classList.toggle("sel", x===o); }); }; });
+}
+
+// ===== HIỂN THỊ BÀI 2 =====
+function renderMoney(){
+  var box=document.getElementById("money"); box.innerHTML="";
+  MONEY.forEach(function(d,i){
+    var el=document.createElement("div"); el.className="item";
+    var q = d.p ? '<span class="tag">'+esc(ITEMS2[d.p])+' '+d.p+'块 <span class="off">打'+d.z+'折</span></span><div style="margin-top:6px">要给多少钱？<span class="vi"> (Phải trả bao nhiêu?)</span></div>'
+                : '<span class="tag">'+esc(d.q)+'</span>';
+    el.innerHTML='<span class="num">'+(i+1)+'</span>'+q+'<div class="money-in"><input id="m'+i+'" inputmode="decimal" autocomplete="off" placeholder="số…"> 元</div><div class="fb" id="nf'+i+'"></div>';
+    box.appendChild(el);
+  });
+}
+function parseMoney(s){ s=String(s).replace(/[元块¥\s]/g,"").replace(",","."); if(!/^\d+(\.\d+)?$/.test(s)) return NaN; return parseFloat(s); }
+
+// ===== HIỂN THỊ BÀI 3 =====
+var gapIdx = [];
+function renderDialog(){
+  var box=document.getElementById("dialog"); box.innerHTML=""; gapIdx=[];
+  document.getElementById("dlbank").innerHTML = DL_OPTS.map(function(a,k){ return '<div id="db'+k+'"><b>'+L[k]+'.</b> '+esc(a)+'</div>'; }).join("");
+  DIALOGS.forEach(function(D){
+    var el=document.createElement("div"); el.className="dl"; var h='<h3>'+esc(D.title)+'</h3>';
+    D.lines.forEach(function(ln){
+      if(ln[0]==="s") h+='<div class="turn s"><span class="who">售货员</span><span class="say">'+esc(ln[1].replace(/^售货员：/,""))+'</span></div>';
+      else { var g=gapIdx.length; gapIdx.push(ln[1]);
+        h+='<div class="turn m"><span class="who">玛丽</span><select class="dsel" id="d'+g+'"><option value="">　…… chọn câu ……　</option></select><div class="fb" id="df'+g+'"></div></div>'; }
+    });
+    el.innerHTML=h; box.appendChild(el);
+  });
+  document.querySelectorAll(".dsel").forEach(function(x){ x.onchange=syncDialog; });
+  syncDialog();
+}
+function syncDialog(){
+  var used={};
+  gapIdx.forEach(function(a,g){ var v=document.getElementById("d"+g).value; if(v!=="") used[v]=g; });
+  gapIdx.forEach(function(a,g){
+    var x=document.getElementById("d"+g), cur=x.value, h='<option value="">　…… chọn câu ……　</option>';
+    DL_OPTS.forEach(function(o,k){ if(!(String(k) in used) || used[k]===g) h+='<option value="'+k+'"'+(cur===String(k)?' selected':'')+'>'+L[k]+'. '+esc(o)+'</option>'; });
+    x.innerHTML=h; x.value=cur;
+  });
+  DL_OPTS.forEach(function(o,k){ document.getElementById("db"+k).classList.toggle("used", String(k) in used); });
+}
+
+// ===== HIỂN THỊ BÀI 4 =====
+var spotPick = [], spotFix = [];
+function renderSpot(){
+  var box=document.getElementById("spot"); box.innerHTML=""; spotPick=[]; spotFix=[];
+  SPOT.forEach(function(d,i){
+    spotPick[i]=-1; spotFix[i]=shuffle([0,1,2]);
+    var el=document.createElement("div"); el.className="item";
+    el.innerHTML='<span class="num">'+(i+1)+'</span><div class="sent">'+d.t.map(function(w,j){
+        return /^[，。！？]$/.test(w) ? '<span class="tok p">'+w+'</span>' : '<span class="tok" data-i="'+i+'" data-j="'+j+'">'+esc(w)+'</span>'; }).join("")+'</div>'+
+      '<div class="fix" id="fx'+i+'">✏️ Sửa “<b id="fw'+i+'"></b>” thành: <select id="fs'+i+'"><option value="">　___　</option>'+
+        spotFix[i].map(function(k){ return '<option value="'+k+'">'+esc(d.f[k])+'</option>'; }).join("")+'</select></div><div class="fb" id="sf'+i+'"></div>';
+    box.appendChild(el);
+  });
+  box.querySelectorAll(".tok[data-j]").forEach(function(t){ t.onclick=function(){
+    var i=+t.dataset.i, j=+t.dataset.j;
+    t.parentNode.querySelectorAll(".tok").forEach(function(x){ x.classList.remove("pick"); });
+    if(spotPick[i]===j){ spotPick[i]=-1; document.getElementById("fx"+i).classList.remove("show"); return; }
+    spotPick[i]=j; t.classList.add("pick");
+    document.getElementById("fw"+i).textContent=SPOT[i].t[j];
+    document.getElementById("fx"+i).classList.add("show");
+  }; });
+}
+
+// ===== HIỂN THỊ BÀI 5 =====
+var place = [], selThing = -1;
+function renderSort(){
+  place = THINGS.map(function(){ return -1; }); selThing=-1;
+  document.getElementById("baskets").innerHTML = BASKETS.map(function(b,k){
+    return '<div class="bk" data-k="'+k+'"><div class="bh">'+b[0]+'<small>'+esc(b[1])+'</small></div><div class="in" id="bk'+k+'"></div></div>'; }).join("")+
+    '<div class="fb sortfb" id="sortfb" style="grid-column:1/-1"></div>';
+  document.querySelectorAll(".bk").forEach(function(bk){ bk.onclick=function(e){
+    if(e.target.closest(".chipw")) return;
+    if(selThing<0) return; place[selThing]=+bk.dataset.k; selThing=-1; drawSort(); }; });
+  window._sortOrder = shuffle(THINGS.map(function(t,i){ return i; }));
+  drawSort();
+}
+function chip(i){ return '<span class="chipw'+(selThing===i?' sel':'')+'" data-t="'+i+'">'+esc(THINGS[i][0])+'<small>'+esc(THINGS[i][1])+'</small></span>'; }
+function drawSort(){
+  document.getElementById("pool").innerHTML = window._sortOrder.filter(function(i){ return place[i]<0; }).map(chip).join("");
+  BASKETS.forEach(function(b,k){ document.getElementById("bk"+k).innerHTML = window._sortOrder.filter(function(i){ return place[i]===k; }).map(chip).join(""); });
+  document.querySelectorAll(".bk").forEach(function(bk){ bk.classList.toggle("ready", selThing>=0); });
+  document.querySelectorAll(".chipw").forEach(function(c){ c.onclick=function(){
+    var i=+c.dataset.t;
+    if(place[i]>=0){ place[i]=-1; selThing=-1; }
+    else selThing = (selThing===i ? -1 : i);
+    drawSort(); }; });
+}
+
+function renderAll(){ renderMcq(); renderMoney(); renderDialog(); renderSpot(); renderSort(); }
+renderAll();
+
+// ===== THỜI GIAN, LỚP, HỌ TÊN =====
 var lastReport = "", submitCount = 0, t0 = 0, tick = null, elapsed = 0;
 function fmt(sec){ sec=Math.round(sec); return ("0"+Math.floor(sec/60)).slice(-2)+":"+("0"+sec%60).slice(-2); }
 function normClass(s){ var d=String(s).replace(/\D/g,""); return d ? "K"+d : ""; }
@@ -509,8 +461,8 @@ function normName(s){ return String(s).toUpperCase().replace(/\s+/g," ").trim();
 function startTimer(){ t0=Date.now(); clearInterval(tick); document.getElementById("timer").textContent="00:00";
   tick=setInterval(function(){ document.getElementById("timer").textContent=fmt((Date.now()-t0)/1000); },1000); }
 var SEND_URL = "";
-var NAMES = ["Trò chơi ghép từ","Điền từ","Ghép câu hỏi – trả lời","Sắp xếp câu","Dịch"];
-var ICONS = ["🎮","✏️","🔗","🔤","🌏"];
+var NAMES = ["Trắc nghiệm từ vựng","Giá tiền & giảm giá","Hội thoại mua sắm","Tìm & sửa lỗi sai","Giỏ lượng từ"];
+var ICONS = ["⚡","💴","🛍️","🔍","🧺"];
 
 document.getElementById("stClass").addEventListener("input",function(){ var v=normClass(this.value); this.value = v || ""; });
 document.getElementById("stName").addEventListener("blur",function(){ this.value=normName(this.value); });
@@ -519,78 +471,78 @@ document.getElementById("startBtn").onclick = function(){
   c.value=normClass(c.value); n.value=normName(n.value);
   if(!/^K\d{2,3}$/.test(c.value)){ alert("Bạn hãy ghi đúng tên lớp, VD: K67"); c.focus(); return; }
   if(!n.value.trim()){ alert("Bạn hãy ghi họ tên nhé."); n.focus(); return; }
-  c.value=normClass(c.value); c.readOnly=true; n.readOnly=true;
-  this.style.display="none";
+  c.readOnly=true; n.readOnly=true; this.style.display="none";
   document.getElementById("quiz").hidden=false; document.getElementById("timerBar").hidden=false;
   startTimer();
-  setTimeout(function(){ var g=document.querySelector(window.innerWidth>=620?".p1":".gtop"); window.scrollTo({top:g.getBoundingClientRect().top+window.scrollY-(window.innerWidth>=620?8:56),behavior:"smooth"}); },50);
+  setTimeout(function(){ var g=document.querySelector(".p1"); window.scrollTo({top:g.getBoundingClientRect().top+window.scrollY-56,behavior:"smooth"}); },50);
 };
 
+// ===== CHẤM =====
 document.getElementById("submitBtn").onclick = function(){
   var nm = document.getElementById("stName"), lop = document.getElementById("stClass").value;
   elapsed = Math.round((Date.now()-t0)/1000); clearInterval(tick);
   document.getElementById("timer").textContent = fmt(elapsed)+" ✔";
-  var P=[0,0,0,0,0], REV=[[],[],[],[],[]], REP=[[],[],[],[],[]], TOT=[WORDS.length,0,MATCH.length,ORDER.length,TRANS.length];
+  var P=[0,0,0,0,0], REV=[[],[],[],[],[]], REP=[[],[],[],[],[]], TOT=[MCQ.length,MONEY.length,gapIdx.length,SPOT.length,THINGS.length];
 
-  WORDS.forEach(function(w,i){
-    var e=G.err[i]||0, h=!!G.hinted[i], done=!!G.done[i], pt=(done&&!e&&!h)?1:0;
-    var tag = !done ? "Chưa ghép" : e ? "Sai "+e+" lần" : h ? "Dùng gợi ý" : "Đúng ngay";
-    P[0]+=pt; REV[0].push([w[0]+" ("+w[1]+")", done?(e?"Chọn sai "+e+" lần":h?"Dùng gợi ý":"Đúng ngay lần đầu"):"", w[2], pt]);
-    REP[0].push(w[0]+" → "+tag);
-  });
-  FILL.forEach(function(d,i){
-    var f=document.getElementById("ff"+i), got=0, vs=[], empty=true;
-    d.a.forEach(function(acc,k){ var v=document.getElementById("s"+i+"_"+k).value; vs.push(v||"___"); if(v) empty=false; TOT[1]++; if(acc.indexOf(v)>-1) got++; });
-    var tag = got===d.a.length?"Đúng":empty?"Chưa làm":got>0?"Đúng "+got+"/"+d.a.length:"Sai";
-    var key = esc(d.show)+' — '+esc(d.why);
-    if(empty) setFb(f,"empty",'⚪ <b>Bạn chưa chọn từ.</b>','👉 Đáp án: '+key);
-    else if(got===d.a.length) okBox(f,esc(d.why));
-    else { var em=[]; d.a.forEach(function(acc,k){ var v=document.getElementById("s"+i+"_"+k).value; if(v && acc.indexOf(v)<0){ em.push('❗ Ô '+(k+1)+': bạn chọn <b>'+esc(v)+'</b>'+((d.err&&d.err[v])?' — '+esc(d.err[v]):' — chưa phù hợp, cần <b>'+esc(acc[0])+'</b>.')); } });
-      setFb(f, got>0?"mid":"no", (got>0?'🙂 <b>Đúng '+got+'/'+d.a.length+' ô.</b>':'💪 <b>Chưa đúng.</b>')+(em.length?'<div class="why">'+em.join('<br>')+'</div>':''), '✏️ Đáp án: '+key); }
-    P[1]+=got; REV[1].push([d.t.map(function(x){return typeof x==="number"?"___":x;}).join(""), empty?"":vs.join(" / "), d.a.map(function(x){return x.join("/");}).join(" / "), got/d.a.length]);
-    REP[1].push((i+1)+". "+(empty?"(bỏ trống)":vs.join(" / "))+" → "+tag);
+  // Bài 1
+  MCQ.forEach(function(d,i){
+    var v=mcqPick[i], f=document.getElementById("mf"+i), pt=0, tag;
+    var opts=document.querySelectorAll('.opt[data-i="'+i+'"]');
+    opts.forEach(function(o){ var oi=+o.dataset.o; if(oi===0) o.classList.add("right"); else if(oi===v) o.classList.add("wrong"); });
+    if(v<0){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa chọn.</b>','👉 Đáp án: <b>'+esc(d.o[0])+'</b> — '+esc(d.why)); }
+    else if(v===0){ pt=1; tag="Đúng"; okBox(f,esc(d.why)); }
+    else { tag="Sai"; setFb(f,"no",'💪 <b>Chưa đúng.</b> Bạn chọn: '+esc(d.o[v]),'✏️ Đáp án: <b>'+esc(d.o[0])+'</b> — '+esc(d.why)); }
+    P[0]+=pt; REV[0].push([d.q, v<0?"":d.o[v], d.o[0], pt]); REP[0].push((i+1)+". "+d.q+" → "+(v<0?"(bỏ trống)":d.o[v])+" → "+tag);
   });
 
-  MATCH.forEach(function(d,i){
-    var v=document.getElementById("x"+i).value, f=document.getElementById("xf"+i), pt=0, tag;
-    var key = L[d.a]+'. '+esc(ANS[d.a])+' — '+esc(d.why);
-    if(v===""){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa chọn.</b>','👉 Đáp án: '+key); }
-    else if(+v===d.a){ pt=1; tag="Đúng"; okBox(f,esc(d.why)); }
-    else { tag="Sai"; setFb(f,"no",'💪 <b>Chưa đúng.</b><div class="why">❗ Bạn chọn '+L[+v]+'. '+esc(ANS[+v])+' — '+esc(ANS_WHY[+v]||"câu này không trả lời đúng ý của câu hỏi.")+'</div>','✏️ Đáp án: '+key); }
-    P[2]+=pt; REV[2].push([d.q, v===""?"":L[+v]+". "+ANS[+v], L[d.a]+". "+ANS[d.a], pt]);
-    REP[2].push((i+1)+". "+(v===""?"(bỏ trống)":L[+v]+". "+ANS[+v])+" → "+tag);
-  });
-
-  ORDER.forEach(function(d,i){
-    var s = picked[i].map(function(j){return d.t[j];}).join(""), f=document.getElementById("of"+i), pt=0, tag;
-    if(!s){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa ghép câu.</b>','👉 Đáp án: '+esc(d.show)); }
-    else if(picked[i].length<d.t.length){ tag="Chưa dùng hết từ"; setFb(f,"no",'💪 <b>Bạn chưa dùng hết các từ.</b>','✏️ Đáp án: '+esc(d.show)); }
-    else if(d.a.indexOf(s)>-1){ pt=1; tag="Đúng"; okBox(f,esc(d.show)); }
-    else { tag="Sai"; setFb(f,"no",'💪 <b>Chưa đúng thứ tự.</b><div class="why">❗ Bạn xếp: '+esc(s)+'<br>💡 '+esc(d.why)+'</div>','✏️ Đáp án: '+esc(d.show)); }
-    P[3]+=pt; REV[3].push([d.t.join(" / "), s, d.show, pt]);
-    REP[3].push((i+1)+". "+(s||"(bỏ trống)")+" → "+tag);
-  });
-
-  TRANS.forEach(function(d,i){
-    var raw = document.getElementById("t"+i).value.trim(), f=document.getElementById("tf"+i), pt=0, tag, r=0;
-    if(!raw){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa dịch câu này.</b>','👉 Đáp án: '+esc(d.show)); }
-    else if(d.d==="zh" && !hasHanzi(raw)){ tag="Không dùng chữ Hán"; setFb(f,"no",'✋ <b>Bạn cần gõ bằng chữ Hán nhé.</b>','👉 Đáp án: '+esc(d.show)); }
-    else if(d.d==="vi" && hasHanzi(raw)){ tag="Chưa dịch sang tiếng Việt"; setFb(f,"no",'✋ <b>Câu này cần dịch sang tiếng Việt.</b>','👉 Đáp án: '+esc(d.show)); }
+  // Bài 2
+  MONEY.forEach(function(d,i){
+    var raw=document.getElementById("m"+i).value.trim(), f=document.getElementById("nf"+i), v=parseMoney(raw), pt=0, tag;
+    var qtxt = d.p ? ITEMS2[d.p]+" "+d.p+"块，打"+d.z+"折" : d.q;
+    if(!raw){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa điền.</b>','👉 Đáp án: <b>'+d.a+'</b> — '+esc(d.why)); }
+    else if(isNaN(v)){ tag="Không phải số"; setFb(f,"no",'✋ <b>Bạn chỉ gõ số nhé</b> (VD: 46.5).','👉 Đáp án: <b>'+d.a+'</b> — '+esc(d.why)); }
+    else if(Math.abs(v-d.a)<0.001){ pt=1; tag="Đúng"; okBox(f,esc(d.why)); }
     else {
-      r = d.d==="zh" ? keyRatio(clean(raw),d.k) : keyRatio(" "+viNorm(raw)+" ",d.k);
-      var tt = d.d==="zh" ? clean(raw) : " "+viNorm(raw)+" ", notes=[];
-      (d.bad||[]).forEach(function(b){ if(tt.indexOf(b[0])>-1) notes.push(b[1]); });
-      d.k.forEach(function(g,gi){ if(!g.some(function(k){return tt.indexOf(k)>-1;}) && d.h) notes.push('🔸 '+d.h[gi]); });
-      if(notes.length && r>=0.99) r=0.75;
-      var nh = notes.length ? '<div class="why">'+notes.map(esc).join('<br>')+'</div>' : '';
-      if(r>=0.99){ pt=1; tag="Đúng"; okBox(f,'📖 Đáp án mẫu: '+esc(d.show)); }
-      else if(r>=0.5){ pt=0.5; tag="Gần đúng"; setFb(f,"mid",'🙂 <b>Gần đúng, còn thiếu hoặc sai một phần:</b>'+nh,'✏️ Đáp án: '+esc(d.show)); }
-      else { tag="Chưa đúng"; setFb(f,"no",'💪 <b>Chưa đúng. Bạn cần lưu ý:</b>'+nh,'✏️ Đáp án: '+esc(d.show)); }
-      if(notes.length) tag += " ("+notes.join(" | ").replace(/[❗🔸]\s?/g,"")+")";
+      tag="Sai"; var note="";
+      if(d.p && Math.abs(v-(d.p-d.a))<0.001) note='<div class="why">❗ Bạn tính ra số tiền được GIẢM. 打'+esc(d.z)+'折 nghĩa là phải TRẢ '+({"九":9,"八":8,"七":7,"五":5}[d.z])+'0% giá.</div>';
+      setFb(f,"no",'💪 <b>Chưa đúng.</b> Bạn ghi: '+esc(raw)+note,'✏️ Đáp án: <b>'+d.a+'</b> — '+esc(d.why));
     }
-    P[4]+=pt; REV[4].push([d.q, raw, d.show, pt]);
-    REP[4].push((i+1)+". "+d.q+"\n   Bạn viết: "+(raw||"(bỏ trống)")+" → "+tag);
+    P[1]+=pt; REV[1].push([qtxt, raw, String(d.a), pt]); REP[1].push((i+1)+". "+qtxt+" → "+(raw||"(bỏ trống)")+" → "+tag);
   });
+
+  // Bài 3
+  gapIdx.forEach(function(a,g){
+    var v=document.getElementById("d"+g).value, f=document.getElementById("df"+g), pt=0, tag;
+    var key=L[a]+'. '+esc(DL_OPTS[a])+' — '+esc(DL_GAP_WHY[g]);
+    if(v===""){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa chọn.</b>','👉 Đáp án: '+key); }
+    else if(+v===a){ pt=1; tag="Đúng"; okBox(f,esc(DL_GAP_WHY[g])); }
+    else { tag="Sai"; setFb(f,"no",'💪 <b>Chưa đúng.</b>'+(DL_WHY[+v]?'<div class="why">❗ '+esc(DL_WHY[+v])+'</div>':'<div class="why">❗ Bạn chọn: '+esc(DL_OPTS[+v])+' — chưa khớp với câu của người bán.</div>'),'✏️ Đáp án: '+key); }
+    P[2]+=pt; REV[2].push(["Lượt nói "+(g+1)+" của 玛丽", v===""?"":DL_OPTS[+v], DL_OPTS[a], pt]); REP[2].push((g+1)+". "+(v===""?"(bỏ trống)":DL_OPTS[+v])+" → "+tag);
+  });
+
+  // Bài 4
+  SPOT.forEach(function(d,i){
+    var j=spotPick[i], fx=document.getElementById("fs"+i).value, f=document.getElementById("sf"+i), pt=0, tag;
+    var key=esc(d.show)+' — '+esc(d.why);
+    if(j<0){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa chọn từ sai.</b>','👉 Sai ở “<b>'+esc(d.t[d.w])+'</b>” → sửa: '+key); }
+    else if(j!==d.w){ tag="Chọn sai chỗ"; setFb(f,"no",'💪 <b>Chỗ sai không phải “'+esc(d.t[j])+'”.</b>','✏️ Sai ở “<b>'+esc(d.t[d.w])+'</b>” → sửa: '+key); }
+    else if(fx==="0"){ pt=1; tag="Đúng"; okBox(f,key); }
+    else { pt=0.5; tag=fx===""?"Tìm đúng, chưa sửa":"Tìm đúng, sửa sai"; setFb(f,"mid",'🙂 <b>Tìm đúng chỗ sai!</b> '+(fx===""?'Nhưng bạn chưa chọn từ sửa.':'Nhưng sửa thành “'+esc(d.f[+fx])+'” chưa đúng.'),'✏️ Đáp án: '+key); }
+    P[3]+=pt; REV[3].push([d.t.join(""), j<0?"":(d.t[j]+(fx!==""?" → "+d.f[+fx]:"")), d.t[d.w]+" → "+d.f[0], pt]); REP[3].push((i+1)+". "+d.t.join("")+" → "+tag);
+  });
+
+  // Bài 5
+  var wrongs=[];
+  THINGS.forEach(function(t,i){
+    var k=place[i], pt = k===t[2] ? 1 : 0;
+    var c=document.querySelector('.chipw[data-t="'+i+'"]'); if(c) c.classList.add(pt?"right":"wrong");
+    if(!pt) wrongs.push(t[0]+" → "+BASKETS[t[2]][0]+(k>=0?" (bạn xếp vào "+BASKETS[k][0]+")":" (chưa xếp)"));
+    P[4]+=pt; REV[4].push([t[0]+" ("+t[1]+")", k<0?"":BASKETS[k][0], BASKETS[t[2]][0], pt]);
+    REP[4].push(t[0]+" → "+(k<0?"(chưa xếp)":BASKETS[k][0])+(pt?" ✓":" ✗"));
+  });
+  var sf=document.getElementById("sortfb");
+  if(!wrongs.length) okBox(sf,"Bạn xếp đúng tất cả 12 món!");
+  else setFb(sf,"no",'💪 <b>Có '+wrongs.length+' món chưa đúng:</b><div class="why">'+wrongs.map(esc).join("<br>")+'</div>','💡 件: quần áo · 双: đồ đi theo đôi · 本: sách, vở · 张: vật mỏng, phẳng (tem, bàn) · 个: dùng chung');
 
   var r1 = function(x){ return Math.round(x*10)/10; };
   var S = P.map(function(p,k){ return p/TOT[k]*PTS[k]; });
@@ -609,8 +561,8 @@ document.getElementById("submitBtn").onclick = function(){
   }
   document.getElementById("review").innerHTML = S.map(function(s,k){
     return '<h3>'+ICONS[k]+' Bài '+(k+1)+' – '+NAMES[k]+' ('+r1(s)+'/'+PTS[k]+')</h3>'+tbl(REV[k]); }).join("")+
-    '<p class="sub" style="margin-top:8px">✅ đúng · 🟡 gần đúng (½ điểm) · ❌ chưa đúng</p>';
-  document.querySelectorAll("#quiz textarea").forEach(function(t){ t.readOnly=true; });
+    '<p class="sub" style="margin-top:8px">✅ đúng · 🟡 đúng một nửa · ❌ chưa đúng</p>';
+  document.querySelectorAll("#quiz input").forEach(function(t){ t.readOnly=true; });
   document.querySelectorAll("#quiz select").forEach(function(t){ t.disabled=true; });
   document.body.classList.add("locked");
   var sb=document.getElementById("submitBtn"); sb.disabled=true; sb.textContent="✅ Đã nộp bài";
@@ -643,16 +595,10 @@ document.getElementById("copyBtn").onclick = function(){
 };
 
 document.getElementById("retryBtn").onclick = function(){
-  document.querySelectorAll("#quiz textarea").forEach(function(t){ t.readOnly=false; });
-  document.querySelectorAll("#quiz select").forEach(function(t){ t.disabled=false; t.value=""; });
   document.body.classList.remove("locked");
   var sb=document.getElementById("submitBtn"); sb.disabled=false; sb.textContent="✅ Nộp bài & chấm điểm";
   document.getElementById("review").innerHTML="";
-  gInit();
-  syncMatch(); syncFill();
-  ORDER.forEach(function(d,i){ document.getElementById("cl"+i).click(); });
-  document.querySelectorAll("textarea").forEach(function(t){ t.value=""; });
-  document.querySelectorAll(".fb").forEach(function(f){ f.className="fb"; });
+  renderAll();
   document.getElementById("result").style.display="none";
   startTimer();
   window.scrollTo({top:0,behavior:"smooth"});
