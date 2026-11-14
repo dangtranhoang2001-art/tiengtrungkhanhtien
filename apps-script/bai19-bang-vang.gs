@@ -6,7 +6,7 @@
  *   - Người có quyền truy cập: Bất kỳ ai
  */
 var HEADERS = ["Thời gian nộp","Lớp","Học sinh","Điểm (/100)","Thời gian làm (giây)","Thời gian làm",
-  "Bài 1 Trắc nghiệm từ vựng (/20)","Bài 2 Giá tiền & giảm giá (/20)","Bài 3 Hội thoại (/20)","Bài 4 Sửa câu sai (/20)","Bài 5 Giỏ lượng từ (/20)",
+  "Bài 1 Trắc nghiệm từ vựng (/16)","Bài 2 Giá tiền & giảm giá (/16)","Bài 3 Hội thoại (/16)","Bài 4 Sửa câu sai (/16)","Bài 5 Giỏ lượng từ (/16)","Bài 6 Dịch đoạn văn (/20)",
   "Lần nộp","Chi tiết bài làm"];
 
 function sheet_() {
@@ -15,6 +15,8 @@ function sheet_() {
     if (sh.getLastRow() > 0) sh.insertRowBefore(1);
     sh.getRange(1,1,1,HEADERS.length).setValues([HEADERS]).setFontWeight("bold").setBackground("#2f5d62").setFontColor("#ffffff");
     sh.setFrozenRows(1);
+  } else if (sh.getLastColumn() < HEADERS.length) {
+    sh.getRange(1,1,1,HEADERS.length).setValues([HEADERS]).setFontWeight("bold").setBackground("#2f5d62").setFontColor("#ffffff");
   }
   return sh;
 }
@@ -26,7 +28,7 @@ function doPost(e) {
   try {
     var p = e.parameter, sh = sheet_();
     sh.appendRow([new Date(), p.lop || "", p.hoc_sinh || "", +p.diem || 0, +p.giay || 0, mmss_(p.giay),
-      p.b1 || "", p.b2 || "", p.b3 || "", p.b4 || "", p.b5 || "", +p.lan_nop || 1, p.chi_tiet || ""]);
+      p.b1 || "", p.b2 || "", p.b3 || "", p.b4 || "", p.b5 || "", p.b6 || "", +p.lan_nop || 1, p.chi_tiet || ""]);
     return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
   } finally { lock.releaseLock(); }
 }

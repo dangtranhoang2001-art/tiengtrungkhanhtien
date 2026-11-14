@@ -83,6 +83,8 @@ select:disabled{opacity:1;background:#f6f6f4}
 .p4 h2{color:var(--green)} .p5 h2{color:var(--pink)}
 .p4 .item{border-left-color:var(--green);background:#eff6f1}
 .p5 .item{border-left-color:var(--pink);background:#f8f0f2}
+.p6 h2{color:var(--head)} .p6 .item{border-left-color:var(--head);background:#eef4f4}
+.p6 .ptitle{font-weight:700;color:var(--head);margin:14px 0 2px}
 .pt{font-size:.9rem;color:var(--muted);font-weight:400}
 .ansbank{background:#fff;border:2px dashed var(--purple);border-radius:12px;padding:10px 14px;margin:6px 0;font-size:1.2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:4px 16px}
 .ansbank b{color:var(--purple)}
@@ -211,36 +213,44 @@ select:disabled{opacity:1;background:#f6f6f4}
 <div id="quiz" hidden>
 
 <div class="box p1">
-  <h2>⚡ Bài 1. Trắc nghiệm nhanh từ vựng <span class="pt">(20 điểm)</span></h2>
+  <h2>⚡ Bài 1. Trắc nghiệm nhanh từ vựng <span class="pt">(16 điểm)</span></h2>
   <p class="note">Chọn đáp án đúng. Có 3 kiểu câu: <b>nghĩa của từ</b>, <b>chọn chữ Hán</b>, <b>chọn cách đọc đúng</b> (chú ý thanh điệu!).</p>
   <div id="mcq"></div>
 </div>
 
 <div class="box p2">
-  <h2>💴 Bài 2. Giá tiền &amp; giảm giá <span class="pt">(20 điểm)</span></h2>
+  <h2>💴 Bài 2. Giá tiền &amp; giảm giá <span class="pt">(16 điểm)</span></h2>
   <p class="note">Câu 1–4: đọc giá bằng chữ Hán → <b>viết thành số</b> (VD: 46.5). Câu 5–8: tính <b>số tiền phải trả</b> sau khi giảm giá. Chỉ gõ số.</p>
   <div class="tip">💡 打八折 = trả <b>80%</b> giá (giảm 20%) · 1 块 = 10 毛</div>
   <div id="money"></div>
 </div>
 
 <div class="box p3">
-  <h2>🛍️ Bài 3. Đi mua sắm – hoàn thành hội thoại <span class="pt">(20 điểm)</span></h2>
+  <h2>🛍️ Bài 3. Đi mua sắm – hoàn thành hội thoại <span class="pt">(16 điểm)</span></h2>
   <p class="note">Bạn là <b>玛丽</b>. Chọn câu phù hợp cho mỗi lượt nói của 玛丽. Có 10 câu cho 8 chỗ → <b>thừa 2 câu</b> (là câu sai ngữ pháp!). Câu đã chọn sẽ <b>ẩn đi</b>.</p>
   <div class="ansbank" id="dlbank"></div>
   <div id="dialog"></div>
 </div>
 
 <div class="box p4">
-  <h2>🔍 Bài 4. Sửa câu sai <span class="pt">(20 điểm)</span></h2>
+  <h2>🔍 Bài 4. Sửa câu sai <span class="pt">(16 điểm)</span></h2>
   <p class="note">Mỗi câu có <b>1 chỗ sai</b>. Gõ lại <b>cả câu đúng</b> bằng chữ Hán (dấu câu không ảnh hưởng điểm). Sửa đúng chỗ sai nhưng câu còn thiếu/thừa chữ được ½ điểm.</p>
   <div id="spot"></div>
 </div>
 
 <div class="box p5">
-  <h2>🧺 Bài 5. Xếp đồ vào giỏ lượng từ <span class="pt">(20 điểm)</span></h2>
+  <h2>🧺 Bài 5. Xếp đồ vào giỏ lượng từ <span class="pt">(16 điểm)</span></h2>
   <p class="note">Bấm 1 món đồ, rồi bấm vào <b>giỏ lượng từ</b> phù hợp. Bấm vào món trong giỏ để lấy ra.</p>
   <div class="pool" id="pool"></div>
   <div class="baskets" id="baskets"></div>
+</div>
+
+<div class="box p6">
+  <h2>📖 Bài 6. Dịch đoạn văn sang tiếng Việt <span class="pt">(20 điểm)</span></h2>
+  <p class="note">Đọc cả đoạn văn trước, rồi dịch <b>từng câu</b> sang tiếng Việt (gõ có dấu hoặc không dấu đều được). Dịch đủ ý được trọn điểm câu đó, đúng một nửa số ý được ½ điểm.</p>
+  <div class="passage" id="passage"></div>
+  <div class="gloss" id="pgloss"></div>
+  <div id="ptrans"></div>
 </div>
 
 <div class="toolbar" style="justify-content:center;margin-top:18px">
@@ -267,7 +277,7 @@ select:disabled{opacity:1;background:#f6f6f4}
   <div id="bxhBody"></div>
 </div>
 
-<footer>第十九课 · 可以试试吗 · 汉语加油站 · <span style="opacity:.6">bản 14/11d</span></footer>
+<footer>第十九课 · 可以试试吗 · 汉语加油站 · <span style="opacity:.6">bản 14/11e</span></footer>
 </div>
 
 <script>
@@ -338,7 +348,24 @@ var SPOT = [
 var BASKETS = [["件","jiàn · áo, quần áo"],["双","shuāng · đồ đi theo đôi"],["本","běn · sách, vở"],["张","zhāng · vật mỏng, phẳng"],["个","gè · dùng chung"]];
 var THINGS = [["羽绒服","yǔróngfú",0],["毛衣","máoyī",0],["衣服","yīfu",0],["鞋","xié",1],["词典","cídiǎn",2],["杂志","zázhì",2],["书","shū",2],["邮票","yóupiào",3],["桌子","zhuōzi",3],["箱子","xiāngzi",4],["苹果","píngguǒ",4],["面包","miànbāo",4]];
 
-var PTS = [20,20,20,20,20];
+// ===== BÀI 6: DỊCH ĐOẠN VĂN (⑦ 成段表达 · 去商店买衣服) =====
+// k: các ý cần có (so khớp không dấu); đủ ý = 1 điểm, được ≥ ½ số ý = ½ điểm
+var PASS = [
+ {p:1, q:"听说这里的冬天很冷，我还没有羽绒服呢，想去买一件。", show:"Nghe nói mùa đông ở đây rất lạnh, tôi vẫn chưa có áo lông vũ, muốn đi mua một chiếc.", k:[["nghe noi"],["mua dong"],["lanh"],["chua co"],["ao long vu","ao phao","ao long"]], h:["听说 = nghe nói","冬天 = mùa đông","冷 = lạnh","还没有 = vẫn chưa có","羽绒服 = áo lông vũ"]},
+ {p:1, q:"麦克说，有一家商店，那里的衣服又好又便宜。我说，明天我们一起去吧。", show:"Mike nói có một cửa hàng, quần áo ở đó vừa tốt vừa rẻ. Tôi nói, ngày mai chúng ta cùng đi nhé.", k:[["mike","mai khac","mac khac"],["cua hang","tiem","shop"],["vua"],["re"],["ngay mai"]], h:["麦克 = Mike","商店 = cửa hàng","又好又便宜 = vừa tốt vừa rẻ","便宜 = rẻ","明天 = ngày mai"]},
+ {p:1, q:"麦克说：“对不起，明天我一个朋友来中国旅行，我要去机场接他，不能跟你一起去。”", show:"Mike nói: “Xin lỗi, ngày mai một người bạn của tôi đến Trung Quốc du lịch, tôi phải ra sân bay đón anh ấy, không thể đi cùng bạn được.”", k:[["xin loi"],["trung quoc"],["du lich"],["san bay"],["don"],["khong the","khong di duoc","khong di cung duoc","khong di voi"]], h:["对不起 = xin lỗi","中国 = Trung Quốc","旅行 = du lịch","机场 = sân bay","接 = đón","不能 = không thể"]},
+ {p:1, q:"我说：“没关系。我可以一个人去。”", show:"Tôi nói: “Không sao. Tôi có thể đi một mình.”", k:[["khong sao","khong co gi","khong van de","khong sao dau"],["mot minh"]], h:["没关系 = không sao","一个人去 = đi một mình"]},
+ {p:1, q:"玛丽听说我要去买衣服，说：“我也想买羽绒服。我跟你一起去，好吗？”", show:"Mary nghe nói tôi định đi mua quần áo, nói: “Mình cũng muốn mua áo lông vũ. Mình đi cùng bạn nhé?”", k:[["mary","ma li","mali"],["nghe noi"],["quan ao"],["cung muon"],["ao long vu","ao phao","ao long"]], h:["玛丽 = Mary","听说 = nghe nói","衣服 = quần áo","也想 = cũng muốn","羽绒服 = áo lông vũ"]},
+ {p:1, q:"我说：“当然好啊！我正想找人跟我一起去呢。”", show:"Tôi nói: “Tất nhiên là được rồi! Mình đang muốn tìm người đi cùng đây.”", k:[["tat nhien","duong nhien","di nhien"],["dang"],["tim"]], h:["当然 = tất nhiên","正想…呢 = đang muốn…","找人 = tìm người"]},
+ {p:2, q:"我问玛丽：“明天我们几点出发？”", show:"Tôi hỏi Mary: “Ngày mai mấy giờ chúng ta xuất phát?”", k:[["hoi"],["ngay mai"],["may gio"],["xuat phat","khoi hanh","di"]], h:["问 = hỏi","明天 = ngày mai","几点 = mấy giờ","出发 = xuất phát"]},
+ {p:2, q:"玛丽说：“明天是星期天，坐车的人一定很多，我们早点儿去吧。八点走怎么样？”", show:"Mary nói: “Ngày mai là chủ nhật, người đi xe chắc chắn rất đông, chúng ta đi sớm một chút nhé. Tám giờ đi thế nào?”", k:[["chu nhat"],["chac","nhat dinh"],["dong","nhieu"],["som"],["8 gio","tam gio"]], h:["星期天 = chủ nhật","一定 = chắc chắn","很多 = rất đông, rất nhiều","早点儿 = sớm một chút","八点 = 8 giờ"]},
+ {p:2, q:"我说：“好吧。那个商店离学校不太远，我们不用坐车去，可以骑车去。”", show:"Tôi nói: “Được thôi. Cửa hàng đó cách trường không xa lắm, chúng ta không cần đi xe buýt, có thể đạp xe đi.”", k:[["cach"],["truong"],["khong xa","khong qua xa"],["khong can"],["dap xe","xe dap"]], h:["离 = cách","学校 = trường học","不太远 = không xa lắm","不用 = không cần","骑车 = đạp xe"]},
+ {p:2, q:"“行！”玛丽说，“听说有一个展览很好看，我很想去看看，你想不想看？”", show:"“Được!” Mary nói, “Nghe nói có một cuộc triển lãm rất hay, mình rất muốn đi xem, bạn có muốn xem không?”", k:[["nghe noi"],["trien lam"],["hay","dep"],["xem"]], h:["听说 = nghe nói","展览 = triển lãm","好看 = hay, đẹp (để xem)","看看 = xem, xem thử"]},
+ {p:2, q:"我说：“我也很想去看。我们一起去吧。”玛丽说：“好，我跟你一起去买衣服，你跟我一起去看展览。”", show:"Tôi nói: “Mình cũng rất muốn đi xem. Chúng ta cùng đi nhé.” Mary nói: “Được, mình đi mua quần áo cùng bạn, bạn đi xem triển lãm cùng mình.”", k:[["cung rat muon","cung muon"],["mua quan ao","mua ao"],["xem trien lam","trien lam"]], h:["也很想 = cũng rất muốn","买衣服 = mua quần áo","看展览 = xem triển lãm"]}
+];
+var PASS_GLOSS = "听说 tīngshuō nghe nói · 冬天 dōngtiān mùa đông · 冷 lěng lạnh · 机场 jīchǎng sân bay · 接 jiē đón · 能 néng có thể · 出发 chūfā xuất phát · 离 lí cách · 远 yuǎn xa · 展览 zhǎnlǎn triển lãm";
+
+var PTS = [16,16,16,16,16,20];
 
 // ===== TIỆN ÍCH =====
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
@@ -440,7 +467,21 @@ function drawSort(){
     drawSort(); }; });
 }
 
-function renderAll(){ renderMcq(); renderMoney(); renderDialog(); renderSpot(); renderSort(); }
+function viNorm(s){ return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim(); }
+// ===== HIỂN THỊ BÀI 6 =====
+function renderPass(){
+  var paras=[1,2].map(function(n){ return '<p>'+PASS.filter(function(d){return d.p===n;}).map(function(d){ return esc(d.q); }).join("")+'</p>'; });
+  document.getElementById("passage").innerHTML='<div style="text-align:center;font-weight:700;text-indent:0">去商店买衣服</div>'+paras.join("");
+  document.getElementById("pgloss").textContent="📌 Từ mới: "+PASS_GLOSS;
+  var box=document.getElementById("ptrans"), h="";
+  PASS.forEach(function(d,i){
+    if(i===0 || PASS[i-1].p!==d.p) h+='<div class="ptitle">Đoạn '+d.p+'</div>';
+    h+='<div class="item"><span class="num">'+(i+1)+'</span><span class="hz">'+esc(d.q)+'</span><textarea id="pt'+i+'" placeholder="Viết câu tiếng Việt…"></textarea><div class="fb" id="pf'+i+'"></div></div>';
+  });
+  box.innerHTML=h;
+}
+
+function renderAll(){ renderMcq(); renderMoney(); renderDialog(); renderSpot(); renderSort(); renderPass(); }
 renderAll();
 
 // ===== THỜI GIAN, LỚP, HỌ TÊN =====
@@ -451,8 +492,8 @@ function normName(s){ return String(s).toUpperCase().replace(/\s+/g," ").trim();
 function startTimer(){ t0=Date.now(); clearInterval(tick); document.getElementById("timer").textContent="00:00";
   tick=setInterval(function(){ document.getElementById("timer").textContent=fmt((Date.now()-t0)/1000); },1000); }
 var SEND_URL = "https://script.google.com/macros/s/AKfycbyLXVaw9ZLbdIw4P6lvbdegzaRCOeQonC_-MH4pWdI3JlNcOjSuCDLaiU1zvAogT3wWeQ/exec";
-var NAMES = ["Trắc nghiệm từ vựng","Giá tiền & giảm giá","Hội thoại mua sắm","Sửa câu sai","Giỏ lượng từ"];
-var ICONS = ["⚡","💴","🛍️","🔍","🧺"];
+var NAMES = ["Trắc nghiệm từ vựng","Giá tiền & giảm giá","Hội thoại mua sắm","Sửa câu sai","Giỏ lượng từ","Dịch đoạn văn"];
+var ICONS = ["⚡","💴","🛍️","🔍","🧺","📖"];
 
 document.getElementById("stClass").addEventListener("input",function(){ var v=normClass(this.value); this.value = v || ""; });
 document.getElementById("stName").addEventListener("blur",function(){ this.value=normName(this.value); });
@@ -472,7 +513,7 @@ document.getElementById("submitBtn").onclick = function(){
   var nm = document.getElementById("stName"), lop = document.getElementById("stClass").value;
   elapsed = Math.round((Date.now()-t0)/1000); clearInterval(tick);
   document.getElementById("timer").textContent = fmt(elapsed)+" ✔";
-  var P=[0,0,0,0,0], REV=[[],[],[],[],[]], REP=[[],[],[],[],[]], TOT=[MCQ.length,MONEY.length,gapIdx.length,SPOT.length,THINGS.length];
+  var P=[0,0,0,0,0,0], REV=[[],[],[],[],[],[]], REP=[[],[],[],[],[],[]], TOT=[MCQ.length,MONEY.length,gapIdx.length,SPOT.length,THINGS.length,PASS.length];
 
   // Bài 1
   MCQ.forEach(function(d,i){
@@ -536,6 +577,22 @@ document.getElementById("submitBtn").onclick = function(){
   if(!wrongs.length) okBox(sf,"Bạn xếp đúng tất cả 12 món!");
   else setFb(sf,"no",'💪 <b>Có '+wrongs.length+' món chưa đúng:</b><div class="why">'+wrongs.map(esc).join("<br>")+'</div>','💡 件: quần áo · 双: đồ đi theo đôi · 本: sách, vở · 张: vật mỏng, phẳng (tem, bàn) · 个: dùng chung');
 
+  // Bài 6
+  PASS.forEach(function(d,i){
+    var raw=document.getElementById("pt"+i).value.trim(), f=document.getElementById("pf"+i), pt=0, tag;
+    if(!raw){ tag="Chưa làm"; setFb(f,"empty",'⚪ <b>Bạn chưa dịch câu này.</b>','👉 Bản dịch mẫu: '+esc(d.show)); }
+    else if(/[一-鿿]/.test(raw)){ tag="Chưa dịch sang tiếng Việt"; setFb(f,"no",'✋ <b>Câu này cần dịch sang tiếng Việt.</b>','👉 Bản dịch mẫu: '+esc(d.show)); }
+    else {
+      var tt=" "+viNorm(raw)+" ", hit=0, miss=[];
+      d.k.forEach(function(g,gi){ if(g.some(function(k){ return tt.indexOf(k)>-1; })) hit++; else miss.push("🔸 "+d.h[gi]); });
+      var r=hit/d.k.length, nh=miss.length?'<div class="why">Còn thiếu / sai ý:<br>'+miss.map(esc).join("<br>")+'</div>':'';
+      if(r>=0.99){ pt=1; tag="Đúng"; okBox(f,'📖 Bản dịch mẫu: '+esc(d.show)); }
+      else if(r>=0.5){ pt=0.5; tag="Gần đúng"; setFb(f,"mid",'🙂 <b>Gần đúng.</b>'+nh,'✏️ Bản dịch mẫu: '+esc(d.show)); }
+      else { tag="Chưa đúng"; setFb(f,"no",'💪 <b>Chưa đúng.</b>'+nh,'✏️ Bản dịch mẫu: '+esc(d.show)); }
+    }
+    P[5]+=pt; REV[5].push([d.q, raw, d.show, pt]); REP[5].push((i+1)+". "+d.q+"\n   Bạn dịch: "+(raw||"(bỏ trống)")+" → "+tag);
+  });
+
   var r1 = function(x){ return Math.round(x*10)/10; };
   var S = P.map(function(p,k){ return p/TOT[k]*PTS[k]; });
   var score = r1(S.reduce(function(a,b){return a+b;},0));
@@ -572,7 +629,7 @@ document.getElementById("submitBtn").onclick = function(){
   var body = new URLSearchParams({
     "bai":"第十九课 · 可以试试吗 (BTVN)", "lop":lop, "giay":String(elapsed), "hoc_sinh":name, "diem":String(score),
     "diem_dich":short, "diem_cau_hoi":"",
-    "b1":r1(S[0])+"/"+PTS[0], "b2":r1(S[1])+"/"+PTS[1], "b3":r1(S[2])+"/"+PTS[2], "b4":r1(S[3])+"/"+PTS[3], "b5":r1(S[4])+"/"+PTS[4],
+    "b1":r1(S[0])+"/"+PTS[0], "b2":r1(S[1])+"/"+PTS[1], "b3":r1(S[2])+"/"+PTS[2], "b4":r1(S[3])+"/"+PTS[3], "b5":r1(S[4])+"/"+PTS[4], "b6":r1(S[5])+"/"+PTS[5],
     "lan_nop":String(submitCount), "chi_tiet":lastReport
   });
   fetch(SEND_URL,{method:"POST",mode:"no-cors",body:body})
