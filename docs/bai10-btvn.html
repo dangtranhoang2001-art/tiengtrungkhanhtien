@@ -64,12 +64,12 @@ select:disabled{opacity:1;background:#f4f2ee;color:var(--ink)}
 .kind{font-size:.8rem;color:var(--mute);border:1px solid var(--rule);border-radius:3px;padding:0 6px;margin-left:6px;vertical-align:middle}
 .q input.t{margin-top:6px;font-size:1.15rem}
 .q input.num{max-width:260px;letter-spacing:2px;font-variant-numeric:tabular-nums}
+.addr{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:flex-end;margin-top:4px}.addr input.num{width:80px;text-align:center}
 .q input.hz{font-family:"Noto Serif SC",serif;font-size:1.25rem}
 .wrong{text-decoration:underline wavy #c46b6b;text-underline-offset:5px}
 /* 4. 阅读 */
 .text{border:1px solid var(--rule);padding:12px 16px;margin:8px 0 6px;background:var(--soft)}
-.text p{margin:3px 0;font-family:"Noto Serif SC",serif;font-size:1.22rem;display:grid;grid-template-columns:3.6em 1fr}
-.text p b{color:var(--navy);font-weight:700}
+.text p{margin:0;font-family:"Noto Serif SC",serif;font-size:1.22rem;line-height:2;text-indent:2em;text-align:justify}
 .tf{display:inline-flex;gap:6px;margin-left:8px;vertical-align:middle}
 .tf button{border:1px solid #9aa3ad;background:#fff;border-radius:3px;padding:3px 12px;min-height:38px;font-size:.95rem}
 .tf button.sel{background:var(--navy);color:#fff;border-color:var(--navy)}
@@ -97,7 +97,7 @@ tr.me td{background:#eef6f1;font-weight:600}
 .empty{text-align:center;color:var(--mute);padding:12px}
 footer{text-align:center;color:var(--mute);font-size:.8rem;margin:20px 0 8px}
 [hidden]{display:none!important}
-@media(max-width:600px){.sheet{padding:16px}.info{grid-template-columns:110px 1fr}.cols{grid-template-columns:1fr}.tab .v{display:none}.toc li{grid-template-columns:1fr;gap:0}.head h1{font-size:1.35rem}.text p{grid-template-columns:3.2em 1fr;font-size:1.12rem}}
+@media(max-width:600px){.sheet{padding:16px}.info{grid-template-columns:110px 1fr}.cols{grid-template-columns:1fr}.tab .v{display:none}.toc li{grid-template-columns:1fr;gap:0}.head h1{font-size:1.35rem}.text p{font-size:1.12rem}}
 </style>
 </head>
 <body>
@@ -108,7 +108,7 @@ footer{text-align:center;color:var(--mute);font-size:.8rem;margin:20px 0 8px}
     <div style="flex:1">
       <div class="book">《汉语教程》第一册（上）· Bài tập về nhà</div>
       <h1>第十课　他住哪儿<span>Bài 10</span></h1>
-      <div class="tch">汉语加油站 · GV Đặng Hoàng</div>
+      <div class="tch">汉语加油站</div>
     </div>
     <img alt="汉语加油站" src="data:image/jpeg;base64,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">
   </div>
@@ -120,7 +120,7 @@ footer{text-align:center;color:var(--mute);font-size:.8rem;margin:20px 0 8px}
     <li><b>练习一　连线</b>Nối từ với nghĩa — 2 điểm</li>
     <li><b>练习二　读拼音写数字</b>Đọc phiên âm, viết số — 2 điểm</li>
     <li><b>练习三　改错句</b>Sửa câu sai — 2 điểm</li>
-    <li><b>练习四　阅读判断</b>Đọc hội thoại, phán đoán đúng sai — 2 điểm</li>
+    <li><b>练习四　阅读判断</b>Đọc đoạn văn, phán đoán đúng sai — 2 điểm</li>
     <li><b>练习五　就画线部分提问</b>Đặt câu hỏi cho phần gạch chân — 2 điểm</li>
   </ol>
   <p class="note">Tổng điểm: 10. Thời gian được tính từ lúc bấm “Bắt đầu”. Bảng vàng xếp theo điểm, bằng điểm xét thời gian; chỉ tính lần nộp đầu tiên.</p>
@@ -136,14 +136,14 @@ footer{text-align:center;color:var(--mute);font-size:.8rem;margin:20px 0 8px}
 
   <section class="sheet part">
     <div class="ph"><span class="pt">2 điểm</span><h2>练习一　连线<small>Nối từ với nghĩa</small></h2></div>
-    <div class="req">Chọn chữ cái (A–H) ứng với nghĩa đúng của mỗi từ. Mỗi chữ cái chỉ dùng một lần.</div>
+    <div class="req">Chọn chữ cái (A–J) ứng với nghĩa đúng của mỗi từ. Các từ có nghĩa gần nhau, cần phân biệt kỹ. Mỗi chữ cái chỉ dùng một lần.</div>
     <div class="cols"><div id="mL"></div><div id="mR"></div></div>
     <div class="fb" id="mfb"></div>
   </section>
 
   <section class="sheet part">
     <div class="ph"><span class="pt">2 điểm</span><h2>练习二　读拼音写数字<small>Đọc phiên âm, viết số</small></h2></div>
-    <div class="req">Đọc to phiên âm rồi viết lại bằng chữ số. Lưu ý: trong dãy số, <i>yāo</i> = 1, <i>líng</i> = 0.</div>
+    <div class="req">Đọc to phiên âm rồi viết lại bằng chữ số. Lưu ý: trong dãy số, <i>yāo</i> = 1, <i>líng</i> = 0; số toà nhà đọc như số đếm (<i>shíliù lóu</i> = toà 16), còn số phòng đọc từng chữ số.</div>
     <div id="numq"></div>
   </section>
 
@@ -154,8 +154,8 @@ footer{text-align:center;color:var(--mute);font-size:.8rem;margin:20px 0 8px}
   </section>
 
   <section class="sheet part">
-    <div class="ph"><span class="pt">2 điểm</span><h2>练习四　阅读判断<small>Đọc hội thoại, phán đoán đúng (对) / sai (错)</small></h2></div>
-    <div class="text" id="text"></div>
+    <div class="ph"><span class="pt">2 điểm</span><h2>练习四　阅读判断<small>Đọc đoạn văn, phán đoán đúng (对) / sai (错)</small></h2></div>
+    <div class="req">Đọc kỹ đoạn văn, rồi phán đoán mỗi câu dưới đây đúng (对) hay sai (错) so với nội dung đoạn văn.</div><div class="text" id="text"></div>
     <div id="tfq"></div>
   </section>
 
@@ -192,56 +192,56 @@ footer{text-align:center;color:var(--mute);font-size:.8rem;margin:20px 0 8px}
   <div id="bxhBody"></div>
 </div>
 
-<footer>《汉语教程》第十课 · 他住哪儿 · 汉语加油站 · bản 26/11d</footer>
+<footer>《汉语教程》第十课 · 他住哪儿 · 汉语加油站 · bản 26/11e</footer>
 </div>
 
 <script>
 // ===================== NỘI DUNG =====================
-var PAIRS = [["办公室","văn phòng"],["职员","nhân viên, viên chức"],["找","tìm"],["住","ở, sống"],["房间","phòng"],["知道","biết"],["号码","số (điện thoại…)"],["手机","điện thoại di động"]];
+// Bài 1: 10 từ dễ nhầm nghĩa với nhau
+var PAIRS = [["号","số (số phòng, số nhà)"],["号码","dãy số (điện thoại…)"],["房间号","số phòng"],["手机号码","số điện thoại di động"],["电话","điện thoại (cố định)"],["手机","điện thoại di động"],["楼","toà nhà"],["门","cửa, đơn nguyên"],["办公室","văn phòng"],["职员","nhân viên, viên chức"]];
+// Bài 2: số dài, số lặp; 2 câu địa chỉ: số toà đọc như số lượng, số phòng đọc từng chữ số
 var NUMS = [
- {py:"sì líng bā hào", a:"408", kind:"số phòng"},
- {py:"qī yāo èr hào", a:"712", kind:"số phòng"},
- {py:"yāo líng sān hào", a:"103", kind:"số phòng"},
- {py:"liù sān qī wǔ èr líng bā jiǔ", a:"63752089", kind:"điện thoại nhà"},
- {py:"yāo sān jiǔ líng èr qī liù wǔ sì yāo bā", a:"13902765418", kind:"điện thoại di động"},
- {py:"líng èr sì sān bā liù yāo qī wǔ jiǔ", a:"0243861759", kind:"điện thoại văn phòng"}
+ {py:"èr yāo yāo líng hào", a:"2110", kind:"số phòng"},
+ {py:"yāo líng líng qī hào", a:"1007", kind:"số phòng"},
+ {py:"liù liù èr líng yāo sì sān bā", a:"66201438", kind:"điện thoại nhà"},
+ {py:"yāo bā bā líng yāo líng qī liù sì èr wǔ", a:"18801076425", kind:"điện thoại di động"},
+ {py:"Tā zhù èrshíyī lóu sān mén yāo líng èr hào.", addr:["21","3","102"], kind:"địa chỉ"},
+ {py:"Mǎlì zhù shíliù lóu èr mén sì yāo yāo hào.", addr:["16","2","411"], kind:"địa chỉ"}
 ];
-// Bài 3: s = câu sai (err = phần sai, để gạch dưới khi chữa); a = các câu đúng được chấp nhận (bỏ dấu câu)
+// Bài 3: câu dài hơn, lỗi khó thấy
 var FIX = [
- {s:"我去图书馆明天。", err:"明天", a:["我明天去图书馆","明天我去图书馆"], show:"我明天去图书馆。", why:"Trạng ngữ thời gian đứng trước động từ (hoặc đầu câu)."},
- {s:"你住多少号码？", err:"号码", a:["你住多少号","你住几号"], show:"你住多少号？", why:"Hỏi số phòng dùng 号; 号码 dùng cho số điện thoại."},
- {s:"她不在家，她在办公室吗。", err:"吗", a:["她不在家她在办公室呢","她不在家她在办公室"], show:"她不在家，她在办公室呢。", why:"Câu trần thuật khẳng định dùng trợ từ 呢, không dùng 吗."},
- {s:"麦克学习汉语在学校。", err:"在学校", a:["麦克在学校学习汉语"], show:"麦克在学校学习汉语。", why:"Trạng ngữ nơi chốn 在 + nơi chốn đứng trước động từ."},
- {s:"玛丽住九楼二门，她的号房间是406。", err:"号房间", a:["玛丽住九楼二门她的房间号是406","玛丽住9楼2门她的房间号是406"], show:"玛丽住九楼二门，她的房间号是406。", why:"Định ngữ đứng trước trung tâm ngữ: 房间号 (số phòng)."},
- {s:"他们的房间在八楼，不在住九楼。", err:"住", a:["他们的房间在八楼不在九楼"], show:"他们的房间在八楼，不在九楼。", why:"在 + nơi chốn đã làm vị ngữ, không thêm động từ 住."}
+ {s:"麦克的朋友今天在家不，他在图书馆呢。", err:"在家不", a:["麦克的朋友今天不在家他在图书馆呢","麦克的朋友今天不在家他在图书馆"], show:"麦克的朋友今天不在家，他在图书馆呢。", why:"Phó từ phủ định 不 đứng trước động từ 在."},
+ {s:"请问，你知道不知道张老师的手机号码吗？", err:"吗", a:["请问你知道不知道张老师的手机号码","请问你知道张老师的手机号码吗"], show:"请问，你知道不知道张老师的手机号码？", why:"Câu hỏi chính phản (知道不知道) không thêm 吗."},
+ {s:"我哥哥是银行职员，他住三门十二楼。", err:"三门十二楼", a:["我哥哥是银行职员他住十二楼三门"], show:"我哥哥是银行职员，他住十二楼三门。", why:"Địa chỉ nói từ lớn đến nhỏ: 楼 → 门 → 号."},
+ {s:"玛丽很忙，她今天下午学习汉语在图书馆。", err:"在图书馆", a:["玛丽很忙她今天下午在图书馆学习汉语","玛丽很忙今天下午她在图书馆学习汉语"], show:"玛丽很忙，她今天下午在图书馆学习汉语。", why:"Trạng ngữ thời gian và trạng ngữ nơi chốn đều đứng trước động từ: 今天下午 + 在图书馆 + 学习."},
+ {s:"这个楼有二个门，我住二门。", err:"二个", a:["这个楼有两个门我住二门"], show:"这个楼有两个门，我住二门。", why:"Trước lượng từ dùng 两 (两个门); khi chỉ số thứ tự / tên cửa thì dùng 二 (二门)."},
+ {s:"我住八楼，玛丽住八楼也。", err:"也", a:["我住八楼玛丽也住八楼"], show:"我住八楼，玛丽也住八楼。", why:"Phó từ 也 đứng sau chủ ngữ, trước động từ."}
 ];
-var TEXT = [
- ["麦克","请问，这是张老师的办公室吗？"],["职员","是。你找张老师吗？"],
- ["麦克","对。我是她的学生。"],["职员","她不在，她在图书馆呢。"],
- ["麦克","您知道她的手机号码吗？"],["职员","知道，13512046837。"],
- ["麦克","她住哪儿？"],["职员","她住五楼三门209号。"],
- ["麦克","谢谢您！"],["职员","不客气。"]
-];
+// Bài 4: đoạn văn
+var PASSAGE = "我是美国留学生，我在学校学习汉语。我住十二楼三门405号，麦克也住十二楼，他住一门。今天下午我去办公室找张老师，办公室的职员说，张老师不在，她在家呢。职员不知道张老师的手机号码，他说张老师家的电话号码是62754013。张老师住七楼二门318号。明天下午我去张老师家。";
 var TF = [
- {s:"麦克去办公室找张老师。", a:true, why:"麦克问：这是张老师的办公室吗？职员问：你找张老师吗？麦克说：对。"},
- {s:"麦克是张老师的朋友。", a:false, why:"麦克说：我是她的学生。"},
- {s:"张老师在办公室呢。", a:false, why:"职员说：她不在，她在图书馆呢。"},
- {s:"职员知道张老师的手机号码。", a:true, why:"职员说：知道，13512046837。"},
- {s:"张老师住三楼五门。", a:false, why:"职员说：她住五楼三门 (toà 5, cửa 3)。"},
- {s:"张老师的房间号是209。", a:true, why:"职员说：她住五楼三门209号。"}
+ {s:"麦克也住三门。", a:false, why:"我住十二楼三门……麦克也住十二楼，他住一门。"},
+ {s:"麦克住十二楼一门。", a:true, why:"麦克也住十二楼，他住一门。"},
+ {s:"今天下午张老师在办公室。", a:false, why:"职员说，张老师不在，她在家呢。"},
+ {s:"张老师今天下午在家。", a:true, why:"她在家呢。"},
+ {s:"职员知道张老师的手机号码。", a:false, why:"职员不知道张老师的手机号码。"},
+ {s:"62754013是张老师的手机号码。", a:false, why:"62754013 là số điện thoại nhà (张老师家的电话号码), không phải số di động."},
+ {s:"张老师的房间号是405。", a:false, why:"405 là phòng của “我”; 张老师住七楼二门318号。"},
+ {s:"明天下午我去七楼二门。", a:true, why:"明天下午我去张老师家，张老师住七楼二门318号。"}
 ];
+// Bài 5: câu dài hơn, phải đổi ngôi (我 → 你) và chọn đúng đại từ nghi vấn
 var ASK = [
- {pre:"我找", u:"玛丽", post:"。", show:"你找谁？", k:[["找谁"]]},
- {pre:"麦克住", u:"八楼", post:"。", show:"麦克住哪儿？", k:[["住哪儿","住哪里"]]},
- {pre:"她住", u:"315", post:"号。", show:"她住多少号？/ 她住几号？", k:[["住多少号","住几号"]]},
- {pre:"我的手机号码是", u:"13902765418", post:"。", show:"你的手机号码是多少？", k:[["手机号"],["是多少"]]},
- {pre:"张老师", u:"不在", post:"办公室。", show:"张老师在办公室吗？/ 张老师在不在办公室？", k:[["在办公室吗","在不在办公室"]]},
- {pre:"他学习", u:"汉语", post:"。", show:"他学习什么？", k:[["学习什么"]]}
+ {pre:"我去办公室找", u:"张老师", post:"。", show:"你去办公室找谁？", k:[["去办公室"],["找谁"]]},
+ {pre:"张老师住", u:"七楼二门", post:"。", show:"张老师住哪儿？", k:[["住哪儿","住哪里"]]},
+ {pre:"麦克的房间号是", u:"405", post:"。", show:"麦克的房间号是多少？/ 麦克住多少号？", k:[["房间号是多少","住多少号","住几号"]]},
+ {pre:"张老师今天下午", u:"在家", post:"呢。", show:"张老师今天下午在哪儿？", k:[["在哪儿","在哪里"]]},
+ {pre:"", u:"办公室的职员", post:"知道张老师家的电话号码。", show:"谁知道张老师家的电话号码？", k:[["谁知道"],["电话号码"]]},
+ {pre:"我", u:"知道", post:"她的手机号码。", show:"你知道她的手机号码吗？/ 你知道不知道她的手机号码？", k:[["知道她的手机号码吗","知道不知道她的手机号码"]]}
 ];
 var PTS = [2,2,2,2,2];
 var CN = ["练习一","练习二","练习三","练习四","练习五"];
 var NAMES = ["Nối từ","Viết số","Sửa câu sai","Đọc – phán đoán","Đặt câu hỏi"];
-var LET = "ABCDEFGH";
+var LET = "ABCDEFGHIJ";
 var SEND_URL = "";  // ← dán link Ứng dụng web (Apps Script) của Sheet Bài 10 vào đây
 
 // ===================== TIỆN ÍCH =====================
@@ -268,12 +268,13 @@ function build(){
   $("mfb").className="fb";
   // 2
   $("numq").innerHTML = NUMS.map(function(d,i){ return '<div class="q"><span class="n">'+(i+1)+'.</span><span class="py">'+d.py+'</span><span class="kind">'+d.kind+'</span><br>'+
-    '<input class="t num" id="n'+i+'" inputmode="numeric" autocomplete="off" placeholder="Viết số"><div class="fb" id="nf'+i+'"></div></div>'; }).join("");
+    (d.addr ? '<div class="addr">Toà <input class="t num" id="n'+i+'_0" inputmode="numeric" autocomplete="off"> Cửa <input class="t num" id="n'+i+'_1" inputmode="numeric" autocomplete="off"> Phòng <input class="t num" id="n'+i+'_2" inputmode="numeric" autocomplete="off"></div>'
+            : '<input class="t num" id="n'+i+'" inputmode="numeric" autocomplete="off" placeholder="Viết số">')+'<div class="fb" id="nf'+i+'"></div></div>'; }).join("");
   // 3
   $("fixq").innerHTML = FIX.map(function(d,i){ return '<div class="q"><span class="n">'+(i+1)+'.</span><span class="zhs">'+d.s+'</span><br>'+
     '<input class="t hz" id="f'+i+'" autocomplete="off" placeholder="Viết lại câu đúng…"><div class="fb" id="ff'+i+'"></div></div>'; }).join("");
   // 4
-  $("text").innerHTML = TEXT.map(function(l){ return '<p><b>'+l[0]+'：</b><span>'+l[1]+'</span></p>'; }).join("");
+  $("text").innerHTML = "<p>"+PASSAGE+"</p>";
   tfAns = TF.map(function(){ return null; });
   $("tfq").innerHTML = TF.map(function(d,i){ return '<div class="q"><span class="n">'+(i+1)+'.</span><span class="zhs">'+d.s+'</span>'+
     '<span class="tf"><button data-q="'+i+'" data-v="1">对 Đúng</button><button data-q="'+i+'" data-v="0">错 Sai</button></span><div class="fb" id="tf'+i+'"></div></div>'; }).join("");
@@ -296,7 +297,7 @@ function go(i){
 function filled(p,n){ for(var i=0;i<n;i++) if(!$(p+i).value.trim()) return false; return true; }
 function answered(k){
   if(k===0) return filled("m",PAIRS.length);
-  if(k===1) return filled("n",NUMS.length);
+  if(k===1) return NUMS.every(function(d,i){ return d.addr ? [0,1,2].every(function(j){ return $("n"+i+"_"+j).value.trim(); }) : $("n"+i).value.trim(); });
   if(k===2) return filled("f",FIX.length);
   if(k===3) return tfAns.every(function(v){ return v!==null; });
   return filled("a",ASK.length);
@@ -341,9 +342,13 @@ $("submitBtn").onclick=function(){
   document.querySelectorAll("#mL select").forEach(function(s){ s.disabled=true; });
 
   // 2
-  NUMS.forEach(function(d,i){ var raw=$("n"+i).value.trim(), ok=raw.replace(/\D/g,"")===d.a;
-    if(ok){ P[1]++; fb($("nf"+i),"ok","Đúng."); } else fb($("nf"+i), raw?"no":"empty", (raw?"Chưa đúng. ":"Chưa làm. ")+"Đáp án: <b>"+d.a+"</b>");
-    REP[1].push((i+1)+". "+d.py+" → "+(raw||"(bỏ trống)")+(ok?" ✓":" ✗ ("+d.a+")")); });
+  NUMS.forEach(function(d,i){ var raw, ok, key;
+    if(d.addr){ var v=[0,1,2].map(function(j){ return $("n"+i+"_"+j).value.replace(/\D/g,""); });
+      raw=v.join("")?("toà "+v[0]+", cửa "+v[1]+", phòng "+v[2]):""; ok=v.every(function(x,j){ return x===d.addr[j]; });
+      key="toà "+d.addr[0]+", cửa "+d.addr[1]+", phòng "+d.addr[2]; }
+    else { raw=$("n"+i).value.trim(); ok=raw.replace(/\D/g,"")===d.a; key=d.a; }
+    if(ok){ P[1]++; fb($("nf"+i),"ok","Đúng."); } else fb($("nf"+i), raw?"no":"empty", (raw?"Chưa đúng. ":"Chưa làm. ")+"Đáp án: <b>"+key+"</b>");
+    REP[1].push((i+1)+". "+d.py+" → "+(raw||"(bỏ trống)")+(ok?" ✓":" ✗ ("+key+")")); });
 
   // 3
   FIX.forEach(function(d,i){ var raw=$("f"+i).value.trim(), s=clean(raw), ok=d.a.indexOf(s)>-1, f=$("ff"+i);
