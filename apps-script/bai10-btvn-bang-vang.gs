@@ -6,7 +6,7 @@
  *   - Người có quyền truy cập: Bất kỳ ai
  */
 var HEADERS = ["Thời gian nộp","Lớp","Học sinh","Điểm (/10)","Thời gian làm (giây)","Thời gian làm",
-  "Bài 1 Trắc nghiệm (/2)","Bài 2 Điền từ (/2)","Bài 3 Ghép câu (/2)","Bài 4 Sắp xếp (/2)","Bài 5 Dịch (/2)",
+  "Bài 1 Nối từ (/2)","Bài 2 Viết số (/2)","Bài 3 Chạm chỗ sai (/2)","Bài 4 Đúng/Sai (/2)","Bài 5 Đặt câu hỏi (/2)",
   "Lần nộp","Chi tiết bài làm"];
 
 function sheet_() {
